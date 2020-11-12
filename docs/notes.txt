@@ -1,0 +1,44 @@
+Directory Structure:
+config.js
+database.js
+readme.md
+server.js
+www/
+  css/
+    *.css
+  html/
+    *.html
+  saved/
+    documents/
+      *.pdf
+    images/
+      *.jpg
+    reviews/
+      *.txt
+  scripts/
+    *.js
+
+Database Design:
+  - Need to be able to store
+    - User information (primary key can be their Google unique id)
+    - Work (Primary key can be serial, foreign key should link to author)
+    - Reviews (Primary key can be serial, foreign key should link to author and related work PK)
+
+API:
+  - I need to use a naming convention. Last time my API looked atrocious
+    - Everything should be lowercase (unless it's a variable)
+    - Use hyphens for API paths rather than camelCase
+
+Login/Authorisation:
+  - I'll use the google API to handle logins and authorisation through the web app
+
+Storing the shared work:
+  - Files could be uploaded using something like Multer. The file would be stored in ./www/saved/documents/ and its name would be converted to a unique id (Research needed into Multer/UUID)
+  - If a link is being used rather than a pdf file, it could be stored in the database where the reference to the pdf would be
+  - I might attempt to have file conversion in the server. If a user tries to upload a file that's not a .pdf but is another kind of document (.docx, etc) then give them the option to continue upload with conversion
+  - Might also look at pdf compression to save server storage space
+  - Work would need to be saved with a creation date, a user profile linked to them, and a date when it was last edited. Edited date for a link version might prove challenging though, so would likely just depend on the creator telling us when it's been updated
+
+Adding reviews:
+  - People could have the option to leave reviews as either plain text which would be done in a standard text box, or they could leave reviews in html format. The reviews would be saved as files with references in the database
+  - Reviews would need to be saved with a creation date, a user profile linked to them, and a date when it was last edited
