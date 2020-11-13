@@ -1,0 +1,32 @@
+{
+  "name": "appeng2020-up940148",
+  "version": "1.0.0",
+  "description": "Use this GitHub repository for managing the development of your AppEng coursework.\r At the formative and summative deadlines, we will use the contents of the repository to give you feedback and to assess your work.\r Push your local copy regularly (and when it's time for submission).",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appeng-m30222/appeng2020-UP940148.git"
+  },
+  "author": "UP940148",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/appeng-m30222/appeng2020-UP940148/issues"
+  },
+  "homepage": "https://github.com/appeng-m30222/appeng2020-UP940148#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "path": "^0.12.7",
+    "simple-google-openid": "^0.3.0",
+    "sqlite-async": "^1.1.0",
+    "sqlite3": "^5.0.0",
+    "stay-awake": "0.0.3"
+  }
+}
