@@ -38,7 +38,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       })
 
-    db.run(`CREATE TABLE IF NOT EXISTS replies (
+    db.run(`CREATE TABLE IF NOT EXISTS reply (
       replyId INTEGER PRIMARY KEY AUTOINCREMENT,
       document references document(documentId) NOT NULL,
       content text NOT NULL,
@@ -85,7 +85,7 @@ async function addDoc(values) {
 }
 
 async function addReply(values) {
-  const sql = 'INSERT INTO replies (document, content, parentReply, author, timeCreated) VALUES (?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO reply (document, content, parentReply, author, timeCreated) VALUES (?, ?, ?, ?, ?)';
   let response = await db.run(sql, values)
     .then(() => {
         return null;
