@@ -20,9 +20,14 @@ www/
 
 Database Design:
   - Need to be able to store
-    - User information (primary key can be their Google unique id)
-    - Work (Primary key can be serial, foreign key should link to author)
-    - Reviews (Primary key can be serial, foreign key should link to author and related work PK)
+    - User information. Primary key can be their Google unique id
+    - Work. Primary key can be serial, foreign key should link to author
+    - Reviews. Primary key can be serial, foreign key should link to author and related work PK
+    - Categories. They probably only need one field, the name of the category. However I might give them a serial primary key
+    - Review groups. Group id would be primary key, group leader and roster would be foreign keys
+    - Joining table for review groups and users
+  When work is uploaded, it should be able to be posted to either a specific group, or to the public (I'm debating a reddit style system where users can only post to groups)
+  Users should be able to search for groups that are open to the public
 
 API:
   - I need to use a naming convention. Last time my API looked atrocious

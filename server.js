@@ -33,10 +33,33 @@ app.post('/users/u/', jsonParser, async (req, res) => {
   });
 });
 
+app.post('/documents/d/', jsonParser, async (req, res) => {
+  const data = [req.body.title, req.body.author, req.body.file, req.body.timeCreated, req.body.lastEditted];
+  let err = await db.addDoc(data);
+  if (err) {
+    res.status(400).json({ error: err.message });
+    return;
+  }
+  res.json({
+    success: true,
+  });
+});
+
+app.post('/replies/r/', jsonParser, async (req, res) => {
+  const data = [req.body.document, req.body.content, req.body.parentReply, req.body.author, req.body.timeCreated];
+  let err = await db.addReply(data);
+  if (err) {
+    res.status(400).json({ error: err.message });
+    return;
+  }
+  res.json({
+    success: true,
+  });
+})
+
 app.get('/users/u/:userId/', jsonParser, async (req, res) => {
   const id = [req.params.userId];
   let response = await db.getUserById(id);
-
   if (response.failed) {
     res.status(400).json({
       success: false,

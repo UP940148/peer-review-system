@@ -61,7 +61,7 @@ database.open(DBSOURCE)
   })
 
 async function addUser(values) {
-  const sql = `INSERT INTO user (googleId, name, displayName, profilePicture, email) VALUES (?, ?, ?, ?, ?)`;
+  const sql = 'INSERT INTO user (googleId, name, displayName, profilePicture, email) VALUES (?, ?, ?, ?, ?)';
   let response = await db.run(sql, values)
     .then(() => {
       return null;
@@ -71,6 +71,30 @@ async function addUser(values) {
     })
   return response;
 };
+
+async function addDoc(values) {
+  const sql = 'INSERT INTO document (title, author, file, timeCreated, lastEditted) VALUES (?, ?, ?, ?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+      })
+    .catch(err => {
+      return err;
+    })
+  return response;
+}
+
+async function addReply(values) {
+  const sql = 'INSERT INTO replies (document, content, parentReply, author, timeCreated) VALUES (?, ?, ?, ?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+      })
+    .catch(err => {
+      return err;
+    })
+  return response;
+}
 
 async function getUserById(userId) {
   // Get user information from the database using their Google ID as a selector

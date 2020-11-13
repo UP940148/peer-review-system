@@ -47,3 +47,7 @@ DELETE:
 /replies/r/:reviewId/                -- Delete reply
 /users/u/:userId/                    -- Delete user account
 ```
+
+## Proposed Categories:
+
+-
