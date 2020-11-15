@@ -110,4 +110,6 @@ async function getUserById(userId) {
 }
 
 module.exports.addUser = addUser;
+module.exports.addDoc = addDoc;
+module.exports.addReply = addReply;
 module.exports.getUserById = getUserById;
