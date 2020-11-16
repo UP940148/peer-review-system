@@ -55,14 +55,13 @@ GET:
 /group/gp/:groupId/                   -- Get group by id
 
 POST:
-/work/u/:userId/                      -- Upload document and link to user account (document id will be created in database)
-/users/u/:userId/                     -- Create new user with their google unique id
-/replies/u/:userId/d/:documentId/     -- Create a new reply from the user on the document
-/replies/u/:userId/r/:replyId/        -- Create a new reply from the user on another reply
-/registration/gp/:groupId/u/:userId/
-/grievance/u/:prosecutor/u/:defendant/
-/share/d/:documentId/gp/:groupId/
-/group/u/:userId/
+/work/
+/user/
+/reply/
+/registration/
+/grievance/
+/share/
+/group/
 
 PATCH:
 /work/d/:documentId/                  -- Update a document
