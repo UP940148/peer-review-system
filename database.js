@@ -22,10 +22,37 @@ database.open(DBSOURCE)
       console.log(err.message);
     })
 
+    db.run(`CREATE TABLE IF NOT EXISTS groups (
+        groupId INTEGER PRIMARY KEY AUTOINCREMENT,
+        groupName text NOT NULL,
+        groupPicture text,
+        groupDescription text
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established group table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
+    db.run(`CREATE TABLE IF NOT EXISTS category (
+        categoryId INTEGER PRIMARY KEY AUTOINCREMENT,
+        categoryName text NOT NULL,
+        parentCategory references category(categoryId)
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established category table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
     db.run(`CREATE TABLE IF NOT EXISTS document (
       documentId INTEGER PRIMARY KEY AUTOINCREMENT,
-      title text NOT NULL,
       author references user(googleId) NOT NULL,
+      title text NOT NULL,
       file text NOT NULL,
       timeCreated integer NOT NULL,
       lastEditted integer
@@ -38,21 +65,97 @@ database.open(DBSOURCE)
         console.log(err.message);
       })
 
+    db.run(`CREATE TABLE IF NOT EXISTS document_categories (
+        documentCatId INTEGER PRIMARY KEY AUTOINCREMENT,
+        categoryId references category(categoryId),
+        documentId references document(documentId)
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established document_categories table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
+    db.run(`CREATE TABLE IF NOT EXISTS share (
+        shareId INTEGER PRIMARY KEY AUTOINCREMENT,
+        documentId references document(documentId),
+        groupId references groups(groupId)
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established share table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
+    db.run(`CREATE TABLE IF NOT EXISTS rank (
+        rankId INTEGER PRIMARY KEY AUTOINCREMENT,
+        groupId references groups(groupId),
+        rankName text NOT NULL,
+        level integer NOT NULL,
+        colour text,
+        canPost integer NOT NULL,
+        canReply integer NOT NULL,
+        canRemove integer NOT NULL,
+        canBan integer NOT NULL
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established rank table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
+    db.run(`CREATE TABLE IF NOT EXISTS registration (
+        registrationId INTEGER PRIMARY KEY AUTOINCREMENT,
+        groupId references groups(groupId),
+        userId references user(googleId),
+        rankId references rank(rankId)
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established registration table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
     db.run(`CREATE TABLE IF NOT EXISTS reply (
       replyId INTEGER PRIMARY KEY AUTOINCREMENT,
-      document references document(documentId) NOT NULL,
-      content text NOT NULL,
-      parentReply references replies(replyId),
       author references user(googleId) NOT NULL,
+      document references share(shareId) NOT NULL,
+      parentReply references reply(replyId),
+      content text NOT NULL,
       timeCreated integer NOT NULL
       );`)
       .then(() => {
         // Table established
-        console.log('Established replies table');
+        console.log('Established reply table');
       })
       .catch(err => {
         console.log(err.message);
       })
+
+    db.run(`CREATE TABLE IF NOT EXISTS grievance (
+        grievanceId INTEGER PRIMARY KEY AUTOINCREMENT,
+        prosecutorId references user(googleId),
+        defendantId references user(googleId),
+        documentId references share(shareId),
+        replyId references reply(replyId),
+        content text
+        );`)
+      .then(() => {
+          // Table established
+          console.log('Established grievance table');
+        })
+      .catch(err => {
+          console.log(err.message);
+        })
+
   })
   .catch(err => {
     // Can't open database
