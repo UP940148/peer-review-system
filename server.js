@@ -21,7 +21,7 @@ app.listen(config.PORT, (err) => {
 
 app.use('/', express.static(config.www, { index: 'html/index.html', extenstions: ['HTML'] }));
 
-app.post('/users/u/', jsonParser, async (req, res) => {
+app.post('/user/', jsonParser, async (req, res) => {
   const data = [req.body.googleId, req.body.name, req.body.displayName, req.body.profilePicture, req.body.email];
   let err = await db.addUser(data);
   if (err) {
@@ -33,7 +33,7 @@ app.post('/users/u/', jsonParser, async (req, res) => {
   });
 });
 
-app.post('/documents/d/', jsonParser, async (req, res) => {
+app.post('/work/', jsonParser, async (req, res) => {
   const data = [req.body.title, req.body.author, req.body.file, req.body.timeCreated, req.body.lastEditted];
   let err = await db.addDoc(data);
   if (err) {
@@ -45,7 +45,7 @@ app.post('/documents/d/', jsonParser, async (req, res) => {
   });
 });
 
-app.post('/replies/r/', jsonParser, async (req, res) => {
+app.post('/reply/', jsonParser, async (req, res) => {
   const data = [req.body.document, req.body.content, req.body.parentReply, req.body.author, req.body.timeCreated];
   let err = await db.addReply(data);
   if (err) {
