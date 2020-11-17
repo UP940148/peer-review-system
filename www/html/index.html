@@ -1,3 +1,34 @@
 <!doctype html>
 
 <h1>Hello World!</h1>
+<section class=pictureUpload id=pic0>
+  <input type=file class=fileButton accept='.pdf'/><br>
+</section>
+
+<script>
+
+const fileButtons = document.getElementsByClassName('fileButton');
+for (let i = 0; i < fileButtons.length; i++) {
+  fileButtons[i].addEventListener('change', handleFileSelect, false);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.readAsDataURL(file);
+  fileUpload(file, e.target);
+}
+
+async function fileUpload(file, target) {
+  const data = new FormData();
+  data.append('document', file);
+  const response = await fetch('/doc-upload/', {
+    method: 'POST',
+    body: data,
+  });
+  const resData = await response.json();
+  console.log(resData);
+}
+
+</script>
