@@ -36,24 +36,12 @@ database.open(DBSOURCE)
           console.log(err.message);
         })
 
-    db.run(`CREATE TABLE IF NOT EXISTS category (
-        categoryId INTEGER PRIMARY KEY AUTOINCREMENT,
-        categoryName text NOT NULL,
-        parentCategory references category(categoryId)
-        );`)
-      .then(() => {
-          // Table established
-          console.log('Established category table');
-        })
-      .catch(err => {
-          console.log(err.message);
-        })
-
     db.run(`CREATE TABLE IF NOT EXISTS document (
       documentId INTEGER PRIMARY KEY AUTOINCREMENT,
       author references user(googleId) NOT NULL,
       title text NOT NULL,
       file text NOT NULL,
+      categories text,
       timeCreated integer NOT NULL,
       lastEditted integer
       );`)
@@ -64,19 +52,6 @@ database.open(DBSOURCE)
       .catch(err => {
         console.log(err.message);
       })
-
-    db.run(`CREATE TABLE IF NOT EXISTS document_categories (
-        documentCatId INTEGER PRIMARY KEY AUTOINCREMENT,
-        categoryId references category(categoryId),
-        documentId references document(documentId)
-        );`)
-      .then(() => {
-          // Table established
-          console.log('Established document_categories table');
-        })
-      .catch(err => {
-          console.log(err.message);
-        })
 
     db.run(`CREATE TABLE IF NOT EXISTS share (
         shareId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -163,6 +138,7 @@ database.open(DBSOURCE)
     throw err;
   })
 
+// CREATE
 async function addUser(values) {
   const sql = 'INSERT INTO user (googleId, name, displayName, profilePicture, email) VALUES (?, ?, ?, ?, ?)';
   let response = await db.run(sql, values)
@@ -199,6 +175,93 @@ async function addReply(values) {
   return response;
 }
 
+async function addRegistration(values) {
+  const sql = 'INSERT INTO registration (groupId, userId, rankId) VALUES (?, ?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+    })
+    .catch(err => {
+        return err;
+    })
+  return response;
+}
+
+async function addGrievance(values) {
+  const sql = 'INSERT INTO grievance (prosecutorId, defendantId, documentId, replyId, content) VALUES (?, ?, ?, ?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+    })
+    .catch(err => {
+        return err;
+    })
+  return response;
+}
+
+async function addShare(values) {
+  const sql = 'INSERT INTO share (documentId, groupId) VALUES (?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+    })
+    .catch(err => {
+        return err;
+    })
+  return response;
+}
+
+async function addGroup(values, admin) {
+  const sql = 'INSERT INTO groups (groupName, groupPicture, groupDescription) VALUES (?, ?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+    })
+    .catch(err => {
+        return err;
+    })
+
+  // Once a group is created, the creator needs the rank of owner
+  let id = await db.get('SELECT last_insert_rowid() as rowid;')
+    .then(row => {
+
+      return row.rowid;
+    })
+
+  let groupId = await db.get('SELECT groupId from groups where rowid = ?', id)
+    .then(row => {
+      return row.groupId;
+    })
+
+  const data = [groupId, "Owner", 0, null, 1, 1, 1, 1];
+  let rankResponse = await addRank(data)
+    .then(() => {
+      return null;
+    })
+    .catch(err => {
+      return err;
+    })
+
+  if (rankResponse) {
+    console.log(rankResponse);
+    return rankResponse;
+  }
+  return response;
+}
+
+async function addRank(values) {
+  const sql = 'INSERT INTO rank (groupId, rankName, level, colour, canPost, canReply, canRemove, canBan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  let response = await db.run(sql, values)
+    .then(() => {
+        return null;
+    })
+    .catch(err => {
+        return err;
+    })
+  return response;
+}
+
+// RETRIEVE
 async function getUserById(userId) {
   // Get user information from the database using their Google ID as a selector
   let sql = `SELECT * FROM user WHERE googleId = ${userId};`;
@@ -215,4 +278,9 @@ async function getUserById(userId) {
 module.exports.addUser = addUser;
 module.exports.addDoc = addDoc;
 module.exports.addReply = addReply;
+module.exports.addRegistration = addRegistration;
+module.exports.addGrievance = addGrievance;
+module.exports.addShare = addShare;
+module.exports.addGroup = addGroup;
+module.exports.addRank = addRank;
 module.exports.getUserById = getUserById;
