@@ -48,15 +48,15 @@
 ```
 GET:
 /work/d/:documentId/                  -- Get the work associated with the provided document id
-/users/u/:userId/                     -- Get the user information associated with the user id
+/user/u/:userId/                      -- Get the user information associated with the user id
 /replies/u/:userId/                   -- Get all replies a user has written
 /replies/d/:documentId/               -- Get all replies for a piece of work
-/registration/u/:userId/              -- Get all groups a user is registered in
+/registrations/u/:userId/             -- Get all groups a user is registered in
 /group/gp/:groupId/                   -- Get group by id
 
 POST:
-/work/
 /user/
+/work/
 /reply/
 /registration/
 /grievance/
