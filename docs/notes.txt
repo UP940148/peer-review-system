@@ -47,3 +47,22 @@ Storing the shared work:
 Adding reviews:
   - People could have the option to leave reviews as either plain text which would be done in a standard text box, or they could leave reviews in html format. The reviews would be saved as files with references in the database
   - Reviews would need to be saved with a creation date, a user profile linked to them, and a date when it was last edited
+
+
+Features and API calls:
+- When creating a profile, need to POST to user table
+  - Might need to POST to Multer API for profile pictures, then respond with new filename
+- When creating a group, need to POST to groups table and POST to registration table
+  - Might need to POST to Multer API for group pictures, then respond with new filename
+- When joining group, need to POST to registration table
+- When uploading work, need to POST to work table, and POST to share table
+  - Will also need to POST to Multer API call and use the response(with new filename) to POST document
+- When uploading a reply, need to POST to reply table
+  [REDACTED]: - Will also need to POST to Multer API call and use the response(with new filename) to POST reply
+- When searching for groups need to GET from groups table (using groupName selector)
+- When viewing feed, need to GET from work (using userId, to check registration, and match with share table)
+- When viewing group feed, need to GET from work (using groupId and comparing share table to get documents)
+- When viewing replies, need to GET from reply table using shareId
+- When updating work, need to PATCH document table using documentId
+- When updating profile, need to PATCH user table using userId
+  - Will also need to POST to Multer API call and use the response(with new filename) to POST document
