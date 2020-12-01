@@ -17,10 +17,10 @@ database.open(DBSOURCE)
       .then(() => {
       // Table established
       console.log('Established user table');
-    })
+      })
       .catch(err => {
       console.log(err.message);
-    })
+      })
 
     db.run(`CREATE TABLE IF NOT EXISTS groups (
         groupId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,11 +28,11 @@ database.open(DBSOURCE)
         groupPicture text,
         groupDescription text
         );`)
-      .then(() => {
+        .then(() => {
           // Table established
           console.log('Established group table');
         })
-      .catch(err => {
+        .catch(err => {
           console.log(err.message);
         })
 

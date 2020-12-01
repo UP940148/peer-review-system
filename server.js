@@ -9,37 +9,23 @@ const db = require('./database.js');
 const fs = require('fs');
 const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
-
+const mime = require('mime-types');
+//const sanitizer = require('sanitize-html');
+const docxConverter = require('docx-pdf');
+const mdConverter = require('markdown-pdf');
 
 // Create express app
 const app = express();
 
-const imgUploader = multer({
-  dest: config.imageStore,
+const uploader = multer({
+  dest: config.uploads,
   limits: {
     fields: 10,
-    fileSize: 1024 * 1024 * 20,
-    files: 1
-  },
-});
-const docUploader = multer({
-  dest: config.docStore,
-  limits: {
-    fields: 10,
-    fileSize: 1024 * 1024 * 20,
+//    fileSize: 1024 * 1024 * 20,
     files: 1
   },
 });
 
-app.post('/doc-upload/', docUploader.single('document'), async (req, res) => {
-  const fileExt = req.file.mimetype.split('/')[1];
-  await renameAsync(req.file.path, req.file.path + '.' + fileExt);
-
-});
-app.post('/img-upload/', imgUploader.single('avatar'), async (req, res) => {
-  const fileExt = req.file.mimetype.split('/')[1];
-  await renameAsync(req.file.path, req.file.path + '.' + fileExt);
-});
 
 const jsonParser = bodyParser.json();
 
@@ -51,9 +37,41 @@ app.listen(config.PORT, (err) => {
   console.log(`Server runnning on port ${config.PORT}`);
 });
 
-app.use('/', express.static(config.www, { index: 'html/index.html', extenstions: ['HTML'] }));
+app.use('/', express.static(config.www, { index: 'html/viewWork.html', extenstions: ['HTML'] }));
 
 // POST
+
+app.post('/doc-upload/', uploader.single('document'), async (req, res) => {
+  console.log(req.file);
+  const fileExtList = req.file.originalname.split('.');
+  const fileExt = fileExtList[fileExtList.length-1];
+  console.log(mime.lookup(fileExt));
+  let newFilename = req.file.filename + '.' + fileExt;
+  await renameAsync(req.file.path, config.docStore + newFilename);
+  // Convert to PDF if word doc
+  if (fileExt == 'docx') {
+    await docxConverter(config.docStore + newFilename, config.docStore + req.file.filename + '.pdf', (err) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+      } else {
+        newFilename = req.file.filename + '.pdf';
+        res.json({ message: 'success', fileSource: newFilename});
+      }
+    });
+  } else if (fileExt == 'md') {
+    await mdConverter().from(config.docStore + newFilename).to(config.docStore + req.file.filename + '.pdf');
+    newFilename = req.file.filename + '.pdf';
+    res.json({ message: 'success', fileSource: newFilename});
+  } else {
+    res.json({ message: 'success', fileSource: newFilename});
+    }
+});
+
+app.post('/img-upload/', uploader.single('image'), async (req, res) => {
+  const fileExt = req.file.mimetype.split('/')[1];
+  await renameAsync(req.file.path, req.file.path + '.' + fileExt);
+});
+
 app.post('/user/', jsonParser, async (req, res) => {
   const data = [req.body.googleId, req.body.name, req.body.displayName, req.body.profilePicture, req.body.email];
   let err = await db.addUser(data);

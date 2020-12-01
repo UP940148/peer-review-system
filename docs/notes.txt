@@ -44,6 +44,8 @@ Storing the shared work:
   - Might also look at pdf compression to save server storage space
   - Work would need to be saved with a creation date, a user profile linked to them, and a date when it was last edited. Edited date for a link version might prove challenging though, so would likely just depend on the creator telling us when it's been updated
 
+  - Opening Microsoft Office documents in the browser is incredibly difficult. It looks like the general solution people go with tends to be to just convert to PDF and embed that way. So for now that's what I'll do
+
 Adding reviews:
   - People could have the option to leave reviews as either plain text which would be done in a standard text box, or they could leave reviews in html format. The reviews would be saved as files with references in the database
   - Reviews would need to be saved with a creation date, a user profile linked to them, and a date when it was last edited
@@ -66,3 +68,13 @@ Features and API calls:
 - When updating work, need to PATCH document table using documentId
 - When updating profile, need to PATCH user table using userId
   - Will also need to POST to Multer API call and use the response(with new filename) to POST document
+
+
+
+
+
+
+
+
+Things learnt during creation:
+- <embed> elements don't like having their sources changed after one has been assigned. Not sure why, I guess it probably loads it's source and doesn't refresh itself once the source changes. So I just delete the element and create a new one instead

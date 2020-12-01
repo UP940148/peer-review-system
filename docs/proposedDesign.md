@@ -1,5 +1,44 @@
 # Peer Review System
 
+---
+
+## **Specification**
+
+You are required to design and build a tool where university students (of any discipline) can share their work for peer review and receive feedback from their peers.
+
+Core capabilities:
+- Users can submit work to a server for others to review:
+  - as one PDF file,
+  - or as a public web link.
+- Users can get the work of others to review.
+- Users can enter reviews and feedback.
+- Users can read reviews of their work.
+
+We do hope (and expect) you will go beyond the core capabilities. Additional features we can imagine are:
+
+
+- Auto-removal of old/stale uploads & reviews.
+- Review Groups (aka Cohorts)
+ - Users can create a group, others can join.
+ - Reviewers might be automatically assigned from within a group.
+ - A user may not be granted access to their reviews until they have completed a threshold number of reviews.
+ - A group owner dashboard might show:
+   - overall performance, e.g. how many reviews have been completed so far.
+   - aggregate results for each user and the group as a whole.
+ - Download / archive / removal of all group work and reviews.
+- Meta-review
+ - Users may somehow feed back on the quality or accuracy of a review.
+ - Users may gain reputation points by completing reviews that have been found useful by their peer.
+- Structured-reviews
+ - Reviews may be free text, or based on a series of specific questions with limited fixed responses.
+ - Structured reviews might afford more analytical/graphical overview of responses.
+
+These additional features are only suggestions – you are encouraged to invent and implement other capabilities.
+
+Note that the core capabilities do not require any login capabilities: we can imagine a limited system that gives an uploader a unique URL that they can then share with reviewers.  
+
+---
+
 ## Proposed features
 
 - Create your own profile with a display name and profile picture
@@ -19,31 +58,31 @@
 ## File Structure
 
 ```
-./ <------------------------------------ Root directory
-├── www/ <------------------------------ Directory that holds all files for the browser to use
-|   ├── css/ <-------------------------- Stores stylesheets
+./ <-------------------- Root directory
+├── www/ <-------------- Directory that holds all files for the browser to use
+|   ├── css/ <---------- Stores stylesheets
 |   |   └── *.css
-|   ├── html/ <------------------------- Stores html files
+|   ├── html/ <--------- Stores html files
 |   |   └── *.html
-|   ├── saved/ <------------------------ Stores all files that users upload
-|   |   ├── documents/ <---------------- The work files that the users upload
+|   ├── saved/ <-------- Stores all files that users upload
+|   |   ├── docs/ <----- The work files that the users upload
 |   |   |   └── *.pdf
-|   |   ├── images/ <------------------- Any images uploaded (I had an idea, I lost it, but I'm keeping this in case it comes back to me)
+|   |   ├── images/ <--- Any images uploaded
 |   |   |   └── *.jpg
-|   |   └── replies/ <------------------ All replies to posts will be stored here as text to be loaded onto the pages
+|   |   └── replies/ <-- All replies to posts will be stored here as text to be loaded onto the pages
 |   |       └── *.txt
-|   └── scripts/ <---------------------- Stores all JavaScript files
+|   └── scripts/ <------ Stores all JavaScript files
 |       └── *.js
 ├── config.js
 ├── database.js
 ├── sqlite.db
-├── readme.md
+├── README.md
 └── server.js
 ```
 
 ---
 
-## API Paths
+## API Paths (WIP)
 
 ```
 GET:
@@ -79,6 +118,8 @@ DELETE:
 
 ### Education Levels
 
+The specification is to build a tool that university students can use. But I see no reason I can't try and open it up to students at any level.
+
 - GCSE
 - A-Level
 - Higher Education
@@ -98,7 +139,7 @@ DELETE:
 - Computing
 - Religious Education
 
-I also think I could implement a system where users can tag their work with custom tags for more specific areas of study
+I also think I could implement a system where users can tag their work with custom tags for more specific areas of study. I need to look into that a bit more.
 
 ---
 
@@ -109,4 +150,3 @@ I also think I could implement a system where users can tag their work with cust
 - [ ] 3) Have a page where users can view their current groups and search for public groups to join
 - [ ] 4) Have a 'News Feed' where users can view work that has been made available to them through their groups
 - [ ] 5) Have a page that opens your selected work and shows replies on it
-- [ ]

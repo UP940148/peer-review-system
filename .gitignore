@@ -1,2 +1,7 @@
-node_modules/
-sqlite.db
+/node_modules/
+/sqlite.db
+/uploads/
+/www/
+/config.js
+/database.js
+/server.js
