@@ -54,3 +54,8 @@ All POST routes will return the ID of the created database entry in their respon
 - `/replies/r/:reviewId/`
 
 - `/users/u/:userId/`
+
+
+## Web Sockets (WIP)
+
+Currently looking into web sockets to maybe implement a live chat/commenting system
