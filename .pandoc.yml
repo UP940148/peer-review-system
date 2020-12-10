@@ -1,0 +1,17 @@
+# This is a yaml file -- be careful when editing
+# Stick to the formatting
+# List the markdown files you want to build into a pdf
+# List them in ORDER
+# One file per line
+
+from: markdown
+output-file: docs/MainDocument.pdf
+
+pdf-engine: xelatex
+
+input-files:
+- docs/proposedFeatures.md
+- docs/API.md
+- docs/fileStructure.md
+- docs/database.md
+- docs/dependencies.md
