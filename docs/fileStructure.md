@@ -70,23 +70,13 @@ The entire system should look something like this:
 ```
  ./
   ├──── uploads/
-  ├──── config.js
   ├──── database.js
-  ├──── README.md
-  ├──── server.js
-  └──── sqlite.db
+  └──── server.js
 ```
 
 - `uploads/` will temporarily hold all files when being uploaded to the server
 
-- `config.js` will hold general settings for the application, such as directory paths
-
 - `database.js` holds all SQL needed to create and interact with the database
-
-- `README.md` not sure this one needs explaining to be honest
 
 - `server.js` will hold all the code needed by the server
   - I'm considering pulling the API paths out of this file and giving them their own file
-
-
-- `sqlite.db` is the actual database file. Only accessed directly by database.js

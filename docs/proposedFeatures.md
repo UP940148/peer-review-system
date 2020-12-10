@@ -1,7 +1,5 @@
 # Peer Review System
 
----
-
 ## Proposed features
 
 - Create your own profile with a display name and profile picture
