@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS user (
 );
 ```
 
+---
+
 ### Groups
 
 The groups table stores information about different groups/pages that have been created
@@ -48,6 +50,8 @@ CREATE TABLE IF NOT EXISTS groups (
   groupDescription text
 );
 ```
+
+---
 
 ### Document
 
@@ -75,6 +79,8 @@ CREATE TABLE IF NOT EXISTS document (
 );
 ```
 
+---
+
 ### Share
 
 The share table stores information about what groups can see different documents
@@ -92,6 +98,8 @@ CREATE TABLE IF NOT EXISTS share (
   groupId references groups(groupId)
 );
 ```
+
+---
 
 ### Rank
 
@@ -123,6 +131,8 @@ CREATE TABLE IF NOT EXISTS rank (
 );
 ```
 
+---
+
 ### Registration
 
 The registration table holds information about what users are members of which groups
@@ -142,6 +152,8 @@ CREATE TABLE IF NOT EXISTS registration (
   rankId references rank(rankId)
 );
 ```
+
+---
 
 ### Reply
 
@@ -166,6 +178,8 @@ CREATE TABLE IF NOT EXISTS reply (
   timeCreated integer NOT NULL
 );
 ```
+
+---
 
 ### Grievance
 
