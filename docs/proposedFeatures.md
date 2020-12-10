@@ -3,44 +3,16 @@
 ## Proposed features
 
 - Create your own profile with a display name and profile picture
-- Create groups with a name, group image, and a member ranking system
-- Upload work to groups with a title, a description, categories, and a link to a document that's either a .pdf or a URL to a public document
-- Search for groups and join them
-- Leave groups you have joined
-- Browse work that's been shared with you
-- Reply to a piece of work. Either as a standard reply to the work, or a reply to another reply
-- Report a user's work or a reply they've made
-- Group admins should be able to review user reports and mark them as seen (archive them)
+- Users can create groups with a name, group image, and a member ranking system
+- Users can upload work in many different forms (still working on a list of options)
+- Users can post their work to different groups that they are members of
+- Users should be able to search for existing public groups and join them
+- Users should be able to see all work in groups that they are signed up to
+- Users should be able to see and reply to comments on posts. This will be the main form of feedback for the users' work
+- Users should be able to report a post or comment
 - Group admins should be able to de-rank and/or remove users from groups
-
----
-
-## Proposed Categories
-
-### Education Levels
-
-The specification is to build a tool that university students can use. But I see no reason I can't try and open it up to students at any level.
-
-- GCSE
-- A-Level
-- Higher Education
-
-### Subject Areas
-
-- English
-- Maths
-- Science
-- History
-- Geography
-- Languages
-- Design and Technology
-- Art and Design
-- Music
-- Physical Education
-- Computing
-- Religious Education
-
-I also think I could implement a system where users can tag their work with custom tags for more specific areas of study. I need to look into that a bit more.
+- Group admins should be able to review user reports and mark them as seen (archive them)
+  - Admins would then decide whether any punishment is required such as banning/revoking privileges
 
 ---
 

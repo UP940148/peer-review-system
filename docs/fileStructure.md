@@ -1,34 +1,17 @@
 # File Structure
 
-## Overview
-
-The entire system should look something like this:
+## Root
 
 ```
  ./
+  ├──── server/
   ├──── www/
-  |    ├──── css/
-  |    |    └──── *.css
-  |    ├──── html/
-  |    |    └──── *.html
-  |    ├──── saved/
-  |    |    ├──── docs/
-  |    |    |    └──── *.pdf
-  |    |    ├──── images/
-  |    |    |    └──── *.jpg
-  |    |    └──── replies/
-  |    |         └──── *.txt
-  |    └──── scripts/
-  |         └──── *.js
-  ├──── uploads/
   ├──── config.js
-  ├──── database.js
   ├──── README.md
-  ├──── server.js
   └──── sqlite.db
 ```
 
-## Client side
+## Served directory
 
 ```
  www/
@@ -68,7 +51,7 @@ The entire system should look something like this:
 ## Server side
 
 ```
- ./
+ server/
   ├──── uploads/
   ├──── database.js
   └──── server.js
