@@ -1,9 +1,7 @@
 /node_modules/
 /sqlite.db
-/uploads/
 /www/
-/config.js
-/database.js
-/server.js
+/server/
 /package.json
 /package-lock.json
+/config.js
