@@ -66,7 +66,6 @@ The document table stores information about work that has been uploaded to the d
 |author|FK||user(googleId)|The id of the work's author|
 |title||text||A title given to the piece of work|
 |file||text||The url associated with the uploaded document|
-|categories||text||List of categories in JSON format|
 |timeCreated||integer||The time the work was uploaded in Unix Time(?)|
 |lastEditted||integer||The time the work was updated in Unix Time(?)|
 
@@ -76,7 +75,6 @@ CREATE TABLE IF NOT EXISTS document (
   author references user(googleId) NOT NULL,
   title text NOT NULL,
   file text NOT NULL,
-  categories text,
   timeCreated integer NOT NULL,
   lastEditted integer
 );
