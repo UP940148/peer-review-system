@@ -3,7 +3,10 @@
 ## Entity Relationship Diagram
 
 ![My ERD](ERD.png)
+
 ERD has been updated since data dictionary creation
+
+---
 
 ## Data Dictionary and SQL
 
