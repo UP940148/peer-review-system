@@ -39,7 +39,7 @@ jobs:
         #uses: Ender-events/pandoc@master # TOOO slow
         with:
           #args: --from=gfm --to=latex --variable=documentclass=report  --variable=geometry:a4paper --variable=geometry:margin=2cm  --variable=linkcolor:blue --pdf-engine=xelatex  ${{ env.FILELIST }} --output=build/Portfolio.pdf
-          args: --defaults=.pandoc.yml --defaults=.Ossonts/pandoc.yml
+          args: --defaults=.pandoc.yml
 
       # - name: SaveArtifact
       #   uses: actions/upload-artifact@v2
