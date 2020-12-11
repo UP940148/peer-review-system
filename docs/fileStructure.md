@@ -30,8 +30,6 @@
      └──── *.js
 ```
 
-- `www/` is the main directory that encapsulates all the files being served to the client.
-
 - `css/` Will hold all Stylesheets that will be used in the system
 
 - `html/` Will hold all HTML files for displaying pages
