@@ -1,0 +1,33 @@
+#pageContainer {
+  display: flex;
+}
+#replyDiv {
+  padding-left: 1%;
+}
+.resizable {
+  min-width: 25%;
+  width: 50%;
+  height: 95vh;
+  padding: 0;
+  margin: 0;
+  flex: 1 1 auto;
+  border: 2px solid #222;
+}
+.handler{
+  width: 5px;
+  cursor: ew-resize;
+  background-color: #ddd;
+  flex: 0 0 auto;
+}
+.handler::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 100%;
+  background: green;
+}
+#work {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
