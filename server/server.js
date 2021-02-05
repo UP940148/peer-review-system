@@ -74,15 +74,16 @@ app.post('/img-upload/', uploader.single('image'), async (req, res) => {
 
 app.post('/user/', jsonParser, async (req, res) => {
   const data = [req.body.googleId, req.body.name, req.body.displayName, req.body.profilePicture, req.body.email];
-  let err = await db.addUser(data);
-  if (err) {
+  try {
+    await db.addUser(data);
+    res.json({
+      success: true,
+    });
+  } catch (err) {
     res.status(400).json({ error: err.message });
-    return;
   }
-  res.json({
-    success: true,
-  });
 });
+
 
 app.post('/work/', jsonParser, async (req, res) => {
   const data = [req.body.title, req.body.author, req.body.file, req.body.timeCreated, req.body.lastEditted];

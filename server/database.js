@@ -141,14 +141,7 @@ database.open(DBSOURCE)
 // CREATE
 async function addUser(values) {
   const sql = 'INSERT INTO user (googleId, name, displayName, profilePicture, email) VALUES (?, ?, ?, ?, ?)';
-  let response = await db.run(sql, values)
-    .then(() => {
-      return null;
-    })
-    .catch(err => {
-      return err;
-    })
-  return response;
+  await db.run(sql, values);
 };
 
 async function addDoc(values) {
