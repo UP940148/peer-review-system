@@ -1,0 +1,75 @@
+#newsFeed {
+  position: relative;
+  top: 6vh;
+  left: 30vw;
+  right:30vw;
+  width: 40vw;
+
+}
+
+.news-item {
+  padding: 12px;
+  margin: 12px;
+  border-radius: 10px;
+}
+
+.news-item h1 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+h4 {
+  margin: 0;
+}
+
+.news-item p, .news-item h4 {
+  color: var(--secondaryColour);
+}
+
+.news-item object {
+  --itemWidth: 100%;
+  width: var(--itemWidth);
+  height: 100%;
+  border-radius: 1em;
+  margin: 1em 0;
+}
+
+.news-item button {
+  width: 100%;
+  font-size: 1em;
+  border: 0;
+  background-color: var(--backgroundColour);
+  padding: 5px;
+  color: var(--secondaryColour);
+  border-radius: 0.5em;
+}
+
+body {
+  position: relative;
+  margin: 0px;
+}
+
+.side-menu {
+  position: fixed;
+  top: 10vh;
+  width: 20vw;
+  height: 80vh;
+  overflow-y: auto;
+}
+
+#leftContent {
+  left: 0;
+}
+
+#rightContent {
+  right: 0;
+}
+
+.selectable {
+  outline: none;
+}
+
+.selectable:hover {
+  cursor: pointer;
+  background-color: var(--hoverColour);
+}

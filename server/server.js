@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const stayAwake = require('stay-awake');
 const config = require('../config');
 const googleAuth = require('simple-google-openid');
+const auth = googleAuth(config.CLIENT_ID);
 const multer = require('multer');
 const db = require('./database.js');
 const fs = require('fs');
@@ -16,6 +17,7 @@ const mdConverter = require('markdown-pdf');
 
 // Create express app
 const app = express();
+app.use(auth);
 
 const uploader = multer({
   dest: config.uploads,
@@ -25,7 +27,6 @@ const uploader = multer({
     files: 1
   },
 });
-
 
 const jsonParser = bodyParser.json();
 
@@ -37,7 +38,11 @@ app.listen(config.PORT, (err) => {
   console.log(`Server runnning on port ${config.PORT}`);
 });
 
-app.use('/', express.static(config.www, { index: 'html/viewWork.html', extenstions: ['HTML'] }));
+// Setting multiple served directories to avoid having folder names in the url
+// 'http://localhost:8080/userfeed.html' rather than 'http://localhost:8080/html/userfeed.html'
+app.use('/', express.static(config.www, { index: 'html/userfeed.html', extensions: ['html'] }));
+app.use('/', express.static(config.www + 'scripts/'));
+app.use('/', express.static(config.www + 'css/'));
 
 // POST
 
@@ -159,7 +164,7 @@ app.post('/group/', jsonParser, async (req, res) => {
 
 app.post('/rank/', jsonParser, async (req, res) => {
   const data = [req.body.groupId, req.body.rankName, req.body.level, req.body.colour, req.body.canPost, req.body.canReply, req.body.canRemove, req.body.canBan];
-  let err = db.addRank(data);
+  let err = await db.addRank(data);
   if (err) {
     res.status(400).json({ error: err.message });
     return;
@@ -172,7 +177,7 @@ app.post('/rank/', jsonParser, async (req, res) => {
 // GET
 
 app.get('/users/u/:userId/', jsonParser, async (req, res) => {
-  const id = [req.params.userId];
+  const id = req.params.userId;
   let response = await db.getUserById(id);
   if (response.failed) {
     res.status(400).json({
@@ -185,4 +190,32 @@ app.get('/users/u/:userId/', jsonParser, async (req, res) => {
     success: true,
     data: response.context,
   });
+})
+
+app.get('/work/d/:documentId/', (req, res) => {
+  const id = [req.params.documentId];
+  const file = `${config.docStore}/${id}`;
+  res.sendFile(file);
+});
+
+app.get('/feed/:userId', async (req, res) => {
+  const id = req.params.userId;
+  let response = await db.getViewableDocs(id);
+  if (response.failed) {
+    res.status(400).json({
+      success: false,
+      data: response.context.message
+    });
+    return;
+  }
+  res.json({
+    success: true,
+    data: response.context,
+  });
+})
+
+app.get('/download/:documentId/', (req, res) => {
+  const id = req.params.documentId;
+  const file = `${config.docStore}/${id}`;
+  res.download(file);
 })

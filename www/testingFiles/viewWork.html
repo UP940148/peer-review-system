@@ -1,0 +1,145 @@
+<!doctype html>
+
+<head>
+  <link type='text/css' rel='stylesheet' href='./css/index.css'>
+</head>
+<button id='swapBtn'>Swap Sides!</button>
+
+<section class=pictureUpload id='fileContainer'>
+  <input type=file class=fileButton accept='.pdf'/><br>
+</section>
+
+<div id='pageContainer'></div>
+<script>
+
+// Get URI parameters in form ?d=1234/u=5678/
+// 'd=(\\d+)\/+u=(\\d+)\/+'
+//console.log( 'Gogogo now!'.match(/(go)+/ig) );
+//const idParam = decodeURIComponent(window.location.search).match('d=(.+)')[1];
+//console.log(idParam);
+
+const container = document.getElementById('pageContainer');
+const workDiv = document.createElement('div');
+workDiv.id = 'workDiv';
+workDiv.classList.add('resizable');
+container.appendChild(workDiv);
+
+const handler = document.createElement('div');
+handler.id = 'dragHandler';
+handler.classList.add('handler');
+handler.style.width = '5px';
+container.appendChild(handler);
+
+const replyDiv = document.createElement('div');
+replyDiv.id = 'replyDiv';
+replyDiv.classList.add('resizable');
+container.appendChild(replyDiv);
+
+const workFile = document.createElement('embed');
+workFile.id = 'work';
+//workFile.src = `./docs/${idParam}#view=Fit&view=FitB`;
+workDiv.appendChild(workFile);
+
+const swapper = document.getElementById('swapBtn');
+let isHandlerDragging = false;
+
+document.addEventListener('mousedown', function(e) {
+  // If mousedown event is fired from .handler, toggle flag to true
+  if (e.target === handler) {
+    isHandlerDragging = true;
+    handler.width = '2px';
+    container.style.pointerEvents = 'none';
+  }
+});
+
+document.addEventListener('mousemove', function(e) {
+  // Don't do anything if dragging flag is false
+
+  if (!isHandlerDragging) {
+    return false;
+  }
+  e.preventDefault();
+
+  // Set boxA width properly
+  // Get offset
+  const containerOffsetLeft = container.offsetLeft;
+
+  // Get x-coordinate of pointer relative to container
+  const pointerRelativeXpos = e.clientX - containerOffsetLeft;
+
+  const leftBox = container.childNodes[0];
+  const rightBox = container.childNodes[2];
+  const totalWidth = container.clientWidth;
+
+  // Resize box A
+  // * 8px is the left/right spacing between .handler and its inner pseudo-element
+  // * Set flex-grow to 0 to prevent it from growing
+  leftBox.style.width = (pointerRelativeXpos - 8) + 'px';
+  rightBox.style.width = totalWidth-5-(pointerRelativeXpos) + 'px';
+});
+
+document.addEventListener('mouseup', function(e) {
+  // Turn off dragging flag when user mouse is up
+  isHandlerDragging = false;
+  container.style.pointerEvents = 'auto';
+});
+
+swapper.addEventListener('click', function() {
+  const children = container.childNodes;
+  const leftWidth = container.childNodes[0].style.width;
+  const rightWidth = container.childNodes[2].style.width;
+
+  let newChildren = [];
+  for (i=0; i<children.length; i++) {
+    newChildren.push(children[0]);
+    container.removeChild(children[0]);
+  }
+  newChildren.reverse();
+  newChildren.forEach(child => {
+    container.appendChild(child);
+  })
+  container.childNodes[0].style.width = leftWidth;
+  container.childNodes[2].style.width = rightWidth;
+})
+
+const fileButtons = document.getElementsByClassName('fileButton');
+for (let i = 0; i < fileButtons.length; i++) {
+  fileButtons[i].addEventListener('change', handleFileSelect, false);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.readAsDataURL(file);
+  console.log(file);
+  fileUpload(file, e.target);
+}
+
+async function fileUpload(file, target) {
+  const data = new FormData();
+  data.append('document', file);
+  const response = await fetch('/doc-upload/', {
+    method: 'POST',
+    body: data,
+  });
+
+  const resData = await response.json();
+  const currentViewer = document.getElementById('work');
+  if (currentViewer) {
+    currentViewer.remove();
+  }
+  const newViewer = document.createElement('embed');
+  workDiv.appendChild(newViewer);
+  newViewer.id = 'work';
+  //newViewer.width = '500px';
+  //newViewer.height = '750px';
+  //newViewer.style.objectFit = 'contain';
+  //document.getElementById('fileContainer').appendChild(newViewer);
+  console.log(resData.fileSource);
+  document.getElementById('work').src = `/work/d/${resData.fileSource}#view=Fit&view=FitB`;
+}
+
+
+
+</script>

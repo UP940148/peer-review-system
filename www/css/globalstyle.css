@@ -1,0 +1,63 @@
+:root[colour-mode="light"] {
+  --backgroundColour: #f0f2f5;
+  --featureColour: #ffffff;
+  --hoverColour: #e4e6eb;
+  --primaryColour: #212121;
+  --secondaryColour: #7b7b7b;
+  --highlightColour: #6200ee;
+}
+:root[colour-mode="dark"] {
+  --backgroundColour: #18191a;
+  --featureColour: #242526;
+  --hoverColour: #3a3b3c;
+  --primaryColour: #e4e6eb;
+  --secondaryColour: #b0b3b8;
+  --highlightColour: #985eff;
+}
+
+html {
+  overflow-y: scroll;
+}
+
+.background-element {
+  background-color: var(--backgroundColour);
+}
+.feature-element {
+  background-color: var(--featureColour);
+}
+.secondary-text {
+  color: var(--secondaryColour);
+}
+body {
+  color: var(--primaryColour);
+}
+hr {
+  border: 1px solid var(--highlightColour);
+}
+
+#navBar {
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left:0;
+  right:0;
+  height: 5.5vh;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--highlightColour);
+  z-index: 100;
+  font-size: 150%;
+}
+
+#navBar div {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 12px;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+#darkModeToggle {
+  position: absolute;
+  right: 10px;
+}

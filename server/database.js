@@ -15,11 +15,11 @@ database.open(DBSOURCE)
       email text UNIQUE NOT NULL
       );`)
       .then(() => {
-      // Table established
-      console.log('Established user table');
+        // Table established
+        console.log('Established user table');
       })
       .catch(err => {
-      console.log(err.message);
+        console.log(err.message);
       })
 
     db.run(`CREATE TABLE IF NOT EXISTS groups (
@@ -41,7 +41,6 @@ database.open(DBSOURCE)
       author references user(googleId) NOT NULL,
       title text NOT NULL,
       file text NOT NULL,
-      categories text,
       timeCreated integer NOT NULL,
       lastEditted integer
       );`)
@@ -268,6 +267,26 @@ async function getUserById(userId) {
   return response;
 }
 
+async function getViewableDocs(userId) {
+  // I just know this SQL is gonna be disgusting and I haven't written it yet
+  let sql = `
+  SELECT *
+  FROM document
+  INNER JOIN share ON share.documentId = document.documentId
+  INNER JOIN groups ON groups.groupId = share.groupId
+  INNER JOIN registration ON registration.groupId = groups.groupId
+  INNER JOIN user ON user.googleId = registration.userId
+  WHERE user.googleId = ${userId};`;
+  let response = await db.get(sql)
+    .then(row => {
+      return {failed: false, context: row};
+    })
+    .catch(err => {
+      return {failed: true, context: err};
+    })
+  return response;
+}
+
 module.exports.addUser = addUser;
 module.exports.addDoc = addDoc;
 module.exports.addReply = addReply;
@@ -277,3 +296,4 @@ module.exports.addShare = addShare;
 module.exports.addGroup = addGroup;
 module.exports.addRank = addRank;
 module.exports.getUserById = getUserById;
+module.exports.getViewableDocs = getViewableDocs;
