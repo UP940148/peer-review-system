@@ -40,7 +40,7 @@ app.listen(config.PORT, (err) => {
 
 // Setting multiple served directories to avoid having folder names in the url
 // 'http://localhost:8080/userfeed.html' rather than 'http://localhost:8080/html/userfeed.html'
-app.use('/', express.static(config.www, { index: 'html/userfeed.html', extensions: ['html'] }));
+app.use('/', express.static(config.www + 'html/', { index: 'userfeed.html', extensions: ['html'] }));
 app.use('/', express.static(config.www + 'scripts/'));
 app.use('/', express.static(config.www + 'css/'));
 
@@ -219,3 +219,7 @@ app.get('/download/:documentId/', (req, res) => {
   const file = `${config.docStore}/${id}`;
   res.download(file);
 })
+
+app.get('*', function(request, response, next) {
+  response.sendFile(config.www + '/html/invalidsource.html');
+});

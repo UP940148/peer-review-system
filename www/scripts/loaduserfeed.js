@@ -41,7 +41,10 @@ function appendPosts(listOfPosts) {
     newContainer.className = 'news-item feature-element';
     newContainer.setAttribute('post', post.id);
     let newTitle = document.createElement('h1');
-    newTitle.textContent = post.title;
+    let newTitleLink = document.createElement('a');
+    newTitleLink.href = `/viewwork.html?doc=${post.file}`;
+    newTitleLink.textContent = post.title;
+    newTitle.appendChild(newTitleLink);
     let newAuthor = document.createElement('h4');
     newAuthor.textContent = `by ${post.author}`;
     let newDesc = document.createElement('p');
@@ -50,7 +53,7 @@ function appendPosts(listOfPosts) {
     toggleButton.textContent = 'Show Content';
     toggleButton.className = 'selectable';
     let innerDoc = document.createElement('object');
-    innerDoc.data = `/work/d/${post.file}#view=FitH`;
+    innerDoc.data = `/work/d/${post.file}`;
     let filenameSplit = post.file.split('.');
     innerDoc.style.display = 'none';
     let fileType = filenameSplit[filenameSplit.length - 1];

@@ -5,7 +5,7 @@ function populateDocumentFromURL() {
   const urlParams = new URLSearchParams(queryString);
   const docId = urlParams.get('doc');
 
-  documentContainer.src = `/${docId}`;
+  documentContainer.src = `/work/d/${docId}`;
 }
 
 populateDocumentFromURL();

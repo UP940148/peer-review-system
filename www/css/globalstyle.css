@@ -61,3 +61,12 @@ hr {
   position: absolute;
   right: 10px;
 }
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+a:hover {
+  text-decoration: underline;
+}
