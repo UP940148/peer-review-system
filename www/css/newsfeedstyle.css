@@ -1,12 +1,14 @@
 #newsFeed {
   position: relative;
-  left: 25vw;
-  width: 50vw;
+  left: 30vw;
+  width: 40vw;
 }
 
 .news-item {
-  padding: 12px;
-  margin: 12px;
+  padding: 1vw;
+  width: 40vw;
+  margin-bottom: 12px;
+  margin-top: 12px;
   border-radius: 10px;
 }
 
@@ -26,9 +28,10 @@ h4 {
 .file-container {
   object-fit: contain;
   border-radius: 1em;
-  margin: 1em 0;
+  margin: 1em 1em 1em 0;
   max-width: 20vw;
   max-height: 20vh;
+  background-color: var(--hoverColour);
 }
 
 .news-item button {
@@ -73,4 +76,56 @@ object.file-container {
 
 .post-description {
   margin: 6px 0px;
+}
+
+.new-post-input {
+  outline: none;
+  color: var(--primaryColour);
+  display: block;
+  box-sizing:border-box;
+  background-color: var(--hoverColour);
+  padding: 0.5rem;
+  border-radius: 12px;
+  margin: 0;
+  width: 100%;
+}
+
+#newPostSubmit {
+  display: block;
+  width: 100%;
+  background-color: var(--highlightColour);
+  color: var(--backgroundColour);
+  text-align: center;
+  padding: 6px 0px;
+  border-radius: 12px;
+  margin: 0;
+}
+
+#newPostSubmit:hover {
+  background-color: var(--highlightHoverColour);
+}
+
+#newPostContainer h2 {
+  margin: 0;
+}
+
+#newPostTitle:empty::before {
+  content: 'Title...';
+  color: var(--secondaryColour);
+}
+
+#newPostDesc:empty::before {
+  content: 'Caption...';
+  color: var(--secondaryColour);
+}
+
+#newPostFileContainer {
+  display: flex;
+  /*flex-direction: row-reverse;*/
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.button {
+  cursor: pointer;
 }

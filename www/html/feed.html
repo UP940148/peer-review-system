@@ -13,12 +13,21 @@
       <div id='googleSignInButton' class="g-signin2" data-onsuccess="onSignIn" hidden=true></div>
       <div id='navBar' class='feature-element'></div>
       <div id='pageContent'>
-        <div class='side-menu' id='leftContent'>
-        </div>
+        <div class='side-menu' id='leftContent'></div>
         <div id='newsFeed'>
+          <div id='newPostContainer' class='news-item feature-element'>
+            <div id='newPostInput'>
+              <h2><span id='newPostTitle' class='input new-post-input' role='textbox' contenteditable></span></h2>
+              <p><span id='newPostDesc' class='input new-post-input' role='textbox' contenteditable></span></p>
+              <div id='newPostFileContainer'>
+                <input id="fileInput" type="file" accept='image/*, audio/*, .pdf' hidden>
+                <img class='file-container button' src='/img/add-new-file.png' onclick="document.getElementById('fileInput').click();" style='max-width:20%;'>
+              </div>
+            </div>
+            <h2><div id='newPostSubmit' class='button'>Post</div></h2>
+          </div>
         </div>
-        <div class='side-menu' id='rightContent'>
-        </div>
+        <div class='side-menu' id='rightContent'></div>
       </div>
     </body>
 </html>

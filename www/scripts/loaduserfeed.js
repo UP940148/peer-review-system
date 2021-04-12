@@ -1,4 +1,4 @@
-/* global getElementForFile */
+/* global getElementForFile gapi */
 
 const newsFeedContainer = document.getElementById('newsFeed');
 
@@ -113,4 +113,44 @@ function initPage() {
   document.getElementById('feedButton').addEventListener('click', () => {
     window.scrollTo(0, 0);
   });
+}
+/* exported initPage */
+
+
+// Handle file input
+const fileUploader = document.getElementById('fileInput');
+
+fileUploader.addEventListener('change', handleFileSelect);
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    createNewFileHolder(reader);
+  };
+  const data = new FormData();
+  console.log(data);
+  // data.append('document', file);
+
+  // const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+
+  // const response = await fetch('/doc/', {
+  //   headers: {
+  //     Authorization: 'Bearer ' + idToken,
+  //   },
+  //   credentials: 'same-origin',
+  //   method: 'POST',
+  //   body: data,
+  // });
+  // const resData = await response.json();
+  // console.log(resData);
+}
+
+function createNewFileHolder(file) {
+  const container = document.getElementById('newPostFileContainer');
+  const item = document.createElement('object');
+  item.classList.add('file-container');
+  item.data = file.result;
+  container.appendChild(item);
 }

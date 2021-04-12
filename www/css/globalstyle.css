@@ -5,6 +5,7 @@
   --primaryColour: #212121;
   --secondaryColour: #7b7b7b;
   --highlightColour: #6200ee;
+  --highlightHoverColour: #6200eeaa;
   --linkColour: #0000ff;
   --linkHoverColour: #0000ff90;
 }
@@ -15,6 +16,7 @@
   --primaryColour: #e4e6eb;
   --secondaryColour: #b0b3b8;
   --highlightColour: #985eff;
+  --highlightHoverColour: #985effaa;
   --linkColour: #0088ff;
   --linkHoverColour: #0088ff90;
 }

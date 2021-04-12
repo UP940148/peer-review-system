@@ -6,9 +6,9 @@ const config = require('../config');
 const googleAuth = require('simple-google-openid');
 const multer = require('multer');
 const api = require('./api-functions.js');
-const fs = require('fs');
-const { promisify } = require('util');
-const renameAsync = promisify(fs.rename);
+// const fs = require('fs');
+// const { promisify } = require('util');
+// const renameAsync = promisify(fs.rename);
 
 
 // Set up middleware
@@ -56,8 +56,14 @@ app.use(auth);
 
 app.post('/user/', googleAuth.guardMiddleware(), api.createUser);
 app.get('/user/:profileId?/', api.getProfile);
+app.patch('/user/', googleAuth.guardMiddleware(), api.updateProfile);
 app.delete('/user/', googleAuth.guardMiddleware(), api.deleteUser);
 
+// Group Routes
+
+// File Routes
+
+app.post('/doc/', googleAuth.guardMiddleware(), uploader.single('document'), api.uploadDoc);
 app.get('/doc/:documentId/', api.sendDoc);
 app.get('/doc/download/:documentId/', api.downloadDoc);
 app.get('/profile-pic/u/:userId?/', api.sendPic);

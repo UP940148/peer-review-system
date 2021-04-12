@@ -1,6 +1,10 @@
 const config = require('../config');
 const db = require('./database.js');
 
+const fs = require('fs');
+const { promisify } = require('util');
+const renameAsync = promisify(fs.rename);
+
 // --- ADMIN FUNCTIONS ---
 
 exports.getAllUsers = async function (req, res) {
@@ -79,6 +83,23 @@ exports.getProfile = async function (req, res) {
   res.status(200).json({
     success: true,
     data: response.context,
+  });
+};
+
+exports.updateProfile = async function (req, res) {
+  // Update User Profile
+  res.sendStatus(418);
+};
+
+exports.uploadDoc = async function (req, res) {
+  // Handle document upload
+  const fileExtList = req.file.originalname.split('.');
+  const fileExt = fileExtList[fileExtList.length - 1];
+  const newFilename = req.file.filename + '.' + fileExt;
+  await renameAsync(req.file.path, config.docStore + newFilename);
+  res.status(200).json({
+    success: true,
+    data: newFilename,
   });
 };
 
