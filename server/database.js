@@ -178,7 +178,7 @@ exports.deleteUser = async function (userId) {
 };
 
 // CREATE
-
+/*
 async function addDoc(values) {
   const sql = 'INSERT INTO document (title, author, file, timeCreated, lastEditted) VALUES (?, ?, ?, ?, ?)';
   let response = await db.run(sql, values)
@@ -333,7 +333,7 @@ async function getViewableDocs(userId) {
     })
   return response;
 }
-/*
+
 module.exports.addUser = addUser;
 module.exports.addDoc = addDoc;
 module.exports.addReply = addReply;
