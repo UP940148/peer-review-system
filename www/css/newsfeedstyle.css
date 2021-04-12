@@ -1,9 +1,7 @@
 #newsFeed {
   position: relative;
-  top: 6vh;
-  left: 30vw;
-  right:30vw;
-  width: 40vw;
+  left: 25vw;
+  width: 50vw;
 }
 
 .news-item {
@@ -25,10 +23,12 @@ h4 {
   color: var(--secondaryColour);
 }
 
-.news-item object {
+.file-container {
   object-fit: contain;
   border-radius: 1em;
   margin: 1em 0;
+  max-width: 20vw;
+  max-height: 20vh;
 }
 
 .news-item button {
@@ -62,11 +62,15 @@ body {
   right: 0;
 }
 
-.selectable {
-  outline: none;
+object.file-container {
+  height: 90vh;
 }
 
-.selectable:hover {
+.post-link {
+  color: var(--primaryColour);
   cursor: pointer;
-  background-color: var(--hoverColour);
+}
+
+.post-description {
+  margin: 6px 0px;
 }

@@ -3,9 +3,9 @@ module.exports.www = path.join(__dirname, '/www/');
 module.exports.files = path.join(__dirname, '/server/saved/');
 module.exports.uploads = path.join(__dirname, '/server/uploads/');
 
-module.exports.docStore = module.exports.files + '/docs/';
-module.exports.imageStore = module.exports.files + '/img/';
-module.exports.replyStore = module.exports.files + '/replies/';
+module.exports.docStore = module.exports.files + 'docs/';
+module.exports.imageStore = module.exports.files + 'img/';
+module.exports.replyStore = module.exports.files + 'replies/';
 
 module.exports.PORT = 8080;
 

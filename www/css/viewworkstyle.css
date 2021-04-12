@@ -1,10 +1,19 @@
 
 #pageContent {
-  top: 6vh;
+  display: flex;
+  justify-content: center;
 }
 
-#userFile {
-  height: 90vh;
-  width: 100%;
+.file-container {
+  max-height: 90vh;
+  max-width: 60vw;
   object-fit: contain;
+  background-color: var(--featureColour);
+  padding: 6px;
+  border-radius: 12px;
+}
+
+object.file-container {
+  min-height: 90vh;
+  min-width: 60vw;
 }

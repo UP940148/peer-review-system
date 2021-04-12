@@ -71,6 +71,10 @@ Features and API calls:
 
 
 
+TODO
+Error listener in `globalscripts.getElementForFile()` function
+`globalscripts.getElementForFile()` returning in wrong order. Problem with await screwing up order. Maybe use `.then()`?
+  - SOLVED: Use normal 'for' loop rather than list.forEach(...)
 
 
 

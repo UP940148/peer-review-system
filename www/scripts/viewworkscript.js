@@ -1,11 +1,13 @@
-const documentContainer = document.getElementById('userFile');
+/* global getElementForFile */
 
-function populateDocumentFromURL() {
+async function populateDocumentFromURL() {
   const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const docId = urlParams.get('doc');
+  const docId = queryString.substring(1);
 
-  documentContainer.src = `/work/d/${docId}`;
+  const documentContainer = await getElementForFile(`/doc/${docId}`);
+  document.getElementById('pageContent').appendChild(documentContainer);
 }
 
-populateDocumentFromURL();
+function initPage() {
+  populateDocumentFromURL();
+}

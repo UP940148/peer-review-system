@@ -1,0 +1,26 @@
+Tasks:
+  Users:
+    Create an account
+    Edit their account
+    Delete their account
+    Search for other users
+    Search for groups
+    Add users as friends (?)
+    Join a group
+    Post work publicly
+    Post work to a group
+    Share work with only specified people
+      - Link share
+      - Invite maybe?
+    Update their uploads
+    Delete their posts/shares
+    Create a group
+    Edit group ranks
+    Assign group ranks to members
+      - Group ranks should then have different powers
+    Delete group ranks (Somehow handle members with deprecated rank)
+    Comment on posts
+    Reply to comments
+    Delete comments
+    Report a post
+    Report a comment
