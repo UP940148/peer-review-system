@@ -18,8 +18,8 @@ const uploader = multer({
   dest: config.uploads,
   limits: {
     fields: 10,
-    fileSize: 1024 * 1024 * 20,
-    files: 1,
+    fileSize: 1024 * 1024 * 30,
+    files: 5,
   },
 });
 
@@ -63,7 +63,7 @@ app.delete('/user/', googleAuth.guardMiddleware(), api.deleteUser);
 
 // File Routes
 
-app.post('/doc/', googleAuth.guardMiddleware(), uploader.single('document'), api.uploadDoc);
+app.post('/docs/', googleAuth.guardMiddleware(), uploader.array('document', 5), api.uploadDocs);
 app.get('/doc/:documentId/', api.sendDoc);
 app.get('/doc/download/:documentId/', api.downloadDoc);
 app.get('/profile-pic/u/:userId?/', api.sendPic);

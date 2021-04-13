@@ -91,15 +91,25 @@ exports.updateProfile = async function (req, res) {
   res.sendStatus(418);
 };
 
-exports.uploadDoc = async function (req, res) {
+exports.uploadDocs = async function (req, res) {
   // Handle document upload
-  const fileExtList = req.file.originalname.split('.');
-  const fileExt = fileExtList[fileExtList.length - 1];
-  const newFilename = req.file.filename + '.' + fileExt;
-  await renameAsync(req.file.path, config.docStore + newFilename);
+  const newFilenames = [];
+
+  // Loop through every file
+  for (const file of req.files) {
+    // Get the file extension and add it to the random file name
+    const fileExtList = file.originalname.split('.');
+    const fileExt = fileExtList[fileExtList.length - 1];
+    const newFilename = file.filename + '.' + fileExt;
+    // Move file and rename it with extension
+    await renameAsync(file.path, config.docStore + newFilename);
+    // Add file to list
+    newFilenames.push(newFilename);
+  }
+  // Return list of file names
   res.status(200).json({
     success: true,
-    data: newFilename,
+    data: newFilenames,
   });
 };
 

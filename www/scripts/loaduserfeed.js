@@ -44,6 +44,7 @@ const documentList = [
     file: '6969.pdf',
   },
 ];
+let newPostFiles = [];
 
 function getNextPosts(offset) {
   return documentList;
@@ -113,44 +114,130 @@ function initPage() {
   document.getElementById('feedButton').addEventListener('click', () => {
     window.scrollTo(0, 0);
   });
+  resetFileInput();
 }
 /* exported initPage */
 
-
-// Handle file input
-const fileUploader = document.getElementById('fileInput');
-
-fileUploader.addEventListener('change', handleFileSelect);
-
 function handleFileSelect(e) {
+  // Get the file and read it so it can be displayed
   const file = e.target.files[0];
+  const fileSizeInMB = file.size / (1024 * 1024);
+  if (fileSizeInMB >= 30) {
+    alert('Max file size is 30MB!');
+    return;
+  }
   const reader = new FileReader();
   reader.readAsDataURL(file);
+
   reader.onload = function () {
-    createNewFileHolder(reader);
+    /*
+      When the reader has loaded the file,
+      attempt to append the file to the list and display it on screen
+    */
+    try {
+      createNewFileHolder(reader);
+      newPostFiles.push(file);
+      checkReadyFileCount();
+    } catch (e) {
+      console.log(e);
+    }
+    resetFileInput();
   };
-  const data = new FormData();
-  console.log(data);
-  // data.append('document', file);
-
-  // const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-
-  // const response = await fetch('/doc/', {
-  //   headers: {
-  //     Authorization: 'Bearer ' + idToken,
-  //   },
-  //   credentials: 'same-origin',
-  //   method: 'POST',
-  //   body: data,
-  // });
-  // const resData = await response.json();
-  // console.log(resData);
 }
 
 function createNewFileHolder(file) {
-  const container = document.getElementById('newPostFileContainer');
-  const item = document.createElement('object');
-  item.classList.add('file-container');
-  item.data = file.result;
-  container.appendChild(item);
+  const mainContainer = document.getElementById('filesToUpload');
+  const itemContainer = document.createElement('div');
+  itemContainer.classList.add('preview-container');
+  // Display document
+  const item = document.createElement('embed');
+  item.classList.add('file-container', 'preview-file');
+  item.src = file.result;
+  itemContainer.appendChild(item);
+  // Create delete button for file
+  const deleteButton = document.createElement('div');
+  deleteButton.classList.add('button', 'file-delete-button');
+  deleteButton.textContent = 'Delete';
+  itemContainer.appendChild(deleteButton);
+  mainContainer.appendChild(itemContainer);
+
+  const currentFileNum = newPostFiles.length;
+  deleteButton.addEventListener('click', (e) => {
+    removeFileFromPost(e.target, currentFileNum);
+  });
+}
+
+document.getElementById('newPostSubmit').addEventListener('click', submitPost);
+
+async function submitPost() {
+  // Submit the post
+  // Add all files to the FormData
+  const data = new FormData();
+  newPostFiles.forEach(file => {
+    if (file) {
+      data.append('document', file);
+    }
+  });
+
+  let fileListString = '';
+  // If any files were included, post them
+  if (data.get('document')) {
+    // Send Request
+    const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    const response = await fetch('/docs/', {
+      headers: {
+        Authorization: 'Bearer ' + idToken,
+      },
+      method: 'POST',
+      credentials: 'same-origin',
+      body: data,
+    });
+
+    const resData = await response.json();
+
+    fileListString = resData.data.toString();
+  }
+
+  // Create new post here
+
+  // Reset the files to be uploaded
+  const container = document.getElementById('filesToUpload');
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+  newPostFiles = [];
+  checkReadyFileCount();
+}
+
+// Check how many files are prepped to be posted so a limit can be enforced
+function checkReadyFileCount() {
+  const container = document.getElementById('filesToUpload');
+  // Show or hide new file upload button
+  if (container.childNodes.length >= 5) {
+    document.getElementById('addNewFile').hidden = true;
+  } else {
+    document.getElementById('addNewFile').hidden = false;
+  }
+}
+
+function removeFileFromPost(target, fileNum) {
+  target.parentElement.remove();
+  newPostFiles[fileNum] = undefined;
+  checkReadyFileCount();
+}
+
+function resetFileInput() {
+  // Delete file input if it exists
+  let fileUploader = document.getElementById('fileInput');
+  if (fileUploader) {
+    fileUploader.remove();
+  }
+
+  // Create new file input
+  const html = "<input id='fileInput' type='file' accept='image/*, audio/*, .pdf' hidden>";
+  document.getElementById('newPostFileContainer').insertAdjacentHTML('afterbegin', html);
+
+  // Add event listener again
+  fileUploader = document.getElementById('fileInput');
+  fileUploader.addEventListener('change', handleFileSelect);
 }

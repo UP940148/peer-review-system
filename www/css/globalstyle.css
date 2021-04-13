@@ -8,6 +8,8 @@
   --highlightHoverColour: #6200eeaa;
   --linkColour: #0000ff;
   --linkHoverColour: #0000ff90;
+  --deleteColour: #d0312d;
+  --deleteHoverColour: #e3242b;
 }
 :root[colour-mode="dark"] {
   --backgroundColour: #18191a;
@@ -19,6 +21,8 @@
   --highlightHoverColour: #985effaa;
   --linkColour: #0088ff;
   --linkHoverColour: #0088ff90;
+  --deleteColour: #710c04;
+  --deleteHoverColour: #900d09;
 }
 
 html {
