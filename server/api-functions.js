@@ -216,6 +216,41 @@ exports.createPost = async function (req, res) {
   }
 };
 
+exports.getNextPosts = async function (req, res) {
+  // Set user ID if not logged in
+  let userId;
+  if (!req.user) {
+    userId = undefined;
+  } else {
+    userId = req.user.id;
+  }
+  // If offset invalid, return 400
+  const offset = parseInt(req.params.offset);
+  if (isNaN(offset) || offset < 0) {
+    res.sendStatus(400);
+    return;
+  }
+  // Get posts
+  const values = [userId, offset];
+  const response = await db.getNextPosts(values);
+  // If something went wrong, return 500
+  if (response.failed) {
+    res.status(500).json({
+      data: response.context.message,
+    });
+    return;
+  }
+  // If no posts found, return 204
+  if (!response.context || response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  // If success, return 200
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
 // Group Functions
 
 exports.createGroup = async function (req, res) {

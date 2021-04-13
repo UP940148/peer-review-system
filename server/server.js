@@ -70,6 +70,7 @@ app.post('/group/', googleAuth.guardMiddleware(), jsonParser, api.createGroup);
 // User Post Routes
 
 app.post('/post/', googleAuth.guardMiddleware(), jsonParser, api.createPost);
+app.get('/posts/:offset', api.getNextPosts);
 
 // File Routes
 

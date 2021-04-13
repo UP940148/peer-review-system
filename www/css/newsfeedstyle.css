@@ -128,7 +128,8 @@ embed.file-container:not(.preview-file) {
   color: var(--secondaryColour);
 }
 
-#filesToUpload {
+
+.file-preview-container {
   display: flex;
   /*flex-direction: row-reverse;*/
   flex-wrap: wrap;
@@ -158,4 +159,8 @@ embed.file-container:not(.preview-file) {
   border-radius: 1em;
   margin-bottom: 0.5em;
   background-color: var(--deleteColour);
+}
+
+.poster-info-header {
+  margin-bottom: 0.5em;
 }

@@ -283,6 +283,39 @@ exports.getPost = async function (values) {
     });
   return response;
 };
+
+exports.getNextPosts = async function (values) {
+  const sql = `
+  SELECT DISTINCT
+  post.postId as id,
+  groups.groupName as "group",
+  post.groupId as groupId,
+  post.title as title,
+  post.caption as description,
+  author.displayName as author,
+  post.author as authorId,
+  post.files as files,
+  post.timeCreated as timeCreated
+  FROM post
+  INNER JOIN user as author ON author.googleId = post.author
+  INNER JOIN groups ON groups.groupId = post.groupId
+  INNER JOIN registration ON registration.groupId = groups.groupId
+  INNER JOIN user ON user.googleId = registration.userId
+  WHERE (groups.isPrivate = 0
+  OR user.googleId = ?)
+  ORDER BY post.timeCreated DESC
+  LIMIT 10
+  OFFSET ?;
+  `;
+  const response = await db.all(sql, values)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
 // CREATE
 /*
 async function addDoc(values) {

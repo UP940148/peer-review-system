@@ -44,71 +44,100 @@ const documentList = [
     file: '6969.pdf',
   },
 ];
+console.log(documentList);
 let newPostFiles = [];
+let currentOffset = 0;
 
-function getNextPosts(offset) {
-  return documentList;
+async function getNextPosts(offset) {
+  // Get posts from server
+  const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+
+  const response = await fetch(`/posts/${offset}`, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+  });
+  try {
+    const resData = await response.json();
+    currentOffset += 10;
+    const listOfPosts = resData.data;
+    return listOfPosts;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 async function appendPosts(listOfPosts) {
   // Was using forEach(...), but it had issues with async await
   for (let i = 0; i < listOfPosts.length; i++) {
-    const post = listOfPosts[i];
-    const newContainer = document.createElement('div');
-    newContainer.className = 'news-item feature-element';
-    newContainer.setAttribute('post', post.id);
+    try {
+      const post = listOfPosts[i];
+      const newContainer = document.createElement('div');
+      newContainer.className = 'news-item feature-element';
+      newContainer.setAttribute('post', post.id);
 
-    // Add title
-    const newTitle = document.createElement('h1');
-    const newTitleLink = document.createElement('a');
-    newTitleLink.href = `/post?${post.file}`;
-    newTitleLink.textContent = post.title;
-    newTitle.appendChild(newTitleLink);
+      // Add title
+      const newTitle = document.createElement('h1');
+      const newTitleLink = document.createElement('a');
+      newTitleLink.href = `/post?${post.id}`;
+      newTitleLink.textContent = post.title;
+      newTitle.appendChild(newTitleLink);
 
-    // Container for group and author
-    const postedContainer = document.createElement('h4');
-    // Add group link
-    const groupLink = document.createElement('a');
-    groupLink.classList.add('post-link');
-    groupLink.href = '/group?' + post.groupId;
-    // Have group picture contained in link
-    const groupImage = document.createElement('img');
-    groupImage.classList.add('group-pic');
-    groupImage.src = '/profile-pic/g/' + post.image;
-    groupLink.appendChild(groupImage);
-    // Add group name to link
-    const groupName = document.createElement('span');
-    groupName.textContent = post.group;
-    groupLink.appendChild(groupName);
-    postedContainer.appendChild(groupLink);
-    // Non-link text to connect group and author
-    const authorConnector = document.createElement('span');
-    authorConnector.textContent = ' | By ';
-    postedContainer.appendChild(authorConnector);
-    // Add author name with link
-    const authorLink = document.createElement('a');
-    authorLink.classList.add('post-link');
-    authorLink.href = '/profile?' + post.authorId;
-    authorLink.textContent = post.author;
-    postedContainer.appendChild(authorLink);
+      // Container for group and author
+      const postedContainer = document.createElement('h4');
+      postedContainer.classList.add('poster-info-header');
+      // Add group link
+      const groupLink = document.createElement('a');
+      groupLink.classList.add('post-link');
+      groupLink.href = '/group?' + post.groupId;
+      // Have group picture contained in link
+      const groupImage = document.createElement('img');
+      groupImage.classList.add('group-pic');
+      groupImage.src = '/profile-pic/g/' + post.image;
+      groupLink.appendChild(groupImage);
+      // Add group name to link
+      const groupName = document.createElement('span');
+      groupName.textContent = post.group;
+      groupLink.appendChild(groupName);
+      postedContainer.appendChild(groupLink);
+      // Non-link text to connect group and author
+      const authorConnector = document.createElement('span');
+      authorConnector.textContent = ' | By ';
+      postedContainer.appendChild(authorConnector);
+      // Add author name with link
+      const authorLink = document.createElement('a');
+      authorLink.classList.add('post-link');
+      authorLink.href = '/profile?' + post.authorId;
+      authorLink.textContent = post.author;
+      postedContainer.appendChild(authorLink);
 
-    // Add description
-    const newDesc = document.createElement('p');
-    newDesc.classList.add('post-description');
-    newDesc.textContent = post.description;
+      // Add description
+      const newDesc = document.createElement('p');
+      newDesc.classList.add('post-description');
+      newDesc.innerText = post.description;
 
-    const innerDoc = await getElementForFile(`/doc/${post.file}`);
 
-    newContainer.appendChild(postedContainer);
-    newContainer.appendChild(newTitle);
-    newContainer.appendChild(newDesc);
-    newContainer.appendChild(innerDoc);
-    newsFeedContainer.appendChild(newContainer);
+      newContainer.appendChild(postedContainer);
+      newContainer.appendChild(newTitle);
+      newContainer.appendChild(newDesc);
+      if (post.files !== '') {
+        const documentContainer = document.createElement('div');
+        documentContainer.classList.add('file-preview-container');
+        newContainer.appendChild(documentContainer);
+        const filesAsList = post.files.split(',');
+        for (const file of filesAsList) {
+          const innerDoc = await getElementForFile(`/doc/${file}`);
+          documentContainer.appendChild(innerDoc);
+        }
+      }
+      newsFeedContainer.appendChild(newContainer);
+    } catch (e) {}
   }
 }
 
-function initPage() {
-  appendPosts(getNextPosts(0));
+async function initPage() {
+  appendPosts(await getNextPosts(currentOffset));
   // Remove link but make it scroll user to top of page
   document.getElementById('feedButton').parentElement.removeAttribute('href');
   document.getElementById('feedButton').addEventListener('click', () => {
@@ -201,7 +230,7 @@ async function submitPost() {
   // Create new post here
   const data = {
     title: document.getElementById('newPostTitle').textContent,
-    caption: document.getElementById('newPostDesc').textContent,
+    caption: document.getElementById('newPostDesc').innerText,
     groupId: document.getElementById('newPostGroup').value,
     files: fileListString,
   };

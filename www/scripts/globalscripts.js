@@ -162,15 +162,25 @@ async function onSignIn(googleUser) {
       credentials: 'same-origin',
       method: 'POST',
     });
-    const resData = await response.json();
-    console.log(resData);
+    // let resData = await response.json();
+    // console.log(resData);
   }
+
+  // Retrieve user profile
+  response = await fetch('/user/', {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+  });
+  const resData = await response.json();
+
+  document.getElementById('profilePic').src = '/profile-pic/u/' + resData.data.googleId;
+  document.getElementById('usernameContainer').textContent = resData.data.displayName;
+
   try {
     initPage();
   } catch {}
-
-  document.getElementById('profilePic').src = '/profile-pic/u/' + userProfile.getId();
-  document.getElementById('usernameContainer').textContent = userProfile.getEmail();
 }
 
 function colourModeToggle() {
