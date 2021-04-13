@@ -37,30 +37,17 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS document (
-      documentId INTEGER PRIMARY KEY AUTOINCREMENT,
-      author references user(googleId) NOT NULL,
-      title text NOT NULL,
-      file text NOT NULL,
-      timeCreated integer NOT NULL,
-      lastEditted integer
-      );`)
-      .then(() => {
-        // Table established
-        console.log('Established document table');
-      })
-      .catch(err => {
-        console.log(err.message);
-      });
-
-    db.run(`CREATE TABLE IF NOT EXISTS share (
-        shareId INTEGER PRIMARY KEY AUTOINCREMENT,
-        documentId references document(documentId),
-        groupId references groups(groupId)
+    db.run(`CREATE TABLE IF NOT EXISTS post (
+        postId INTEGER PRIMARY KEY AUTOINCREMENT,
+        author references user(googleId) NOT NULL,
+        groupId references groups(groupId),
+        title text NOT NULL,
+        caption text NOT NULL,
+        files text
         );`)
       .then(() => {
         // Table established
-        console.log('Established share table');
+        console.log('Established post table');
       })
       .catch(err => {
         console.log(err.message);
