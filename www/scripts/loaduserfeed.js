@@ -171,26 +171,26 @@ document.getElementById('newPostSubmit').addEventListener('click', submitPost);
 
 async function submitPost() {
   // Submit the post
+  const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
   // Add all files to the FormData
-  const data = new FormData();
+  const fileData = new FormData();
   newPostFiles.forEach(file => {
     if (file) {
-      data.append('document', file);
+      fileData.append('document', file);
     }
   });
 
   let fileListString = '';
   // If any files were included, post them
-  if (data.get('document')) {
+  if (fileData.get('document')) {
     // Send Request
-    const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
     const response = await fetch('/docs/', {
       headers: {
         Authorization: 'Bearer ' + idToken,
       },
       method: 'POST',
       credentials: 'same-origin',
-      body: data,
+      body: fileData,
     });
 
     const resData = await response.json();
@@ -199,8 +199,31 @@ async function submitPost() {
   }
 
   // Create new post here
+  const data = {
+    title: document.getElementById('newPostTitle').textContent,
+    caption: document.getElementById('newPostDesc').textContent,
+    groupId: document.getElementById('newPostGroup').value,
+    files: fileListString,
+  };
 
-  // Reset the files to be uploaded
+  const response = await fetch('/post/', {
+    headers: {
+      'Authorization': 'Bearer ' + idToken,
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify(data),
+  });
+
+  console.log(response);
+  const resData = await response.json();
+  console.log(resData);
+
+  // Reset the new post container
+  document.getElementById('newPostTitle').textContent = '';
+  document.getElementById('newPostDesc').textContent = '';
+
   const container = document.getElementById('filesToUpload');
   while (container.firstChild) {
     container.removeChild(container.firstChild);

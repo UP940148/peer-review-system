@@ -48,7 +48,11 @@ app.use('/', express.static(config.www));
 
 // --- ADMIN ROUTES ---
 
-app.get('/users/', api.getAllUsers);
+app.get('/all-users/', api.getAllUsers);
+app.get('/all-groups/', api.getAllGroups);
+app.get('/all-ranks/', api.getAllRanks);
+app.get('/all-registrations/', api.getAllRegistrations);
+app.get('/all-posts/', api.getAllPosts);
 
 app.use(auth);
 
@@ -61,11 +65,18 @@ app.delete('/user/', googleAuth.guardMiddleware(), api.deleteUser);
 
 // Group Routes
 
+app.post('/group/', googleAuth.guardMiddleware(), jsonParser, api.createGroup);
+
+// User Post Routes
+
+app.post('/post/', googleAuth.guardMiddleware(), jsonParser, api.createPost);
+
 // File Routes
 
 app.post('/docs/', googleAuth.guardMiddleware(), uploader.array('document', 5), api.uploadDocs);
 app.get('/doc/:documentId/', api.sendDoc);
 app.get('/doc/download/:documentId/', api.downloadDoc);
+app.get('/post/:postId/:documentId/', api.getDocFromPost);
 app.get('/profile-pic/u/:userId?/', api.sendPic);
 app.get('/profile-pic/g/:groupId?/', api.sendPic);
 

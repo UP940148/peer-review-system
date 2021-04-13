@@ -24,7 +24,7 @@ database.open(DBSOURCE)
 
     db.run(`CREATE TABLE IF NOT EXISTS groups (
         groupId INTEGER PRIMARY KEY AUTOINCREMENT,
-        groupName text NOT NULL,
+        groupName text UNIQUE NOT NULL,
         groupPicture text,
         groupDescription text,
         isPrivate integer NOT NULL
@@ -43,7 +43,8 @@ database.open(DBSOURCE)
         groupId references groups(groupId),
         title text NOT NULL,
         caption text NOT NULL,
-        files text
+        files text,
+        timeCreated integer NOT NULL
         );`)
       .then(() => {
         // Table established
@@ -124,6 +125,69 @@ database.open(DBSOURCE)
     throw err;
   });
 
+
+// ADMIN Functions
+exports.getAllUsers = async function () {
+  const sql = 'SELECT * FROM user;';
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getAllGroups = async function () {
+  const sql = 'SELECT * FROM groups;';
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getAllRanks = async function () {
+  const sql = 'SELECT * FROM rank;';
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getAllRegistrations = async function () {
+  const sql = 'SELECT * FROM registration;';
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getAllPosts = async function () {
+  const sql = 'SELECT * FROM post;';
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+
 // User Table Functions
 
 exports.getOwnProfile = async function (userId) {
@@ -164,6 +228,61 @@ exports.deleteUser = async function (userId) {
   await db.run(sql);
 };
 
+// Groups Table Functions
+
+exports.addGroup = async function (values) {
+  const sql = 'INSERT INTO groups (groupName, isPrivate) VALUES (?, ?);';
+  const data = await db.run(sql, values);
+  // Return groupId for later use
+  return data.lastID;
+};
+
+// Registration Table Functions
+
+exports.addRegistration = async function (values) {
+  const sql = 'INSERT INTO registration (userId, groupId, rankId) VALUES (?, ?, ?);';
+  await db.run(sql, values);
+};
+
+// Rank Table Functions
+
+exports.addRank = async function (values) {
+  const sql = 'INSERT INTO rank (groupId, rankName, level, colour, canPost, canReply, canRemove, canBan) VALUES (?, ?, ?, ?, ?, ?, ?, ?);';
+  const data = await db.run(sql, values);
+  // Return rankId for later use
+  return data.lastID;
+};
+
+// Post Table Functions
+
+exports.addPost = async function (values) {
+  const sql = 'INSERT INTO post (author, groupId, title, caption, files, timeCreated) VALUES (?, ?, ?, ?, ?, ?);';
+  await db.run(sql, values);
+};
+
+exports.getPost = async function (values) {
+  // This SQL is very gross
+  // It retrieves the post if the post is public,
+  // or if the user is registered with the private group it's posted in
+  const sql = `
+  SELECT *
+  FROM post
+  INNER JOIN groups ON groups.groupId = post.groupId
+  INNER JOIN registration ON registration.groupId = groups.groupId
+  INNER JOIN user ON user.googleId = registration.userId
+  WHERE post.postId = ?
+  AND (groups.isPrivate = 0
+  OR user.googleId = ?);
+  `;
+  const response = await db.get(sql, values)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
 // CREATE
 /*
 async function addDoc(values) {
@@ -276,17 +395,7 @@ async function addRank(values) {
 
 // RETRIEVE
 
-module.exports.getAllUsers = async function () {
-  const sql = 'SELECT * FROM user;';
-  const response = await db.get(sql)
-    .then(rows => {
-      return { failed: false, context: rows };
-    })
-    .catch(err => {
-      return { failed: true, context: err };
-    });
-  return response;
-};
+
 
 async function getUserById(userId) {
   // Get user information from the database using their Google ID as a selector
