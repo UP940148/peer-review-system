@@ -77,15 +77,30 @@ hr {
   right: 24px;
 }
 
+#logInOutContainer {
+  position: absolute;
+  left: 24px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#logInOutContainer > p {
+  margin: 0 0 0 12px;
+  font-size: 75%;
+}
+
+#signOutButton {
+  left: 24px;
+}
+
 #profileButton {
   display: flex;
-  position: absolute;
   height: 28px;
   padding: 0px !important;
   padding-right: 9px !important;
   margin-top: 12px;
   border-radius: 14px;
-  left: 24px;
 }
 #profilePic {
   height: 28px;
@@ -121,12 +136,13 @@ a:hover {
   background-color: var(--hoverColour);
 }
 
-.download-link {
+.normal-link {
   text-decoration: underline;
   color: var(--linkColour);
 }
 
-.download-link:hover {
+.normal-link:hover {
+  cursor: pointer;
   color: var(--linkHoverColour);
 }
 

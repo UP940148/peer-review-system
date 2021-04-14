@@ -17,7 +17,8 @@ function initialise() {
 
 function fillNavBar() {
   const navBarContainer = document.getElementById('navBar');
-
+  const logInOutContainer = document.createElement('div');
+  logInOutContainer.id = 'logInOutContainer';
   const profileContainer = document.createElement('div');
   profileContainer.id = 'profileButton';
   profileContainer.classList.add('nav-button', 'selectable');
@@ -29,6 +30,7 @@ function fillNavBar() {
   usernameContainer.textContent = 'Login/Sign Up!';
   profileContainer.appendChild(profilePic);
   profileContainer.appendChild(usernameContainer);
+  logInOutContainer.appendChild(profileContainer);
 
   const darkModeToggle = document.createElement('div');
   darkModeToggle.id = 'darkModeToggle';
@@ -59,7 +61,7 @@ function fillNavBar() {
   settingsButton.textContent = 'Settings';
   settingsLink.appendChild(settingsButton);
 
-  navBarContainer.appendChild(profileContainer);
+  navBarContainer.appendChild(logInOutContainer);
   navBarContainer.appendChild(darkModeToggle);
   navBarContainer.appendChild(groupsLink);
   navBarContainer.appendChild(feedLink);
@@ -138,10 +140,13 @@ function profileClicked() {
 async function onSignIn(googleUser) {
   userProfile = googleUser.getBasicProfile();
   if (!localStorage.getItem('LPRS_loggedIn')) {
-    console.log('Logging in');
     localStorage.setItem('LPRS_loggedIn', 'true');
     location.reload();
+    return;
   }
+  const logInOutContainer = document.getElementById('logInOutContainer');
+  const signOutHTML = '<p id="signOutButton"><a class="normal-link" onclick="signOut();">Sign out</a></p>';
+  logInOutContainer.insertAdjacentHTML('beforeend', signOutHTML);
 
   const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 

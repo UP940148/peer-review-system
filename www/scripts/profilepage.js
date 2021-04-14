@@ -122,11 +122,6 @@ function loadOwnProfile() {
   saveChangesButton.addEventListener('click', updateProfile);
   fileInput.addEventListener('change', uploadProfilePic);
 
-  // Log out link
-  const bannerContainer = document.getElementById('profileBanner').parentElement;
-  const signOutHTML = '<h4><a onclick="signOut();">Sign out</a></h4>';
-  bannerContainer.insertAdjacentHTML('beforebegin', signOutHTML);
-
   // Fetch own posts
 
   // Display posts
