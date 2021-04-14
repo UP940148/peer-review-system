@@ -157,7 +157,44 @@ async function loadUserProfile() {
   profilePic.src = '/profile-pic/u/' + profileId;
   profilePicContainer.appendChild(profilePic);
 
+  // Create vertical border
+  const borderElement = document.createElement('div');
+  borderElement.classList.add('vertical-border');
+
+  // Create profile information container
+  const profileDetailsContainer = document.createElement('div');
+  profileDetailsContainer.id = 'profileDetailsContainer';
+  // Add profile details
+  // Should be content editable
+  // Add username
+  const profileUsernameContainer = document.createElement('div');
+  profileUsernameContainer.id = 'profileUsernameContainer';
+  profileUsernameContainer.classList.add('profile-details-container');
+  profileUsernameContainer.innerHTML = '<p>Username:</p>';
+  const profileUsername = document.createElement('input');
+  profileUsername.id = 'profileUsername';
+  profileUsername.classList.add('profile-details');
+  profileUsername.disabled = true;
+  profileUsername.value = profileInfo.displayName;
+  profileUsernameContainer.appendChild(profileUsername);
+  // Add name
+  const profileNameContainer = document.createElement('div');
+  profileNameContainer.id = 'profileNameContainer';
+  profileNameContainer.classList.add('profile-details-container');
+  profileNameContainer.innerHTML = '<p>Name:</p>';
+  const profileName = document.createElement('input');
+  profileName.id = 'profileName';
+  profileName.classList.add('profile-details');
+  profileName.disabled = true;
+  profileName.value = profileInfo.name;
+  profileNameContainer.appendChild(profileName);
+  // Display details
+  profileDetailsContainer.appendChild(profileUsernameContainer);
+  profileDetailsContainer.appendChild(profileNameContainer);
+
   profileBanner.appendChild(profilePicContainer);
+  profileBanner.appendChild(borderElement);
+  profileBanner.appendChild(profileDetailsContainer);
 }
 
 async function uploadProfilePic(e) {
