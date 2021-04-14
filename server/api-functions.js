@@ -322,6 +322,17 @@ exports.getNextPosts = async function (req, res) {
     res.sendStatus(204);
     return;
   }
+
+  // Only return number of files, so the file numbers can only
+  // be accessed in relation to the post
+  for (const post of response.context) {
+    if (post.files === '') {
+      post.files = 0;
+    } else {
+      const fileList = post.files.split(',');
+      post.files = fileList.length;
+    }
+  }
   // If success, return 200
   res.status(200).json({
     data: response.context,

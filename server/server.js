@@ -77,7 +77,7 @@ app.get('/posts/:offset', api.getNextPosts);
 // File Routes
 
 app.post('/docs/', googleAuth.guardMiddleware(), uploader.array('document', 5), api.uploadDocs);
-app.get('/doc/:documentId/', api.sendDoc);
+// app.get('/doc/:documentId/', api.sendDoc);
 app.get('/doc/download/:documentId/', api.downloadDoc);
 app.get('/post/:postId/:documentId/', api.getDocFromPost);
 

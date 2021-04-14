@@ -120,18 +120,19 @@ async function appendPosts(listOfPosts) {
       newContainer.appendChild(postedContainer);
       newContainer.appendChild(newTitle);
       newContainer.appendChild(newDesc);
-      if (post.files !== '') {
+      if (post.files > 0) {
         const documentContainer = document.createElement('div');
         documentContainer.classList.add('file-preview-container');
         newContainer.appendChild(documentContainer);
-        const filesAsList = post.files.split(',');
-        for (const file of filesAsList) {
-          const innerDoc = await getElementForFile(`/doc/${file}`);
+        for (let i = 0; i < post.files; i++) {
+          const innerDoc = await getElementForFile(post.id, i);
           documentContainer.appendChild(innerDoc);
         }
       }
       newsFeedContainer.appendChild(newContainer);
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 

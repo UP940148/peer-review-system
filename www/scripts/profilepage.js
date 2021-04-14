@@ -1,4 +1,4 @@
-/* global userProfile */
+/* global gapi userProfile */
 
 const profileBanner = document.getElementById('profileBanner');
 const profileContent = document.getElementById('profileContent');

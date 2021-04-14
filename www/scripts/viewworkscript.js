@@ -4,7 +4,7 @@ async function populateDocumentFromURL() {
   const queryString = window.location.search;
   const docId = queryString.substring(1);
 
-  const documentContainer = await getElementForFile(`/post/${docId}/0/`);
+  const documentContainer = await getElementForFile(docId, 0);
   document.getElementById('pageContent').appendChild(documentContainer);
 }
 

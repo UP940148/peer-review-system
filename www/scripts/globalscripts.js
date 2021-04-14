@@ -53,24 +53,16 @@ function fillNavBar() {
   feedButton.textContent = 'Feed';
   feedLink.appendChild(feedButton);
 
-  const settingsLink = document.createElement('a');
-  settingsLink.href = '/settings';
-  const settingsButton = document.createElement('div');
-  settingsButton.id = 'settingsButton';
-  settingsButton.classList.add('nav-button', 'selectable');
-  settingsButton.textContent = 'Settings';
-  settingsLink.appendChild(settingsButton);
-
   navBarContainer.appendChild(logInOutContainer);
   navBarContainer.appendChild(darkModeToggle);
   navBarContainer.appendChild(groupsLink);
   navBarContainer.appendChild(feedLink);
-  navBarContainer.appendChild(settingsLink);
 
   darkModeToggle.addEventListener('click', colourModeToggle);
 }
 
-async function getElementForFile(fileRoute) {
+async function getElementForFile(docId, fileNum) {
+  const fileRoute = '/post/' + docId + '/' + fileNum;
   // Take in an API route for a file and return an element which will display the file
   const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 
