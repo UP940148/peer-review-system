@@ -5,8 +5,8 @@
 }
 
 .file-container {
-  max-height: 90vh;
-  max-width: 60vw;
+  height: 80vh;
+  width: 60vw;
   object-fit: contain;
   background-color: var(--featureColour);
   padding: 6px;
@@ -16,4 +16,43 @@
 object.file-container {
   min-height: 90vh;
   min-width: 60vw;
+}
+
+.scroll-arrow {
+  font-size: 300%;
+  height: 100%;
+  color: var(--secondaryColour);
+}
+
+.scroll-arrow > h1 {
+  position: relative;
+  margin: 0 12px;
+  top: 40%;
+}
+.scroll-arrow > h1::selection {
+  color: none;
+  background: none;
+}
+
+.scroll-arrow.hidden {
+  cursor: default;
+  color: var(--backgroundColour);
+}
+
+#postContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.document-viewer {
+  display: block;
+}
+.document-viewer *::selection {
+  color: none;
+  background: none;
+}
+
+.document-viewer.hidden {
+  display: none;
 }

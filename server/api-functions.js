@@ -293,6 +293,48 @@ exports.createPost = async function (req, res) {
   }
 };
 
+exports.getPost = async function (req, res) {
+  // Set user ID if not logged in
+  let userId;
+  if (!req.user) {
+    userId = undefined;
+  } else {
+    userId = req.user.id;
+  }
+  // If post ID isn't a number, return 400
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(400);
+    return;
+  }
+  const values = [postId, userId];
+  const response = await db.getPost(values);
+  // If something went wrong, return 500
+  if (response.failed) {
+    res.status(500).json({
+      data: response.context.message,
+    });
+    return;
+  }
+  // If post not found, return 404
+  if (!response.context || response.context.length === 0) {
+    res.sendStatus(404);
+    return;
+  }
+  // Only return number of files, so the file numbers can only
+  // be accessed in relation to the post
+  if (response.context.files === '') {
+    response.context.files = 0;
+  } else {
+    const fileList = response.context.files.split(',');
+    response.context.files = fileList.length;
+  }
+  // If success, return 200
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
 exports.getNextPosts = async function (req, res) {
   // Set user ID if not logged in
   let userId;
