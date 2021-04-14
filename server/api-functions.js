@@ -172,8 +172,85 @@ exports.getProfile = async function (req, res) {
 };
 
 exports.updateProfile = async function (req, res) {
-  // Update User Profile
-  res.sendStatus(418);
+  // Get data
+  const name = req.body.name;
+  const displayName = req.body.displayName;
+  // Verify data
+  if (displayName && displayName.length > 25) {
+    res.sendStatus(400);
+    return;
+  }
+  // Check profile exists
+  const response = await db.getOwnProfile(req.user.id);
+  if (!response.context) {
+    res.status(404).json({
+      success: false,
+    });
+    return;
+  }
+
+  // Update profile
+  const data = [name, displayName, req.user.id];
+  try {
+    await db.updateProfile(data);
+    // If update successful, return 200
+    res.sendStatus(200);
+  } catch (err) {
+    // If there's an error, return 500
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.uploadProfilePic = async function (req, res) {
+  // Check if user has a profile picture
+  let response = await db.getProfilePic(req.user.id);
+  const oldPic = response.context.profilePicture;
+  // If old picture exists, delete it
+  if (oldPic !== '') {
+    // Remove picture from database
+    response = await db.deleteProfilePicture(req.user.id);
+    // Delete picture from server
+    fs.unlink(config.imageStore + oldPic, (err) => {
+      if (err) throw err;
+    });
+  }
+
+  // Move and rename file
+  const file = req.file;
+  const fileExtList = file.originalname.split('.');
+  const fileExt = fileExtList[fileExtList.length - 1];
+  const newFilename = file.filename + '.' + fileExt;
+  // Move file and rename it with extension
+  await renameAsync(file.path, config.imageStore + newFilename);
+
+  // Update user profile
+  const data = [newFilename, req.user.id];
+  try {
+    await db.updateProfilePic(data);
+    // If profile was changed successfully, return 201
+    res.status(201).json({ success: true });
+  } catch (err) {
+    // If there's an error, return 500
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deleteProfilePic = async function (req, res) {
+  // Get current profile picture
+  let response = await db.getProfilePic(req.user.id);
+  const oldPic = response.context.profilePicture;
+  // If no profile pic exists, return
+  if (oldPic === '') {
+    res.sendStatus(204);
+    return;
+  }
+  // Remove picture from database
+  response = await db.deleteProfilePicture(req.user.id);
+  // Delete picture from server
+  fs.unlink(config.imageStore + oldPic, (err) => {
+    if (err) throw err;
+  });
+  res.sendStatus(204);
 };
 
 exports.deleteUser = async function (req, res) {
@@ -344,12 +421,21 @@ exports.downloadDoc = function (req, res) {
   res.download(file);
 };
 
-exports.sendPic = function (req, res) {
-  // Get picture from database
-  if (req.params.userId) {
-    // Get user profile pic
-  } else if (req.params.groupId) {
-    // Get group picture
+exports.sendPic = async function (req, res) {
+  try {
+    // Get picture from database
+    if (req.params.userId) {
+      // Get user profile pic
+      const response = await db.getProfilePic(req.params.userId);
+      if (response.context.profilePicture !== '') {
+        res.sendFile(config.imageStore + response.context.profilePicture);
+        return;
+      }
+    } else if (req.params.groupId) {
+      // Get group picture
+    }
+  } catch (e) {
+    console.log(e);
   }
   // Else serve default
   res.sendFile(config.imageStore + 'default-profile-pic.jpg');

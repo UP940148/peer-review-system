@@ -205,7 +205,7 @@ exports.getOwnProfile = async function (userId) {
 
 exports.getOtherProfile = async function (userId) {
   // Get public user information from the database using their Google ID as a selector
-  const sql = `SELECT name, displayName, profilePicture FROM user WHERE googleId = "${userId}";`;
+  const sql = `SELECT name, displayName FROM user WHERE googleId = "${userId}";`;
   const response = await db.get(sql)
     .then(row => {
       return { failed: false, context: row };
@@ -214,6 +214,40 @@ exports.getOtherProfile = async function (userId) {
       return { failed: true, context: err };
     });
   return response;
+};
+
+exports.getProfilePic = async function (userId) {
+  const sql = `SELECT profilePicture FROM user WHERE googleId = "${userId}";`;
+  const response = await db.get(sql)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.updateProfilePic = async function (values) {
+  const sql = 'UPDATE user SET profilePicture = ? WHERE googleId = ?;';
+  await db.run(sql, values);
+};
+
+exports.deleteProfilePicture = async function (userId) {
+  const sql = `UPDATE user SET profilePicture = '' WHERE googleId = "${userId}"`;
+  await db.run(sql);
+};
+
+exports.updateProfile = async function (values) {
+  const sql = `
+  UPDATE user
+  SET
+    name = ?,
+    displayName = ?
+  WHERE
+    googleId = ?
+  ;`;
+  await db.run(sql, values);
 };
 
 exports.addUser = async function (values) {
@@ -267,12 +301,14 @@ exports.getPost = async function (values) {
   const sql = `
   SELECT *
   FROM post
-  INNER JOIN groups ON groups.groupId = post.groupId
-  INNER JOIN registration ON registration.groupId = groups.groupId
-  INNER JOIN user ON user.googleId = registration.userId
+  INNER JOIN groups
+    ON groups.groupId = post.groupId
+  INNER JOIN registration
+    ON registration.groupId = groups.groupId
+  INNER JOIN user
+    ON user.googleId = registration.userId
   WHERE post.postId = ?
-  AND (groups.isPrivate = 0
-  OR user.googleId = ?);
+    AND (groups.isPrivate = 0 OR user.googleId = ?);
   `;
   const response = await db.get(sql, values)
     .then(row => {
@@ -287,22 +323,25 @@ exports.getPost = async function (values) {
 exports.getNextPosts = async function (values) {
   const sql = `
   SELECT DISTINCT
-  post.postId as id,
-  groups.groupName as "group",
-  post.groupId as groupId,
-  post.title as title,
-  post.caption as description,
-  author.displayName as author,
-  post.author as authorId,
-  post.files as files,
-  post.timeCreated as timeCreated
+    post.postId as id,
+    post.groupId as groupId,
+    post.title as title,
+    post.caption as description,
+    post.author as authorId,
+    post.files as files,
+    post.timeCreated as timeCreated,
+    author.displayName as author,
+    groups.groupName as "group"
   FROM post
-  INNER JOIN user as author ON author.googleId = post.author
-  INNER JOIN groups ON groups.groupId = post.groupId
-  INNER JOIN registration ON registration.groupId = groups.groupId
-  INNER JOIN user ON user.googleId = registration.userId
-  WHERE (groups.isPrivate = 0
-  OR user.googleId = ?)
+  INNER JOIN user as author
+    ON author.googleId = post.author
+  INNER JOIN groups
+    ON groups.groupId = post.groupId
+  INNER JOIN registration
+    ON registration.groupId = groups.groupId
+  INNER JOIN user
+    ON user.googleId = registration.userId
+  WHERE (groups.isPrivate = 0 OR user.googleId = ?)
   ORDER BY post.timeCreated DESC
   LIMIT 10
   OFFSET ?;

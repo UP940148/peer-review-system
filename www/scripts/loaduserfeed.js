@@ -44,7 +44,6 @@ const documentList = [
     file: '6969.pdf',
   },
 ];
-console.log(documentList);
 let newPostFiles = [];
 let currentOffset = 0;
 
@@ -197,6 +196,13 @@ function createNewFileHolder(file) {
 }
 
 document.getElementById('newPostSubmit').addEventListener('click', submitPost);
+
+// Prevent new line character from being added to title
+document.getElementById('newPostTitle').addEventListener('keypress', (e) => {
+  if (e.which === 13) {
+    e.preventDefault();
+  }
+});
 
 async function submitPost() {
   // Submit the post

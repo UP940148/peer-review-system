@@ -1,0 +1,103 @@
+#profileBanner {
+  display: flex;
+  justify-content: center;
+  width: 60%;
+  border-radius: 2em;
+  padding: 1rem;
+}
+
+#profilePicContainer {
+  box-sizing: border-box;
+  padding: 1em;
+}
+#profilePicContainer {
+  width: 40%;
+}
+#profileDetailsContainer {
+  box-sizing: border-box;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 5rem 0 10rem 1rem;
+}
+
+#mainProfilePic {
+  display: block;
+  border-radius: 2rem 2rem 0 0;
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+}
+
+#mainProfilePic.other-profile {
+  border-radius: 2rem;
+}
+
+.profile-pic-button h2 {
+  margin: 0;
+}
+
+.profile-button {
+  text-align: center;
+  padding: 0.5em;
+}
+
+#updatePicButton {
+  background-color: var(--highlightHoverColour);
+}
+#updatePicButton:hover {
+  background-color: var(--highlightColour);
+}
+
+#deletePicButton {
+  background-color: var(--deleteColour);
+  border-radius: 0 0 2rem 2rem;
+}
+#deletePicButton:hover {
+  background-color: var(--deleteHoverColour);
+}
+
+.profile-details-container {
+  margin: 0.25rem;
+}
+
+.profile-details-container > p {
+  margin: 0.5rem 0 0.25rem 0.25rem;
+}
+
+input.profile-details {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.25rem;
+  background-color: var(--hoverColour);
+  border: 0;
+  color: var(--primaryColour);
+  border-radius: 0.5rem;
+}
+
+#profileUsernameContainer {
+  font-size: 175%;
+}
+
+#profileNameContainer {
+  font-size: 125%;
+}
+#profileEmailContainer {
+  font-size: 120%;
+}
+.profile-details-container > input {
+  font-size: 100%;
+}
+
+#saveChangesButton {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 5rem;
+  background-color: var(--saveColour);
+  border-radius: 1rem;
+}
+#saveChangesButton:hover {
+  background-color: var(--saveHoverColour);
+}

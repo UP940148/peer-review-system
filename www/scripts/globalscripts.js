@@ -124,7 +124,7 @@ document.getElementById('profileButton').addEventListener('click', profileClicke
 
 function profileClicked() {
   // If not logged in, open google login
-  if (!userProfile) {
+  if (!localStorage.getItem('LPRS_loggedIn')) {
     // Dispatch a click event on the hidden google button to open the menu
     document.getElementById('googleSignInButton').firstChild.click();
   } else {
@@ -174,9 +174,10 @@ async function onSignIn(googleUser) {
     credentials: 'same-origin',
   });
   const resData = await response.json();
+  userProfile = resData.data;
 
-  document.getElementById('profilePic').src = '/profile-pic/u/' + resData.data.googleId;
-  document.getElementById('usernameContainer').textContent = resData.data.displayName;
+  document.getElementById('profilePic').src = '/profile-pic/u/' + userProfile.googleId;
+  document.getElementById('usernameContainer').textContent = userProfile.displayName;
 
   try {
     initPage();

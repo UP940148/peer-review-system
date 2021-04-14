@@ -10,6 +10,8 @@
   --linkHoverColour: #0000ff90;
   --deleteColour: #d0312d;
   --deleteHoverColour: #e3242b;
+  --saveColour: #03ac13;
+  --saveHoverColour: #028a0f;
 }
 :root[colour-mode="dark"] {
   --backgroundColour: #18191a;
@@ -23,6 +25,8 @@
   --linkHoverColour: #0088ff90;
   --deleteColour: #710c04;
   --deleteHoverColour: #900d09;
+  --saveColour: #234f1e;
+  --saveHoverColour: #32612d;
 }
 
 html {
@@ -131,4 +135,18 @@ a:hover {
   padding: 12px 9px 12px 9px !important;
   border-radius: 3px;
   background-color: var(--backgroundColour);
+}
+
+.button {
+  cursor: pointer;
+}
+
+.vertical-border {
+  position: relative;
+  width: 0px;
+  top: 5%;
+  height: 90%;
+  border-right: 2px solid var(--highlightColour);
+  margin: 0;
+  padding: 0;
 }

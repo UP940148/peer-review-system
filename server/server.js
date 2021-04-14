@@ -60,8 +60,10 @@ app.use(auth);
 
 app.post('/user/', googleAuth.guardMiddleware(), api.createUser);
 app.get('/user/:profileId?/', api.getProfile);
-app.patch('/user/', googleAuth.guardMiddleware(), api.updateProfile);
+app.patch('/user/', googleAuth.guardMiddleware(), jsonParser, api.updateProfile);
 app.delete('/user/', googleAuth.guardMiddleware(), api.deleteUser);
+app.post('/profile-pic/', googleAuth.guardMiddleware(), uploader.single('picture'), api.uploadProfilePic);
+app.delete('/profile-pic/', googleAuth.guardMiddleware(), api.deleteProfilePic);
 
 // Group Routes
 
@@ -78,6 +80,7 @@ app.post('/docs/', googleAuth.guardMiddleware(), uploader.array('document', 5), 
 app.get('/doc/:documentId/', api.sendDoc);
 app.get('/doc/download/:documentId/', api.downloadDoc);
 app.get('/post/:postId/:documentId/', api.getDocFromPost);
+
 app.get('/profile-pic/u/:userId?/', api.sendPic);
 app.get('/profile-pic/g/:groupId?/', api.sendPic);
 

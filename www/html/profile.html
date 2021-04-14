@@ -5,16 +5,19 @@
     <meta name="google-signin-client_id" content='708615793330-085t8nucql4ft884ld0e35j8i29fl8ek.apps.googleusercontent.com'>
 
     <link href='/css/globalstyle.css' rel='stylesheet' type='text/css'>
-    <!--<link href='/css/viewworkstyle.css' rel='stylesheet' type='text/css'>-->
+    <link href='/css/profilestyle.css' rel='stylesheet' type='text/css'>
     <script src='/scripts/globalscripts.js' defer></script>
-    <!--<script src='/scripts/viewworkscript.js' defer></script>-->
+    <script src='/scripts/profilepage.js' defer></script>
   </head>
 
   <body class='background-element'>
     <div id='googleSignInButton' class="g-signin2" data-onsuccess="onSignIn" hidden=true></div>
     <div id='navBar' class='feature-element'></div>
     <div id='pageContent'>
-      <h1>Coming Soon</h1>
+      <div style='display:flex;justify-content:center;'>
+        <div id='profileBanner' class='feature-element'></div>
+      </div>
+      <div id='profileContent'></div>
     </div>
   </body>
 </html>
