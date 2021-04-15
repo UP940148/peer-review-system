@@ -8,12 +8,32 @@ let postData, currentDoc;
 
 async function displayFile(docNum) {
   const documentContainer = await getElementForFile(docId, docNum);
+  // If document is object, then add class
+  // CSS has no selector to check if an element contains another,
+  // therefore this is my workaround
+  const docChild = documentContainer.firstChild;
+  if (docChild.nodeName === 'OBJECT') {
+    documentContainer.classList.add('contains-object');
+    // PDFs hate literally everything so I'm making a manual resizeing function
+    // Come back to this later. CSS needs .document-viewer.contains-object to have resize: vertical;
+    /*
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Get new dimensions
+      const rect = entries[0].contentRect;
+      const height = rect.height;
+      console.log(entries[0].target.firstChild);
+      entries[0].target.firstChild.style.height = height + 'px';
+      console.log(entries[0].target.firstChild.style.height);
+    });
+    resizeObserver.observe(documentContainer);
+    */
+  }
   currentDoc = 0;
   if (docNum > 0) {
     documentContainer.classList.add('hidden');
   }
   documentContainer.classList.add('document-viewer');
-  document.getElementById('postContent').appendChild(documentContainer);
+  document.getElementById('documentContent').appendChild(documentContainer);
 }
 
 async function initPage() {
@@ -34,10 +54,35 @@ async function initPage() {
   const resData = await response.json();
   postData = resData.data;
 
+  // Create a container for the post
   const postContent = document.createElement('div');
   postContent.id = 'postContent';
-  postContent.classList.add('feature-element');
   pageContent.appendChild(postContent);
+  // Create header container
+  const headerContainer = document.createElement('div');
+  headerContainer.id = 'postHeaderContainer';
+  postContent.appendChild(headerContainer);
+  // Add post title
+  const postTitleHeader = document.createElement('h1');
+  postTitleHeader.id = 'postTitleHeader';
+  postTitleHeader.textContent = postData.title;
+  headerContainer.appendChild(postTitleHeader);
+  // Add author information
+  const authorContainer = document.createElement('div');
+  authorContainer.id = 'postAuthorContainer';
+  headerContainer.appendChild(authorContainer);
+  // Add author name with link
+  const authorLink = document.createElement('a');
+  authorLink.classList.add('author-link');
+  authorLink.href = '/profile?' + postData.author;
+  const authorName = document.createElement('h3');
+  authorName.textContent = postData.displayName;
+  authorLink.appendChild(authorName);
+  authorContainer.appendChild(authorLink);
+  // Create a container for the files and their navigational arrows
+  const documentContent = document.createElement('div');
+  documentContent.id = 'documentContent';
+  postContent.appendChild(documentContent);
   if (postData.files > 0) {
     // Add left arrow
     if (postData.files > 1) {
@@ -45,7 +90,7 @@ async function initPage() {
       leftArrow.id = 'leftArrow';
       leftArrow.classList.add('button', 'scroll-arrow', 'background-element', 'hidden');
       leftArrow.innerHTML = '<h1>❮</h1>';
-      postContent.appendChild(leftArrow);
+      documentContent.appendChild(leftArrow);
     }
     // Add files
     for (let i = 0; i < postData.files; i++) {
@@ -57,7 +102,7 @@ async function initPage() {
       rightArrow.id = 'rightArrow';
       rightArrow.classList.add('button', 'scroll-arrow', 'background-element');
       rightArrow.innerHTML = '<h1>❯</h1>';
-      postContent.appendChild(rightArrow);
+      documentContent.appendChild(rightArrow);
     }
     try {
       // Add arrow event listeners

@@ -299,8 +299,19 @@ exports.getPost = async function (values) {
   // It retrieves the post if the post is public,
   // or if the user is registered with the private group it's posted in
   const sql = `
-  SELECT *
+  SELECT
+    post.postId,
+    post.groupId,
+    post.title,
+    post.caption,
+    post.author,
+    post.files,
+    post.timeCreated,
+    author.displayName,
+    groups.groupName as "group"
   FROM post
+  INNER JOIN user as author
+    ON author.googleId = post.author
   INNER JOIN groups
     ON groups.groupId = post.groupId
   INNER JOIN registration

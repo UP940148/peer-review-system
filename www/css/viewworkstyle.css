@@ -4,18 +4,31 @@
   justify-content: center;
 }
 
-.file-container {
-  height: 80vh;
-  width: 60vw;
-  object-fit: contain;
+
+
+.document-viewer {
+  min-height: 21vh;
+  min-width: 15vw;
   background-color: var(--featureColour);
   padding: 6px;
   border-radius: 12px;
 }
 
+.file-container {
+  max-height: 70vh;
+  max-width: 50vw;
+  object-fit: contain;
+}
+
+.document-viewer.contains-object {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
 object.file-container {
-  min-height: 90vh;
-  min-width: 60vw;
+  height: 69vh;
+  width: 49vw;
 }
 
 .scroll-arrow {
@@ -39,7 +52,7 @@ object.file-container {
   color: var(--backgroundColour);
 }
 
-#postContent {
+#documentContent {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -55,4 +68,21 @@ object.file-container {
 
 .document-viewer.hidden {
   display: none;
+}
+
+#postHeaderContainer {
+  text-align: center;
+}
+
+#postTitleHeader {
+  margin: 0;
+  font-size: 3em;
+}
+
+.author-link {
+  color: var(--secondaryColour);
+}
+
+h3 {
+  margin: 6px 0 12px 0;
 }
