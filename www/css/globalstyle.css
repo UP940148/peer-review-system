@@ -42,6 +42,12 @@ html {
 .secondary-text {
   color: var(--secondaryColour);
 }
+.highlight-element {
+  background-color: var(--highlightColour);
+}
+.highlight-element.button:hover {
+  background-color: var(--highlightHoverColour);
+}
 body {
   color: var(--primaryColour);
 }
@@ -102,7 +108,7 @@ hr {
   margin-top: 12px;
   border-radius: 14px;
 }
-#profilePic {
+.profile-picture {
   height: 28px;
   width: 28px;
   object-fit: contain;

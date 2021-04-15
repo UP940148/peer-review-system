@@ -90,7 +90,7 @@ database.open(DBSOURCE)
     db.run(`CREATE TABLE IF NOT EXISTS reply (
       replyId INTEGER PRIMARY KEY AUTOINCREMENT,
       author references user(googleId) NOT NULL,
-      document references share(shareId) NOT NULL,
+      postId references post(postId) NOT NULL,
       parentReply references reply(replyId),
       content text NOT NULL,
       timeCreated integer NOT NULL
@@ -337,7 +337,7 @@ exports.getNextPosts = async function (values) {
     post.postId as id,
     post.groupId as groupId,
     post.title as title,
-    post.caption as description,
+    post.caption,
     post.author as authorId,
     post.files as files,
     post.timeCreated as timeCreated,
@@ -365,6 +365,84 @@ exports.getNextPosts = async function (values) {
       return { failed: true, context: err };
     });
   return response;
+};
+
+// Replies Functions
+
+exports.addReply = async function (values) {
+  const sql = 'INSERT INTO reply (authorId, postId, parentReply, content, timeCreated) VALUES (?, ?, ?, ?, ?);';
+  await db.run(sql, values);
+};
+
+exports.getPrimaryComments = async function (postId) {
+  const sql = `
+  SELECT
+    reply.replyId,
+    reply.author,
+    reply.content,
+    reply.timeCreated,
+    author.displayName as displayName
+  FROM reply
+  INNER JOIN user as author
+    ON author.googleId = reply.author
+  WHERE reply.postId = "${postId}"
+  AND reply.parentReply = ''
+  ORDER BY
+    reply.parentReply ASC,
+    reply.timeCreated DESC;
+  `;
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getReplyPost = async function (replyId) {
+  const sql = `
+  SELECT postId
+  FROM reply
+  WHERE replyId = "${replyId}";
+  `;
+  const response = await db.get(sql)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+// Misc Functions
+
+exports.canUserViewPost = async function (values) {
+  const sql = `
+  SELECT 1
+  FROM post
+  INNER JOIN groups
+    ON groups.groupId = post.groupId
+  INNER JOIN registration
+    ON registration.groupId = groups.groupId
+  INNER JOIN user
+    ON user.googleId = registration.userId
+  WHERE post.postId = ?
+    AND (groups.isPrivate = 0 OR user.googleId = ?);
+  `;
+  const response = await db.get(sql, values)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  if (!response.failed && response.context) {
+    return true;
+  }
+  return false;
 };
 // CREATE
 /*

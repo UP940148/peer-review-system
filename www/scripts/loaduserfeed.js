@@ -114,7 +114,7 @@ async function appendPosts(listOfPosts) {
       // Add description
       const newDesc = document.createElement('p');
       newDesc.classList.add('post-description');
-      newDesc.innerText = post.description;
+      newDesc.innerText = post.caption;
 
 
       newContainer.appendChild(postedContainer);
@@ -137,6 +137,9 @@ async function appendPosts(listOfPosts) {
 }
 
 async function initPage() {
+  if (!userProfile) {
+    document.getElementById('newPostContainer').remove();
+  }
   appendPosts(await getNextPosts(currentOffset));
   // Remove link but make it scroll user to top of page
   document.getElementById('feedButton').parentElement.removeAttribute('href');

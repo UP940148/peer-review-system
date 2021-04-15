@@ -75,6 +75,11 @@ app.post('/post/', googleAuth.guardMiddleware(), jsonParser, api.createPost);
 app.get('/post/:postId/', api.getPost);
 app.get('/posts/:offset/', api.getNextPosts);
 
+// Post Comment Routes
+
+app.post('/comment/:postId/', googleAuth.guardMiddleware(), api.createReply);
+app.get('/comments/:postId/', api.getPrimaryComments);
+
 // File Routes
 
 app.post('/docs/', googleAuth.guardMiddleware(), uploader.array('document', 5), api.uploadDocs);
@@ -84,6 +89,8 @@ app.get('/post/:postId/:documentId/', api.getDocFromPost);
 
 app.get('/profile-pic/u/:userId?/', api.sendPic);
 app.get('/profile-pic/g/:groupId?/', api.sendPic);
+
+// app.get('/test/', api.getComments);
 
 
 // TINKERING

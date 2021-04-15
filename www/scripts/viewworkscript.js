@@ -3,7 +3,8 @@
 // Get document ID
 const queryString = window.location.search;
 const docId = queryString.substring(1);
-const pageContent = document.getElementById('pageContent');
+const upperContent = document.getElementById('upperContent');
+const lowerContent = document.getElementById('lowerContent');
 let postData, currentDoc;
 
 async function displayFile(docNum) {
@@ -36,11 +37,16 @@ async function displayFile(docNum) {
   document.getElementById('documentContent').appendChild(documentContainer);
 }
 
-async function initPage() {
+function initPage() {
   // If no document ID, cancel
   if (docId === '') {
-    pageContent.innerHTML = '<h1>Post not found!</h1>';
+    upperContent.innerHTML = '<h1>Post not found!</h1>';
+    return;
   }
+  addPost();
+}
+
+async function addPost() {
   // Get document info
   const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 
@@ -51,13 +57,19 @@ async function initPage() {
     credentials: 'same-origin',
   });
 
+  if (!response.ok) {
+    upperContent.innerHTML = '<h1>Post not found!</h1>';
+    return;
+  }
+
   const resData = await response.json();
   postData = resData.data;
 
   // Create a container for the post
   const postContent = document.createElement('div');
   postContent.id = 'postContent';
-  pageContent.appendChild(postContent);
+  postContent.classList.add('feature-element');
+  upperContent.appendChild(postContent);
   // Create header container
   const headerContainer = document.createElement('div');
   headerContainer.id = 'postHeaderContainer';
@@ -88,7 +100,7 @@ async function initPage() {
     if (postData.files > 1) {
       const leftArrow = document.createElement('div');
       leftArrow.id = 'leftArrow';
-      leftArrow.classList.add('button', 'scroll-arrow', 'background-element', 'hidden');
+      leftArrow.classList.add('button', 'scroll-arrow', 'hidden');
       leftArrow.innerHTML = '<h1>❮</h1>';
       documentContent.appendChild(leftArrow);
     }
@@ -100,7 +112,7 @@ async function initPage() {
     if (postData.files > 1) {
       const rightArrow = document.createElement('div');
       rightArrow.id = 'rightArrow';
-      rightArrow.classList.add('button', 'scroll-arrow', 'background-element');
+      rightArrow.classList.add('button', 'scroll-arrow');
       rightArrow.innerHTML = '<h1>❯</h1>';
       documentContent.appendChild(rightArrow);
     }
@@ -111,6 +123,68 @@ async function initPage() {
     } catch (e) {
       console.log(e);
     }
+  }
+  // Add post caption
+  const postCaption = document.createElement('p');
+  postCaption.id = 'postCaption';
+  postCaption.innerText = postData.caption;
+  postContent.appendChild(postCaption);
+  // Add comments
+  addComments();
+}
+
+async function addComments() {
+  // Create container for flex purposes
+  const createCommentFlexContainer = document.createElement('div');
+  createCommentFlexContainer.classList.add('flex-container');
+  lowerContent.appendChild(createCommentFlexContainer);
+  // Create new comment field
+  const createCommentContainer = document.createElement('div');
+  createCommentContainer.id = 'userCommentContainer';
+  createCommentContainer.classList.add('comment-container', 'feature-element');
+  createCommentFlexContainer.appendChild(createCommentContainer);
+  // Create div for flex purposes
+  const createCommentTop = document.createElement('div');
+  createCommentTop.id = 'userCommentTop';
+  createCommentTop.classList.add('comment-top-div');
+  createCommentContainer.appendChild(createCommentTop);
+  // Insert profile picture
+  const createCommentProfile = document.createElement('img');
+  createCommentProfile.id = 'userCommentProfile';
+  createCommentProfile.classList.add('profile-picture');
+  createCommentProfile.src = '/profile-pic/u/';
+  createCommentTop.appendChild(createCommentProfile);
+  // Editable content
+  const createCommentContent = document.createElement('div');
+  createCommentContent.id = 'userCommentContent';
+  createCommentContent.classList.add('comment-content-box');
+  createCommentTop.appendChild(createCommentContent);
+  // Post Comment Button
+  const submitCommentButton = document.createElement('div');
+  submitCommentButton.id = 'submitCommentButton';
+  submitCommentButton.classList.add('button', 'highlight-element');
+  submitCommentButton.textContent = 'Send';
+  createCommentTop.appendChild(submitCommentButton);
+
+  if (userProfile) {
+    // Add profile picture
+    createCommentProfile.src = '/profile-pic/u/' + userProfile.googleId;
+    // If signed in, clicking your profile should take you to your profile
+    createCommentProfile.classList.add('button');
+    createCommentProfile.addEventListener('click', () => {
+      window.location.href = '/profile';
+    });
+    // If signed in, then you can type a comment
+    createCommentContent.setAttribute('contenteditable', true);
+  } else {
+    // If not signed in, trying to make a comment should prompt sign in
+    createCommentContent.classList.add('button');
+    createCommentContent.addEventListener('click', () => {
+      if (!localStorage.getItem('LPRS_loggedIn')) {
+        // Dispatch a click event on the hidden google button to open the menu
+        document.getElementById('googleSignInButton').firstChild.click();
+      }
+    });
   }
 }
 

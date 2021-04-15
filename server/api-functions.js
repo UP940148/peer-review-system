@@ -278,6 +278,11 @@ exports.createPost = async function (req, res) {
   const currentDate = new Date();
   const currentTime = currentDate.getTime();
 
+  // If no title or caption, return 400
+  if (!title || title === '' || !caption || caption === '') {
+    res.sendStatus(400);
+    return;
+  }
 
   // Validate data
 
@@ -435,6 +440,103 @@ exports.createGroup = async function (req, res) {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Comments Functions
+
+exports.createReply = async function (req, res) {
+  const userId = req.user.id;
+  // Get reply information
+  // Validate data
+  const postId = parseInt(req.params.postId);
+  // If post ID not a number, return 400
+  if (isNaN(postId) || postId < 0) {
+    res.sendStatus(400);
+    return;
+  }
+  let parentReply;
+  if (req.body.parentReply) {
+    parentReply = parseInt(req.body.parentReply);
+    // If parent reply ID not a number, return 400
+    if (isNaN(parentReply)) {
+      res.sendStatus(400);
+      return;
+    }
+  }
+
+  const currentDate = new Date();
+  const currentTime = currentDate.getTime();
+
+  // Check if user can post reply
+  let data = [postId, userId];
+  // If the user can't view the post, return 404
+  const canView = await db.canUserViewPost(data);
+  if (!canView) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Add to database
+  try {
+    data = [userId, postId, parentReply, req.body.content, currentTime];
+    await db.addReply(data);
+    // If reply was successfully created, return 201
+    res.status(201).json({ success: true });
+  } catch (err) {
+    // If there's an error, return 500
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getPrimaryComments = async function (req, res) {
+  // Set user ID if not logged in
+  let userId;
+  if (!req.user) {
+    userId = undefined;
+  } else {
+    userId = req.user.id;
+  }
+  const postId = parseInt(req.params.postId);
+  // If post ID not a number, return 400
+  if (isNaN(postId) || postId < 0) {
+    res.sendStatus(400);
+    return;
+  }
+  const data = [postId, userId];
+  // If the user can't view the post, return 404
+  const canView = await db.canUserViewPost(data);
+  if (!canView) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If they can view the post, then retrieve the comments
+  const response = await db.getPrimaryComments(postId);
+  // If something went wrong, return 500
+  if (response.failed) {
+    res.status(500).json({
+      data: response.context.message,
+    });
+    return;
+  }
+  // If no comments found, return 204
+  if (!response.context || response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  // If success, return 200
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
+// Get replies made under a comment
+exports.getReplies = async function (req, res) {
+  // Get post ID
+
+  // Check if user can view post
+
+  // Get replies
+}
 
 // Document  functions
 

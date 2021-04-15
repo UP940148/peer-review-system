@@ -1,23 +1,31 @@
-
-#pageContent {
+#upperContent, #lowerContent {
   display: flex;
   justify-content: center;
 }
 
+#pageContent {
+  border-bottom: 1px solid var(--backgroundColour);
+  padding-bottom: 2.5vh;
+}
 
+#postContent {
+  margin: 0.5em;
+  padding: 1em;
+  border-radius: 2em;
+}
 
 .document-viewer {
   min-height: 21vh;
   min-width: 15vw;
   background-color: var(--featureColour);
   padding: 6px;
-  border-radius: 12px;
 }
 
 .file-container {
   max-height: 70vh;
   max-width: 50vw;
   object-fit: contain;
+  border-radius: 1em;
 }
 
 .document-viewer.contains-object {
@@ -49,7 +57,7 @@ object.file-container {
 
 .scroll-arrow.hidden {
   cursor: default;
-  color: var(--backgroundColour);
+  color: var(--featureColour);
 }
 
 #documentContent {
@@ -79,10 +87,63 @@ object.file-container {
   font-size: 3em;
 }
 
+#postCaption {
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--secondaryColour);
+  margin: 0.2rem 0;
+  padding: 0 2rem;
+  font-size: 150%;
+}
+
 .author-link {
   color: var(--secondaryColour);
 }
 
 h3 {
   margin: 6px 0 12px 0;
+}
+
+.comment-container {
+  box-sizing: border-box;
+  padding: 1rem;
+  border-radius: 1rem;
+  width: 50vw;
+}
+
+.comment-top-div {
+  display: flex;
+}
+
+.comment-content-box {
+  width: 90%;
+  background-color: var(--backgroundColour);
+  border-radius: 0.75rem;
+  margin-right: 6px;
+  padding: 0.25em 0.5em;
+  font-size: 110%;
+}
+
+#userCommentContent:empty::before {
+  content: 'Leave a comment...';
+  color: var(--secondaryColour);
+}
+
+#userCommentContent[contenteditable] {
+  cursor: text;
+  outline: none;
+}
+
+#submitCommentButton {
+  width: 8%;
+  height: 100%;
+  padding: 0.25em;
+  text-align: center;
+  border-radius: 0.75rem;
+  font-size: 110%;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: center;
 }

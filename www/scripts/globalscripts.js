@@ -6,13 +6,17 @@
 const root = document.documentElement;
 let userProfile;
 let currentColourMode = localStorage.getItem('LPRS_colourMode') || 'dark';
+root.setAttribute('colour-mode', currentColourMode);
 
-initialise();
 
 function initialise() {
-  root.setAttribute('colour-mode', currentColourMode);
   // Add NavBar to each page
   fillNavBar();
+  try {
+    initPage();
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function fillNavBar() {
@@ -24,7 +28,12 @@ function fillNavBar() {
   profileContainer.classList.add('nav-button', 'selectable');
   const profilePic = document.createElement('img');
   profilePic.id = 'profilePic';
-  profilePic.src = '/profile-pic/u/';
+  profilePic.classList.add('profile-picture');
+  if (userProfile) {
+    profilePic.src = '/profile-pic/u/' + userProfile.googleId;
+  } else {
+    profilePic.src = '/profile-pic/u/';
+  }
   const usernameContainer = document.createElement('div');
   usernameContainer.id = 'usernameContainer';
   usernameContainer.textContent = 'Login/Sign Up!';
@@ -58,7 +67,14 @@ function fillNavBar() {
   navBarContainer.appendChild(groupsLink);
   navBarContainer.appendChild(feedLink);
 
+  profileContainer.addEventListener('click', profileClicked);
   darkModeToggle.addEventListener('click', colourModeToggle);
+
+  if (userProfile) {
+    const signOutHTML = '<p id="signOutButton"><a class="normal-link" onclick="signOut();">Sign out</a></p>';
+    logInOutContainer.insertAdjacentHTML('beforeend', signOutHTML);
+    usernameContainer.textContent = userProfile.displayName;
+  }
 }
 
 async function getElementForFile(docId, fileNum) {
@@ -114,7 +130,7 @@ async function getElementForFile(docId, fileNum) {
   return container;
 }
 
-document.getElementById('profileButton').addEventListener('click', profileClicked);
+
 
 function profileClicked() {
   // If not logged in, open google login
@@ -136,9 +152,6 @@ async function onSignIn(googleUser) {
     location.reload();
     return;
   }
-  const logInOutContainer = document.getElementById('logInOutContainer');
-  const signOutHTML = '<p id="signOutButton"><a class="normal-link" onclick="signOut();">Sign out</a></p>';
-  logInOutContainer.insertAdjacentHTML('beforeend', signOutHTML);
 
   const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 
@@ -173,12 +186,7 @@ async function onSignIn(googleUser) {
   const resData = await response.json();
   userProfile = resData.data;
 
-  document.getElementById('profilePic').src = '/profile-pic/u/' + userProfile.googleId;
-  document.getElementById('usernameContainer').textContent = userProfile.displayName;
-
-  try {
-    initPage();
-  } catch {}
+  initialise();
 }
 
 function colourModeToggle() {
@@ -197,12 +205,7 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('LPRS_loggedIn')) {
     return;
   }
-
-  try {
-    initPage();
-  } catch (e) {
-    console.log(e);
-  }
+  initialise();
 });
 
 async function signOut() {
