@@ -57,14 +57,15 @@ async function getNextPosts(offset) {
     },
     credentials: 'same-origin',
   });
-  try {
-    const resData = await response.json();
-    currentOffset += 10;
-    const listOfPosts = resData.data;
-    return listOfPosts;
-  } catch (e) {
-    console.log(e);
+  // If no posts retrieved, return empty list
+  if (!response.ok || response.status === 204) {
+    return [];
   }
+  // Get posts from response and return them
+  const resData = await response.json();
+  currentOffset += 10;
+  const listOfPosts = resData.data;
+  return listOfPosts;
 }
 
 async function appendPosts(listOfPosts) {
