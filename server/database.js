@@ -410,10 +410,10 @@ exports.getNextPosts = async function (values) {
 
 exports.deletePost = async function (postId) {
   // Delete all comments made on the post
-  let sql = `DELETE FROM reply WHERE postId = "${postId}";`;
+  let sql = `DELETE FROM reply WHERE postId = ${postId};`;
   await db.run(sql);
   // Delete post
-  sql = `DELETE FROM post WHERE postId = "${postId}";`;
+  sql = `DELETE FROM post WHERE postId = ${postId};`;
   await db.run(sql);
 };
 

@@ -129,6 +129,16 @@ async function addPost() {
   postCaption.id = 'postCaption';
   postCaption.innerText = postData.caption;
   postContent.appendChild(postCaption);
+  // If the current user made the post
+  if (userProfile && userProfile.googleId === postData.author) {
+    // Add delete post button
+    const postDeleteButton = document.createElement('div');
+    postDeleteButton.id = 'postDeleteButton';
+    postDeleteButton.classList.add('button');
+    postDeleteButton.textContent = 'Delete Post';
+    postContent.appendChild(postDeleteButton);
+    postDeleteButton.addEventListener('click', deletePost);
+  }
   // Add comments
   addComments();
 }
@@ -200,8 +210,10 @@ async function addComments() {
     },
     credentials: 'same-origin',
   });
+  if (!response.ok || response.status === 204) {
+    return;
+  }
   const resData = await response.json();
-  console.log(resData);
   const comments = resData.data;
   comments.forEach(comment => {
     // Display comment
@@ -310,4 +322,25 @@ async function commentCreated() {
     console.log(resData);
   }
   location.reload();
+}
+
+async function deletePost() {
+  if (!userProfile) {
+    return;
+  }
+  if (!window.confirm('Are you sure you want to delete this post?')) {
+    return;
+  }
+  // Delete the post
+  const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+  const response = await fetch('/post/' + docId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    method: 'DELETE',
+    credentials: 'same-origin',
+  });
+  if (response.ok) {
+    window.location.href = '/';
+  }
 }

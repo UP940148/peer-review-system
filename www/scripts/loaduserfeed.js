@@ -267,8 +267,9 @@ async function submitPost() {
   while (container.firstChild) {
     container.removeChild(container.firstChild);
   }
-  newPostFiles = [];
-  checkReadyFileCount();
+  location.reload();
+  // newPostFiles = [];
+  // checkReadyFileCount();
 }
 
 // Check how many files are prepped to be posted so a limit can be enforced
