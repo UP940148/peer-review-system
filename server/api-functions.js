@@ -113,6 +113,27 @@ exports.getAllPosts = async function (req, res) {
   });
 };
 
+exports.getAllReplies = async function (req, res) {
+  // Retrieves all replies from database and returns them
+  const response = await db.getAllReplies();
+  // If something went wrong, return 500
+  if (response.failed) {
+    res.status(500).json({
+      data: response.context.message,
+    });
+    return;
+  }
+  // If no replies found, return 204
+  if (!response.context || response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  // If success, return 200
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
 // User Functions
 
 exports.createUser = async function (req, res) {
@@ -121,9 +142,12 @@ exports.createUser = async function (req, res) {
   const email = req.user.emails[0].value;
   const displayName = 'User' + req.user.id;
 
-  const data = [req.user.id, name, displayName, '', email];
+  let data = [req.user.id, name, displayName, '', email];
   try {
     await db.addUser(data);
+    // Make member of public group
+    data = [req.user.id, 1, 2];
+    await db.addRegistration(data);
     // If user was successfully created, return 201
     res.status(201).json({ success: true });
   } catch (err) {
@@ -254,9 +278,19 @@ exports.deleteProfilePic = async function (req, res) {
 };
 
 exports.deleteUser = async function (req, res) {
-  // Delete currently logged in user
   try {
+    // Get profile picture if it exists
+    const response = await db.getOwnProfile(req.user.id);
+    const profilePic = response.context.profilePicture;
+    // Delete currently logged in user
     await db.deleteUser(req.user.id);
+    // IF they have a profile picture, delete it
+    if (profilePic !== '') {
+      // Delete picture from server
+      fs.unlink(config.imageStore + profilePic, (err) => {
+        if (err) throw err;
+      });
+    }
     // If user was successfully deleted, return 200
     res.status(200).json({ success: true });
   } catch (err) {
@@ -386,6 +420,48 @@ exports.getNextPosts = async function (req, res) {
   });
 };
 
+exports.deletePost = async function (req, res) {
+  // If post ID isn't a number, return 400
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(400);
+    return;
+  }
+  // Check if user is post author
+  const data = [req.params.postId, req.user.id];
+  const isAuthor = await db.isPostAuthor(data);
+
+  // If post author is current user then delete
+  if (!isAuthor) {
+    res.sendStatus(401);
+    return;
+  }
+  try {
+    // Get attached files
+    const response = await db.getPost(data);
+    const files = response.context.files;
+    console.log(response);
+    console.log(files);
+    // Attempt to delete post
+    await db.deletePost(postId);
+    // Delete files from server
+    if (files !== '') {
+      const fileList = files.split(',');
+      for (const file of fileList) {
+        fs.unlink(config.docStore + file, (err) => {
+          if (err) throw err;
+        });
+      }
+    }
+    // If post was successfully deleted, return 200
+    res.status(200).json({ success: true });
+  } catch (err) {
+    // If there's an error, return 500
+    console.log(err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // Group Functions
 
 exports.createGroup = async function (req, res) {
@@ -453,6 +529,12 @@ exports.createReply = async function (req, res) {
     res.sendStatus(400);
     return;
   }
+  // If no content, return 400
+  if (!req.body.content || req.body.content.length === 0) {
+    res.sendStatus(400);
+    return;
+  }
+
   let parentReply;
   if (req.body.parentReply) {
     parentReply = parseInt(req.body.parentReply);
@@ -461,6 +543,8 @@ exports.createReply = async function (req, res) {
       res.sendStatus(400);
       return;
     }
+  } else {
+    parentReply = '';
   }
 
   const currentDate = new Date();

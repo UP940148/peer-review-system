@@ -3,11 +3,11 @@ const DBSOURCE = 'sqlite.db';
 
 let db;
 database.open(DBSOURCE)
-  .then(_db => {
+  .then(async _db => {
     db = _db;
     // Connection established. Create tables
     console.log('Connection to SQLite database has been established!');
-    db.run(`CREATE TABLE IF NOT EXISTS user (
+    await db.run(`CREATE TABLE IF NOT EXISTS user (
       googleId PRIMARY KEY NOT NULL,
       name text NOT NULL,
       displayName text UNIQUE,
@@ -22,7 +22,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS groups (
+    await db.run(`CREATE TABLE IF NOT EXISTS groups (
         groupId INTEGER PRIMARY KEY AUTOINCREMENT,
         groupName text UNIQUE NOT NULL,
         groupPicture text,
@@ -37,7 +37,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS post (
+    await db.run(`CREATE TABLE IF NOT EXISTS post (
         postId INTEGER PRIMARY KEY AUTOINCREMENT,
         author references user(googleId) NOT NULL,
         groupId references groups(groupId),
@@ -54,7 +54,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS rank (
+    await db.run(`CREATE TABLE IF NOT EXISTS rank (
         rankId INTEGER PRIMARY KEY AUTOINCREMENT,
         groupId references groups(groupId),
         rankName text NOT NULL,
@@ -73,7 +73,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS registration (
+    await db.run(`CREATE TABLE IF NOT EXISTS registration (
         registrationId INTEGER PRIMARY KEY AUTOINCREMENT,
         userId references user(googleId),
         groupId references groups(groupId),
@@ -87,7 +87,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS reply (
+    await db.run(`CREATE TABLE IF NOT EXISTS reply (
       replyId INTEGER PRIMARY KEY AUTOINCREMENT,
       author references user(googleId) NOT NULL,
       postId references post(postId) NOT NULL,
@@ -103,7 +103,7 @@ database.open(DBSOURCE)
         console.log(err.message);
       });
 
-    db.run(`CREATE TABLE IF NOT EXISTS grievance (
+    await db.run(`CREATE TABLE IF NOT EXISTS grievance (
         grievanceId INTEGER PRIMARY KEY AUTOINCREMENT,
         prosecutorId references user(googleId),
         defendantId references user(googleId),
@@ -118,6 +118,36 @@ database.open(DBSOURCE)
       .catch(err => {
         console.log(err.message);
       });
+
+    await db.run(`
+        INSERT INTO groups
+        (groupName, isPrivate)
+        VALUES ('Public', 0);`)
+      .then(async () => {
+        console.log('Created public group');
+        await db.run(`
+          INSERT INTO rank
+          (groupId, rankName, level, colour, canPost, canReply, canRemove, canBan)
+          VALUES (1, 'Administrator', 0, '#ff0000', 1, 1, 1, 1);`)
+          .then(() => {
+            console.log('Created public admin rank');
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
+
+        await db.run(`
+          INSERT INTO rank
+          (groupId, rankName, level, canPost, canReply, canRemove, canBan)
+          VALUES (1, 'Member', 1, 1, 1, 0, 0);`)
+          .then(() => {
+            console.log('Created public member rank');
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
+      })
+      .catch(() => {});
   })
   .catch(err => {
     // Can't open database
@@ -187,6 +217,17 @@ exports.getAllPosts = async function () {
   return response;
 };
 
+exports.getAllReplies = async function () {
+  const sql = 'SELECT * FROM reply;';
+  const response = await db.all(sql)
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
 
 // User Table Functions
 
@@ -367,10 +408,19 @@ exports.getNextPosts = async function (values) {
   return response;
 };
 
+exports.deletePost = async function (postId) {
+  // Delete all comments made on the post
+  let sql = `DELETE FROM reply WHERE postId = "${postId}";`;
+  await db.run(sql);
+  // Delete post
+  sql = `DELETE FROM post WHERE postId = "${postId}";`;
+  await db.run(sql);
+};
+
 // Replies Functions
 
 exports.addReply = async function (values) {
-  const sql = 'INSERT INTO reply (authorId, postId, parentReply, content, timeCreated) VALUES (?, ?, ?, ?, ?);';
+  const sql = 'INSERT INTO reply (author, postId, parentReply, content, timeCreated) VALUES (?, ?, ?, ?, ?);';
   await db.run(sql, values);
 };
 
@@ -385,8 +435,7 @@ exports.getPrimaryComments = async function (postId) {
   FROM reply
   INNER JOIN user as author
     ON author.googleId = reply.author
-  WHERE reply.postId = "${postId}"
-  AND reply.parentReply = ''
+  WHERE reply.postId = ${postId}
   ORDER BY
     reply.parentReply ASC,
     reply.timeCreated DESC;
@@ -418,6 +467,25 @@ exports.getReplyPost = async function (replyId) {
 };
 
 // Misc Functions
+
+exports.isPostAuthor = async function (values) {
+  const sql = `
+  SELECT 1
+  FROM post
+  WHERE postId = ?
+  AND author = ?;`;
+  const response = await db.get(sql, values)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  if (!response.failed && response.context) {
+    return true;
+  }
+  return false;
+};
 
 exports.canUserViewPost = async function (values) {
   const sql = `
@@ -555,7 +623,6 @@ async function addRank(values) {
 }
 
 // RETRIEVE
-
 
 
 async function getUserById(userId) {

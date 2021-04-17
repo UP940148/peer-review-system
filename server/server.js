@@ -53,6 +53,7 @@ app.get('/all-groups/', api.getAllGroups);
 app.get('/all-ranks/', api.getAllRanks);
 app.get('/all-registrations/', api.getAllRegistrations);
 app.get('/all-posts/', api.getAllPosts);
+app.get('/all-replies/', api.getAllReplies);
 
 app.use(auth);
 
@@ -74,10 +75,11 @@ app.post('/group/', googleAuth.guardMiddleware(), jsonParser, api.createGroup);
 app.post('/post/', googleAuth.guardMiddleware(), jsonParser, api.createPost);
 app.get('/post/:postId/', api.getPost);
 app.get('/posts/:offset/', api.getNextPosts);
+app.delete('/post/:postId/', googleAuth.guardMiddleware(), api.deletePost);
 
 // Post Comment Routes
 
-app.post('/comment/:postId/', googleAuth.guardMiddleware(), api.createReply);
+app.post('/comment/:postId/', googleAuth.guardMiddleware(), jsonParser, api.createReply);
 app.get('/comments/:postId/', api.getPrimaryComments);
 
 // File Routes
