@@ -132,7 +132,6 @@ async function loadUserProfile() {
   const response = await fetch('/user/' + profileId);
   if (!response.ok) {
     // 404 Not Found
-    console.log(404);
     const errorMessage = document.createElement('h1');
     errorMessage.textContent = 'Profile not found';
     profileBanner.appendChild(errorMessage);
