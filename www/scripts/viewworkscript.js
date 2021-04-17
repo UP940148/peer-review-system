@@ -134,10 +134,13 @@ async function addPost() {
 }
 
 async function addComments() {
+  const commentsContainer = document.createElement('div');
+  lowerContent.appendChild(commentsContainer);
+  commentsContainer.appendChild(document.createElement('hr'));
   // Create container for flex purposes
   const createCommentFlexContainer = document.createElement('div');
-  createCommentFlexContainer.classList.add('flex-container');
-  lowerContent.appendChild(createCommentFlexContainer);
+  createCommentFlexContainer.classList.add('flex-container', 'comment-box');
+  commentsContainer.appendChild(createCommentFlexContainer);
   // Create new comment field
   const createCommentContainer = document.createElement('div');
   createCommentContainer.id = 'userCommentContainer';
@@ -146,7 +149,7 @@ async function addComments() {
   // Create div for flex purposes
   const createCommentTop = document.createElement('div');
   createCommentTop.id = 'userCommentTop';
-  createCommentTop.classList.add('comment-top-div');
+  createCommentTop.classList.add('flex-container');
   createCommentContainer.appendChild(createCommentTop);
   // Insert profile picture
   const createCommentProfile = document.createElement('img');
@@ -176,6 +179,8 @@ async function addComments() {
     });
     // If signed in, then you can type a comment
     createCommentContent.setAttribute('contenteditable', true);
+    // Add submit button event listener
+    submitCommentButton.addEventListener('click', commentCreated);
   } else {
     // If not signed in, trying to make a comment should prompt sign in
     createCommentContent.classList.add('button');
@@ -186,6 +191,54 @@ async function addComments() {
       }
     });
   }
+
+  // Get comments
+  const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+  const response = await fetch('/comments/' + docId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+  });
+  const resData = await response.json();
+  console.log(resData);
+  const comments = resData.data;
+  comments.forEach(comment => {
+    // Display comment
+    // Create container for flex purposes
+    const commentFlexContainer = document.createElement('div');
+    commentFlexContainer.classList.add('comment-box');
+    commentsContainer.appendChild(commentFlexContainer);
+    // Create new comment field
+    const commentContainer = document.createElement('div');
+    commentContainer.classList.add('comment-container', 'feature-element');
+    commentFlexContainer.appendChild(commentContainer);
+    // Create div for flex purposes
+    const commentTop = document.createElement('div');
+    commentContainer.appendChild(commentTop);
+    // Insert profile picture
+    const commentProfile = document.createElement('div');
+    commentProfile.classList.add('button', 'flex-container', 'user-profile');
+    const commentProfilePic = document.createElement('img');
+    commentProfilePic.classList.add('profile-picture');
+    commentProfilePic.src = '/profile-pic/u/' + comment.author;
+    commentProfile.appendChild(commentProfilePic);
+    const commentUsername = document.createElement('a');
+    commentUsername.textContent = comment.displayName;
+    commentProfile.appendChild(commentUsername);
+    commentTop.appendChild(commentProfile);
+    // Comment content
+    const commentContent = document.createElement('div');
+    commentContent.classList.add('comment-content-box');
+    commentContent.innerText = comment.content;
+    commentTop.appendChild(commentContent);
+
+    // Add profile link
+    commentUsername.href = '/profile?' + comment.author;
+    commentProfile.addEventListener('click', () => {
+      window.location.href = '/profile?' + comment.author;
+    });
+  });
 }
 
 function documentScrolled(e) {
@@ -229,4 +282,32 @@ function documentScrolled(e) {
       document.getElementById('rightArrow').classList.add('hidden');
     }
   }
+}
+
+async function commentCreated() {
+  if (!userProfile) {
+    return;
+  }
+  const replyContent = document.getElementById('userCommentContent').innerText;
+
+  const data = {
+    content: replyContent,
+  };
+
+  // Submit the comment
+  const idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+  const response = await fetch('/comment/' + docId, {
+    headers: {
+      'Authorization': 'Bearer ' + idToken,
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const resData = await response.json();
+    console.log(resData);
+  }
+  location.reload();
 }
