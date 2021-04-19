@@ -2,49 +2,7 @@
 
 const newsFeedContainer = document.getElementById('newsFeed');
 
-const documentList = [
-  {
-    id: 0,
-    group: 'Public',
-    groupId: '0',
-    title: 'Picture 1',
-    description: 'This is a test post',
-    author: 'Lennie',
-    authorId: '104861837073323726468',
-    file: '89024931_302218764085505_5568612806514704384_n.jpg',
-  },
-  {
-    id: 1,
-    group: 'Public',
-    groupId: '0',
-    title: 'Picture 2',
-    description: 'This is another test post',
-    author: 'Daniel',
-    authorId: '12345',
-    file: '123634642_1657565107759887_2531456001333406319_n.jpg',
-  },
-  {
-    id: 2,
-    group: 'Public',
-    groupId: '0',
-    title: 'Picture 3',
-    description: 'This is yet another test post',
-    author: 'up940148',
-    authorId: '987654321',
-    file: '420.png',
-  },
-  {
-    id: 3,
-    group: 'Public',
-    groupId: '0',
-    title: 'DBPRIN Submission 4',
-    description: "It's awful",
-    author: 'UP940148',
-    authorId: '987654321',
-    file: '6969.pdf',
-  },
-];
-let newPostFiles = [];
+const newPostFiles = [];
 let currentOffset = 0;
 
 async function getNextPosts(offset) {
@@ -245,6 +203,9 @@ async function submitPost() {
     groupId: document.getElementById('newPostGroup').value,
     files: fileListString,
   };
+  if (!(data.title && data.caption && data.groupId)) {
+    return;
+  }
 
   const response = await fetch('/post/', {
     headers: {
@@ -256,7 +217,6 @@ async function submitPost() {
     body: JSON.stringify(data),
   });
 
-  console.log(response);
   const resData = await response.json();
   console.log(resData);
 

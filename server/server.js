@@ -21,7 +21,25 @@ const uploader = multer({
     fileSize: 1024 * 1024 * 30,
     files: 5,
   },
+  fileFilter: function (_req, file, cb) {
+    checkFileType(file, cb);
+  },
 });
+
+function checkFileType(file, cb) {
+  // Allowed types
+  const filetypes = /image|audio|pdf/;
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype) {
+    // If file is accepted, return true
+    return cb(null, true);
+  } else {
+    // Else skip the file
+    return cb(null, false);
+  }
+}
 
 // Set up stay awake
 stayAwake.prevent((err, data) => {

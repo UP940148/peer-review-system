@@ -8,12 +8,12 @@ database.open(DBSOURCE)
     // Connection established. Create tables
     console.log('Connection to SQLite database has been established!');
     await db.run(`CREATE TABLE IF NOT EXISTS user (
-      googleId PRIMARY KEY NOT NULL,
-      name text NOT NULL,
-      displayName text UNIQUE,
-      profilePicture text,
-      email text UNIQUE NOT NULL
-      );`)
+        googleId PRIMARY KEY NOT NULL,
+        name text NOT NULL,
+        displayName text UNIQUE,
+        profilePicture text,
+        email text UNIQUE NOT NULL
+        );`)
       .then(() => {
         // Table established
         console.log('Established user table');

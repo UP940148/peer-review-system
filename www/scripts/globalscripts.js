@@ -41,11 +41,11 @@ function fillNavBar() {
   profileContainer.appendChild(usernameContainer);
   logInOutContainer.appendChild(profileContainer);
 
+  /*
   const darkModeToggle = document.createElement('div');
   darkModeToggle.id = 'darkModeToggle';
   darkModeToggle.classList.add('nav-button', 'selectable');
   darkModeToggle.textContent = 'Toggle Dark Mode';
-
   const groupsLink = document.createElement('a');
   groupsLink.href = '/groups';
   const groupsButton = document.createElement('div');
@@ -53,22 +53,22 @@ function fillNavBar() {
   groupsButton.classList.add('nav-button', 'selectable');
   groupsButton.textContent = 'Groups';
   groupsLink.appendChild(groupsButton);
-
+  */
   const feedLink = document.createElement('a');
   feedLink.href = '/';
   const feedButton = document.createElement('div');
   feedButton.id = 'feedButton';
   feedButton.classList.add('nav-button', 'selectable');
-  feedButton.textContent = 'Feed';
+  feedButton.textContent = 'Home';
   feedLink.appendChild(feedButton);
 
   navBarContainer.appendChild(logInOutContainer);
-  navBarContainer.appendChild(darkModeToggle);
-  navBarContainer.appendChild(groupsLink);
+  // navBarContainer.appendChild(darkModeToggle);
+  // navBarContainer.appendChild(groupsLink);
   navBarContainer.appendChild(feedLink);
 
   profileContainer.addEventListener('click', profileClicked);
-  darkModeToggle.addEventListener('click', colourModeToggle);
+  // darkModeToggle.addEventListener('click', colourModeToggle);
 
   if (userProfile) {
     const signOutHTML = '<p id="signOutButton"><a class="normal-link" onclick="signOut();">Sign out</a></p>';

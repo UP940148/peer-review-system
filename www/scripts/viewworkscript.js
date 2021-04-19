@@ -1,4 +1,4 @@
-/* global gapi getElementForFile */
+/* global gapi userProfile getElementForFile */
 
 // Get document ID
 const queryString = window.location.search;

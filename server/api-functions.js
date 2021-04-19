@@ -620,7 +620,7 @@ exports.getReplies = async function (req, res) {
   // Check if user can view post
 
   // Get replies
-}
+};
 
 // Document  functions
 

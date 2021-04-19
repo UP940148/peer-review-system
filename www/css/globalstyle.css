@@ -78,14 +78,15 @@ hr {
   position: relative;
   top: 6vh;
 }
-#darkModeToggle {
+#feedButton {
   position: absolute;
-  right: 24px;
+  left: 0;
+  text-align: center;
 }
 
 #logInOutContainer {
   position: absolute;
-  left: 24px;
+  right: 24px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
