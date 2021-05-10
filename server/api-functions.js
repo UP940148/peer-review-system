@@ -440,8 +440,6 @@ exports.deletePost = async function (req, res) {
     // Get attached files
     const response = await db.getPost(data);
     const files = response.context.files;
-    console.log(response);
-    console.log(files);
     // Attempt to delete post
     await db.deletePost(postId);
     // Delete files from server

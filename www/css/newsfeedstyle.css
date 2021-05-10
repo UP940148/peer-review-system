@@ -71,7 +71,7 @@ body {
 #leftContent {
   left: 0;
   border-radius: 0 1rem 1rem 0;
-  background-color: var(--highlightColour);
+  /*background-color: var(--highlightColour);*/
 }
 
 #rightContent {
@@ -137,6 +137,7 @@ embed.file-container:not(.preview-file) {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-items: flex-end;
 }
 
 .file-delete-button {
