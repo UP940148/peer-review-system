@@ -1,0 +1,7 @@
+Maintainability:
+  - Comments
+  - Linting
+Delivery:
+  - Correct scripts
+  - Commit everything
+  - 
