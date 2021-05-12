@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "node server/initDatabase.js",
     "start": "node server/server.js"
   },
   "repository": {
