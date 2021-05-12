@@ -215,7 +215,16 @@ database.open(DBSOURCE)
         console.log('Error creating submission table:', err.message);
         success = false;
       });
+
+    // If one or more tables failed to create, notify
+    if (success) {
+      console.log('\nDatabase initialised. Ready to start...');
+    } else {
+      console.log('\n\nErr: One or more tables could not be established');
+      console.log('\n    (╯°□°)╯ ┻━┻');
+      console.log('"This never happened during production and testing, so I don\'t know how this happened" ~UP940148\n');
+    }
   })
   .catch(err => {
-    console.log(err);
+    console.log('Error initialising database:', err);
   });
