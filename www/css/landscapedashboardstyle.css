@@ -1,0 +1,65 @@
+body {
+  background-color: #e8e8e8;
+}
+.full-width {
+  width: 100%;
+}
+
+#pageTitle {
+  text-align: center;
+}
+
+#tabSelector {
+  border-top: 6px solid #cecece;
+  background-color: #cecece;
+}
+
+.horizontal-flex-container {
+  display: flex;
+}
+
+.tab-marker.selected-tab {
+  background-color: #e8e8e8;
+}
+
+.tab-marker > h2 {
+  margin: .25em;
+}
+
+#tabSelector > div {
+  margin: 0 3px;
+}
+
+.selectable:hover {
+  cursor: pointer;
+  background-color: #e8e8e8;
+}
+
+.content-item > p {
+  margin: 4px;
+  font-size: 125%;
+}
+
+.content-display {
+  padding: 12px;
+}
+
+.content-item {
+  margin: 6px;
+  padding: 4px;
+  background-color: #b9b9b9;
+  border: 2px solid #b9b9b9;
+  border-radius: .5rem;
+}
+
+p.owner-tag {
+  color: mediumblue;
+}
+
+p.admin-tag {
+  color: red;
+}
+
+.hidden {
+  display: none;
+}
