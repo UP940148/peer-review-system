@@ -63,3 +63,9 @@ app.listen(config.PORT, (err) => {
 
 app.use('/', express.static(config.www + 'html/', { index: 'dashboard.html', extensions: ['html'] }));
 app.use('/', express.static(config.www));
+
+app.get('/admin/all/:table', api.getAllInTable);
+
+
+app.post('/user', jsonParser, api.createNewUser);
+app.post('/cohort', jsonParser, api.createNewCohort);
