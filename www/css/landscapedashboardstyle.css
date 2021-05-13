@@ -63,3 +63,11 @@ p.admin-tag {
 .hidden {
   display: none;
 }
+
+.active-assignment-tag {
+  border-color: gold;
+}
+
+.completed-assignment-tag {
+  border-color: green;
+}

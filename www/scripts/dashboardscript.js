@@ -21,6 +21,11 @@ function tabClicked(e) {
     // Select new tab
     target.classList.remove('selectable');
     target.classList.add('selected-tab');
+
+    const displays = document.getElementsByClassName('content-display');
+    for (let i = 0; i < displays.length; i++) {
+      displays[i].classList.toggle('hidden');
+    }
   }
 }
 
