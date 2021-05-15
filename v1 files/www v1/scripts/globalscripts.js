@@ -174,15 +174,15 @@ async function onSignIn(googleUser) {
     });
     // let resData = await response.json();
     // console.log(resData);
-  }
 
-  // Retrieve user profile
-  response = await fetch('/user/', {
-    headers: {
-      Authorization: 'Bearer ' + idToken,
-    },
-    credentials: 'same-origin',
-  });
+    // Retrieve user profile
+    response = await fetch('/user/', {
+      headers: {
+        Authorization: 'Bearer ' + idToken,
+      },
+      credentials: 'same-origin',
+    });
+  }
   const resData = await response.json();
   userProfile = resData.data;
 
