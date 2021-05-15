@@ -1,6 +1,12 @@
 body {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
   background-color: #e8e8e8;
+  height: 100vh;
+  margin: 0 .5vw;
 }
+
 .full-width {
   width: 100%;
 }
@@ -70,4 +76,17 @@ p.admin-tag {
 
 .completed-assignment-tag {
   border-color: green;
+}
+
+#tabView {
+  overflow-y: auto;
+  height: 100%;
+}
+
+#pageContent {
+  flex-grow: 1;
+  max-height: 86vh;
+}
+#topSection {
+  height: 14vh;
 }

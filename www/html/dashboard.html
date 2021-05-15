@@ -8,16 +8,19 @@
   </head>
 
   <body>
-    <div id='navBar' class='full-width'>
-      <!-- Add login/signup button here -->
-    </div>
-    <h1 id='pageTitle' class='full-width'>Dashboard</h1>
-    <div id='pageContent' class='full-width'>
+    <div id='topSection'>
+      <div id='navBar' class='full-width'>
+        <!-- Add login/signup button here -->
+      </div>
+      <h1 id='pageTitle' class='full-width'>Dashboard</h1>
       <div id='tabSelector' class='full-width horizontal-flex-container'>
         <div id='groups' class='selected-tab tab-marker'><h2>Groups</h2></div>
         <div id='assignments' class='selectable tab-marker'><h2>Assignments</h2></div>
       </div>
+    </div>
+    <div id='pageContent' class='full-width'>
       <div id='tabView' class='full-width'>
+
         <div id='groupsView' class='content-display'>
           <div class='content-item selectable'>
             <p>Filler Group Text</p>
@@ -28,6 +31,7 @@
             <p class='admin-tag'>Admin</p>
           </div>
         </div>
+
         <div id='assignmentsView' class='content-display hidden'>
           <div class='content-item selectable active-assignment-tag'>
             <p>Active Assignment Text</p>
@@ -36,6 +40,7 @@
             <p>Completed Assignment Text</p>
           </div>
         </div>
+
       </div>
     </div>
   </body>
