@@ -6,7 +6,8 @@ const config = require('../config');
 const googleAuth = require('simple-google-openid');
 const multer = require('multer');
 const api = require('./api-functions.js');
-// const fs = require('fs');
+const mkdirp = require('mkdirp');
+const fs = require('fs');
 // const { promisify } = require('util');
 // const renameAsync = promisify(fs.rename);
 
@@ -60,12 +61,36 @@ app.listen(config.PORT, (err) => {
   console.log(`Server runnning on port ${config.PORT}`);
 });
 
+async function logRequests(req, res, next) {
+  await next();
+  if (req.hostname === 'localhost') {
+    return;
+  }
+  const currentTime = new Date();
+  const fileDir = `./logs/${currentTime.getFullYear()}/${currentTime.getMonth() + 1}/`;
+  const filePath = fileDir + currentTime.getDate() + '.txt';
+  const data = `${req.ip} - - [${currentTime}] "${req.method} ${req.hostname} ${req.path}" ${res.statusCode}`;
+  await mkdirp(fileDir);
+  fs.appendFile(filePath, data + '\n', err => {
+    if (err) {
+      console.log(err);
+    }
+  });
+}
+
+app.use(logRequests);
+app.use(auth);
 
 app.use('/', express.static(config.www + 'html/', { index: 'dashboard.html', extensions: ['html'] }));
 app.use('/', express.static(config.www));
 
 app.get('/admin/all/:table', api.getAllInTable);
+app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 
+app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);
+app.post('/cohort', googleAuth.guardMiddleware(), uploader.none(), api.createNewCohort);
 
-app.post('/user', jsonParser, api.createNewUser);
-app.post('/cohort', jsonParser, api.createNewCohort);
+app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
+app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
+
+app.get('/profile-pic/:userId?', api.getProfilePic);

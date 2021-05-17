@@ -4,7 +4,7 @@
 
 <!--
 
-Create user
+Create user X
 Retrieve user
 Update user
 Delete user
@@ -14,7 +14,7 @@ Get user's cohorts
 Get user's invites
 Get user's responses
 
-Create cohort
+Create cohort X
 Retrieve users
 Retrieve cohort (if public or member)
 Update cohort (Admin+)

@@ -1,5 +1,6 @@
 const database = require('sqlite-async');
 const DBSOURCE = 'sqlite.db';
+const tableNames = ['request', 'user', 'invite', 'registration', 'cohort', 'assignment', 'post', 'criteria', 'submission', 'response', 'question'];
 
 let db;
 database.open(DBSOURCE)
@@ -11,8 +12,8 @@ database.open(DBSOURCE)
     console.log('Error connecting to database:', err);
   });
 
-// ADMIN FUNCTIONS
-
+// ADMIN FUNCTION/S
+/* UP940148 Creds */
 // Retrieve all records from a given table
 exports.getAllInTable = async function (tableName) {
   const sql = `SELECT * FROM ${tableName};`;
@@ -30,13 +31,16 @@ exports.getAllInTable = async function (tableName) {
 
 // Retrieve single record with a given primary key value from a given table
 exports.getRecordByPrimaryKey = async function (tableName, pKeyValue) {
-  const sql = `SELECT * FROM ${tableName} WHERE ${tableName}Id = ${pKeyValue};`;
-  const response = await db.get(sql)
+  if (!tableNames.includes(tableName)) {
+    return { failed: true, code: 404, context: `Bad data: tableName = ${tableName}` };
+  }
+  const sql = `SELECT * FROM ${tableName} WHERE ${tableName}Id = ?;`;
+  const response = await db.get(sql, [pKeyValue])
     .then(row => {
       return { failed: false, context: row };
     })
     .catch(err => {
-      return { failed: true, context: err };
+      return { failed: true, code: 500, context: err };
     });
   return response;
 };
@@ -57,11 +61,46 @@ exports.createUser = async function (data) {
 exports.createCohort = async function (data) {
   const sql = 'INSERT INTO cohort (name, description, isPrivate) VALUES (?, ?, ?);';
   const response = await db.run(sql, data)
-    .then((record) => {
-      return { failed: false, context: { id: record.lastID } };
+    .then(details => {
+      return { failed: false, context: { id: details.lastID } };
     })
     .catch(err => {
       return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.createRegistration = async function (data) {
+  const sql = 'INSERT INTO registration (userId, cohortId, rank) VALUES (?, ?, ?);';
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+// Retrieve all cohorts that user is registered in
+exports.getUserCohorts = async function (userId) {
+  const sql = `
+    SELECT
+      cohort.cohortId,
+      cohort.name,
+      cohort.description,
+      registration.rank
+    FROM cohort
+    INNER JOIN registration
+      ON cohort.cohortId = registration.cohortId
+    WHERE registration.userId = ?
+    ;`;
+  const response = await db.all(sql, [userId])
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
     });
   return response;
 };

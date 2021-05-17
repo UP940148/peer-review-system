@@ -7,6 +7,45 @@ body {
   margin: 0 .5vw;
 }
 
+
+#logInOutContainer {
+
+}
+
+#profileButton {
+  margin: .5rem;
+  padding: .5rem;
+  position: fixed;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  border: 1px solid #666;
+  background-color: #ffffff;
+}
+
+#profilePic {
+  object-fit: contain;
+  height: 3rem;
+}
+
+#usernameContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#usernameContainer > p {
+  margin: 0;
+  margin-left: .5rem;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  #usernameContainer {
+    display: none;
+  }
+}
+
+
 .full-width {
   width: 100%;
 }
@@ -37,8 +76,8 @@ body {
 }
 
 .selectable:hover {
-  cursor: pointer;
-  background-color: #e8e8e8;
+  cursor: pointer !important;
+  background-color: #e8e8e8 !important;
 }
 
 .content-item > p {
@@ -67,7 +106,7 @@ p.admin-tag {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .active-assignment-tag {
@@ -89,4 +128,18 @@ p.admin-tag {
 }
 #topSection {
   height: 14vh;
+}
+
+form.content-item > label {
+  font-size: 150%;
+}
+form.content-item > input[type='text'], form.content-item > input[type='checkbox'] {
+  margin-top: .5rem;
+  margin-bottom: .75rem;
+}
+
+input[type='text'].large {
+  box-sizing: border-box;
+  width: 100%;
+  height: 3rem;
 }
