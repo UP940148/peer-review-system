@@ -177,3 +177,36 @@ exports.getCohort = async function (req, res) {
     data: response.context,
   });
 };
+
+exports.registerUser = async function (req, res) {
+  const cohortId = parseInt(req.params.cohortId);
+  const response = await db.getPublicCohort(cohortId);
+  if (!response.context) {
+    res.sendStatus(404);
+    return;
+  }
+  const registerResponse = await insertRegistration(req.user.id, cohortId);
+  if (registerResponse.failed) {
+    res.sendStatus(500);
+    return;
+  }
+  res.sendStatus(200);
+};
+
+exports.getRegistration = async function (req, res) {
+  const cohortId = parseInt(req.params.cohortId);
+  if (!req.user) {
+    res.sendStatus(404);
+    return;
+  }
+  const response = await db.checkRegistration(cohortId, req.user.id);
+  if (!response.context) {
+    res.status(200).json({
+      rank: 'guest',
+    });
+    return;
+  }
+  res.status(200).json({
+    rank: response.context.rank,
+  });
+};

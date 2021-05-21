@@ -6,3 +6,20 @@
   margin-top: 0;
   color: #2e2e2e;
 }
+
+#joinGroup {
+  height: 3rem;
+}
+
+@media (min-aspect-ratio: 2/3) {
+  #joinGroup {
+    position: relative;
+    width: 10%;
+    left: 45%;
+  }
+}
+@media (max-aspect-ratio: 2/3) {
+  #joinGroup {
+    width: 100%;
+  }
+}

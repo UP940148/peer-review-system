@@ -92,9 +92,11 @@ app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 
 app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);
 app.post('/cohort', googleAuth.guardMiddleware(), uploader.none(), api.createNewCohort);
+app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
 app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
 app.get('/cohort/:cohortId', api.getCohort);
+app.get('/registration/:cohortId', api.getRegistration);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);

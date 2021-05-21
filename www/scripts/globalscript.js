@@ -64,6 +64,7 @@ function profileButtonClicked() {
     document.getElementById('googleSignInButton').firstChild.click();
   } else {
     // Else load user profile page
+    signOut();
   }
 }
 

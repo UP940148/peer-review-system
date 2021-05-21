@@ -8,6 +8,19 @@ body {
   font-family: 'Century Gothic';
 }
 
+.invite-button {
+  border-radius: .2rem;
+}
+
+.accept-btn {
+  background-color: green;
+  border: 1px solid green;
+}
+.decline-btn {
+  background-color: red;
+  border: 1px solid red;
+}
+
 #profileButton {
   margin: .5rem;
   padding: .5rem;

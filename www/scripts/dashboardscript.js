@@ -1,4 +1,4 @@
-/* global idToken */
+/* global userProfile, idToken */
 function addEventListeners() {
   // Add event listeners to tab selectors
   const tabMarkers = document.getElementsByClassName('tab-marker');
@@ -7,6 +7,7 @@ function addEventListeners() {
   }
   document.getElementById('createNewGroup').addEventListener('click', newGroupButtonClicked);
   document.getElementById('createNewGroupContent').addEventListener('submit', createNewGroup);
+  document.getElementById('groupInvitesButton').addEventListener('click', invitesButtonClicked);
 }
 
 function tabClicked(e) {
@@ -54,7 +55,6 @@ async function createNewGroup(e) {
 async function fillPage() {
   // Populate user cohorts tab
   const userCohorts = await getCohorts();
-  console.log(userCohorts);
   for (let i = 0; i < userCohorts.length; i++) {
     const group = userCohorts[i];
     // Create container element
@@ -83,6 +83,7 @@ async function fillPage() {
 }
 
 async function getCohorts() {
+  if (!userProfile) return;
   // Fetch request to get user's cohorts
   const response = await fetch('/cohorts', {
     headers: {
@@ -116,6 +117,25 @@ function groupItemClicked(e) {
     const item = target.childNodes[i];
     item.style.whiteSpace = 'normal';
   }
+}
+
+function invitesButtonClicked() {
+  document.getElementById('groupInvites').classList.toggle('hidden');
+}
+
+async function getGroupInvites() {
+  if (!userProfile) return;
+  const response = await fetch('/invites', {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+  });
+  if (response.status !== 200) {
+    return;
+  }
+  const resData = await response.json();
+  return resData.data;
 }
 
 addEventListeners();

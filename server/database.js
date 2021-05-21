@@ -109,14 +109,24 @@ exports.getUserCohorts = async function (userId) {
 exports.checkRegistration = async function (cohortId, userId) {
   const sql = `
     SELECT
-      registrationId
+      rank
     FROM registration
     WHERE cohortId = ?
     AND userId = ?
     ;`;
-    console.log(sql);
-    console.log([cohortId, userId]);
   const response = await db.get(sql, [cohortId, userId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getPublicCohort = async function (cohortId) {
+  const sql = 'SELECT * FROM cohort WHERE cohortId = ? AND isPrivate = 0';
+  const response = await db.get(sql, [cohortId])
     .then(row => {
       return { failed: false, context: row };
     })
