@@ -135,3 +135,21 @@ exports.getPublicCohort = async function (cohortId) {
     });
   return response;
 };
+
+exports.updateCohort = async function (data) {
+  const sql = `
+    UPDATE cohort
+    SET
+      name = ?,
+      description = ?,
+      isPrivate = ? 
+    WHERE cohortId = ?;`;
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};

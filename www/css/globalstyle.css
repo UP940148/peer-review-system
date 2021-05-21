@@ -79,6 +79,48 @@ body {
   display: none !important;
 }
 
-#topSection {
-  height: 14vh;
+.content-display {
+  padding: 12px;
+}
+
+.content-item {
+  margin: -1px 6px;
+  padding: 2px;
+  border: 1px solid #aaa;
+}
+
+.content-item:hover {
+  background-color: #d9d9d9;
+}
+
+.content-create-item {
+  margin: 6px;
+  padding: 2px;
+  background-color: #b9b9b9;
+  border: 2px solid #b9b9b9;
+  border-radius: .5rem;
+}
+
+
+form.content-item > label {
+  font-size: 150%;
+}
+form.content-item > input[type='text'], textarea, form.content-item > input[type='checkbox'] {
+  margin-top: .5rem;
+  margin-bottom: .75rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+textarea.large {
+  box-sizing: border-box;
+  width: 100%;
+  height: 3rem;
+}
+
+#pageContent {
+  flex-grow: 1;
+  max-height: 86vh;
 }

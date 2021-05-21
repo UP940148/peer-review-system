@@ -11,11 +11,12 @@ const queryString = window.location.search;
 const groupId = queryString.substring(1);
 
 async function fillPage() {
-  const isGroupFound = await getGroupInfo();
+  await getGroupInfo();
   // If user doesn't have access to group, return
-  if (!isGroupFound) return;
-  if (groupInfo.rank === 'owner') {
+  if (!groupInfo) return;
+  if (groupInfo.rank === 'owner' || groupInfo.rank === 'admin') {
     // Load admin tools
+    loadAdminTools();
   }
   // Add posts and stuffs
 }
@@ -80,7 +81,34 @@ async function joinGroup() {
 }
 
 async function loadAdminTools() {
-  // Invite users via their email address
-  // Toggle group public/private
+  document.getElementById('updateGroupName').value = groupInfo.name;
+  document.getElementById('updateGroupDesc').value = groupInfo.description;
+  document.getElementById('groupPrivate').checked = groupInfo.isPrivate;
 
+  document.getElementById('toggleUpdateGroupMenu').addEventListener('click', toggleUpdateMenu);
+  document.getElementById('updateGroup').addEventListener('submit', updateGroupDetails);
+  // Invite users via their username
+  // Toggle group public/private
+}
+
+function toggleUpdateMenu() {
+  document.getElementById('updateGroup').classList.toggle('hidden');
+}
+
+async function updateGroupDetails(e) {
+  e.preventDefault();
+  const formData = new FormData(document.getElementById('updateGroup'));
+  console.log(formData.get('cohortName'));
+  console.log(formData.get('cohortDesc'));
+  console.log(formData.get('isPrivate'));
+
+  const response = await fetch('/cohort/' + groupId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'POST',
+    body: formData,
+  });
+  if (response.ok) location.reload();
 }

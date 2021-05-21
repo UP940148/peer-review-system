@@ -49,12 +49,33 @@ exports.createNewUser = async function (req, res) {
   }
 };
 
-exports.createNewCohort = async function (req, res) {
+exports.createUpdateCohort = async function (req, res) {
+  // Format data correctly
   let isPrivate = 0;
   if (req.body.isPrivate) {
     isPrivate = 1;
   }
   const data = [req.body.cohortName, req.body.cohortDesc, isPrivate];
+
+  if (req.params.cohortId) {
+    // Check if cohort exists, if so then update and return
+    const cohortId = parseInt(req.params.cohortId);
+    const checkRank = await db.checkRegistration(cohortId, req.user.id);
+    if (checkRank.context.rank === 'owner') {
+      data.push(cohortId);
+      const cohortResponse = await db.updateCohort(data);
+      if (cohortResponse.failed) {
+        res.sendStatus(500);
+      } else {
+        res.sendStatus(200);
+      }
+    } else {
+      res.sendStatus(404);
+    }
+    return;
+  }
+
+  // Create cohort
   const response = await db.createCohort(data);
   if (response.failed) {
     // If an error occured: Output to console for debugging

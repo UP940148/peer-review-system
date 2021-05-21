@@ -91,7 +91,7 @@ app.get('/admin/all/:table', api.getAllInTable);
 app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 
 app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);
-app.post('/cohort', googleAuth.guardMiddleware(), uploader.none(), api.createNewCohort);
+app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), uploader.none(), api.createUpdateCohort);
 app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);

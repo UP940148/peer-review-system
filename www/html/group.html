@@ -22,10 +22,27 @@
 
       <h1 id='pageTitle'></h1>
       <p id='groupDesc'></p>
-
     </div>
-    <div id='groupAdminTools'></div>
-    <div id='pageContent'></div>
+    <div id='pageContent'>
+      <div id='groupAdminTools' class='content-create-item'>
+        <button id='toggleUpdateGroupMenu'>Toggle edit menu</button><br>
+        <form id='updateGroup' class='content-create-item hidden'>
+          <label for='updateGroupName'>Group Name:</label><br>
+          <input type='text' id='updateGroupName' name='cohortName'><br>
+
+          <label for='updateGroupDesc'>Group Description:</label><br>
+          <textarea id='updateGroupDesc' name='cohortDesc' class='large'></textarea><br>
+
+          <label for='groupPrivate'>Private</label>
+          <input type='checkbox' id='groupPrivate' name='isPrivate'><br>
+
+          <input type='submit' value='Update Details'>
+          <hr>
+        </form>
+        <button id='toggleInviteUsers'>Invite people to join group</button>
+      </div>
+    </div>
+
 
   </body>
 </html>
