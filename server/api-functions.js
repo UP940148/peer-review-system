@@ -135,3 +135,45 @@ exports.getProfilePic = async function (req, res) {
   // Currently no need for anything else as I'm using google profile pictures which have external urls
   res.sendStatus(418);
 };
+
+exports.getCohort = async function (req, res) {
+  const cohortId = parseInt(req.params.cohortId);
+  // Get group from database
+  const response = await db.getRecordByPrimaryKey('cohort', cohortId);
+  console.log();
+
+  // If group not found, return 404
+  if (!response.context) {
+    res.sendStatus(404);
+    return;
+  }
+  // If group public
+  if (!response.context.isPrivate) {
+    // If group found, return 200
+    res.status(200).json({
+      data: response.context,
+    });
+    return;
+  }
+
+  // If group is private and user not logged in, return 404
+  if (!req.user) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If group private and user logged in, check registration
+  const registrationResponse = await db.checkRegistration(cohortId, req.user.id);
+  console.log(registrationResponse);
+  // If user not registered, return 404
+  if (!registrationResponse.context) {
+    console.log('Not registered');
+    res.sendStatus(404);
+    return;
+  }
+
+  // If user registration found, return 200
+  res.status(200).json({
+    data: response.context,
+  });
+};

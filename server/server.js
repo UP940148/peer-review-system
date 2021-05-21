@@ -95,5 +95,6 @@ app.post('/cohort', googleAuth.guardMiddleware(), uploader.none(), api.createNew
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
 app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
+app.get('/cohort/:cohortId', api.getCohort);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);

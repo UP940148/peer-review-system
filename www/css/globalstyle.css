@@ -46,7 +46,11 @@ body {
 }
 
 #pageTitle {
+  position: relative;
   text-align: center;
+  width: 80%;
+  left: 10%;
+
 }
 
 .horizontal-flex-container {

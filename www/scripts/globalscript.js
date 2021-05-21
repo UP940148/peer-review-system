@@ -13,7 +13,6 @@ function initialise() {
 
 // Google Auth
 async function onSignIn(googleUser) {
-  console.log(googleUser);
   idToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
   // Check if user has profile in the database
   let response = await fetch('/user', {

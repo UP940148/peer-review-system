@@ -105,3 +105,23 @@ exports.getUserCohorts = async function (userId) {
     });
   return response;
 };
+
+exports.checkRegistration = async function (cohortId, userId) {
+  const sql = `
+    SELECT
+      registrationId
+    FROM registration
+    WHERE cohortId = ?
+    AND userId = ?
+    ;`;
+    console.log(sql);
+    console.log([cohortId, userId]);
+  const response = await db.get(sql, [cohortId, userId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
