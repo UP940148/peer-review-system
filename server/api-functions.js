@@ -127,9 +127,11 @@ exports.getCurrentUser = async function (req, res) {
 };
 
 exports.getProfilePic = async function (req, res) {
+  // If no user specified, return default image
   if (!req.params.userId) {
     res.sendFile(config.imageStore + 'default-profile-pic.jpg');
     return;
   }
+  // Currently no need for anything else as I'm using google profile pictures which have external urls
   res.sendStatus(418);
 };

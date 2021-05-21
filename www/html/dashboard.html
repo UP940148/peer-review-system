@@ -3,9 +3,9 @@
 <html>
   <head>
     <title>Dashboard</title>
-
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <meta name="google-signin-client_id" content='708615793330-085t8nucql4ft884ld0e35j8i29fl8ek.apps.googleusercontent.com'>
+
     <link href='/css/globalstyle.css' rel='stylesheet' type='text/css'>
     <link href='/css/landscapedashboardstyle.css' rel='stylesheet' type='text/css'>
   </head>
@@ -32,11 +32,11 @@
       <div id='tabView' class='full-width'>
 
         <div id='groupsView' class='content-display'>
-          <div id='createNewGroup' class='content-item selectable'>
+          <div id='createNewGroup' class='content-create-item selectable'>
             <h2>+ Create new group</h2>
           </div>
 
-          <form id='createNewGroupContent' class='content-item hidden'>
+          <form id='createNewGroupContent' class='content-create-item hidden'>
             <label for='groupName'>Group Name:</label><br>
             <input type='text' id='groupName' name='cohortName'><br>
 
@@ -47,16 +47,7 @@
             <input type='checkbox' name='isPrivate'><br>
 
             <input type='submit' value='Create Group!'>
-        </form>
-
-          <div class='content-item selectable'>
-            <p>Filler Group Text</p>
-            <p class='owner-tag'>Owner</p>
-          </div>
-          <div class='content-item selectable'>
-            <p>Second Filler Group Text</p>
-            <p class='admin-tag'>Admin</p>
-          </div>
+          </form>
         </div>
 
         <div id='postsView' class='content-display'>

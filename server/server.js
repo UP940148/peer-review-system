@@ -1,7 +1,6 @@
 // Required modules
 const express = require('express');
 const bodyParser = require('body-parser');
-const stayAwake = require('stay-awake');
 const config = require('../config');
 const googleAuth = require('simple-google-openid');
 const multer = require('multer');
@@ -10,7 +9,19 @@ const mkdirp = require('mkdirp');
 const fs = require('fs');
 // const { promisify } = require('util');
 // const renameAsync = promisify(fs.rename);
-
+try {
+  const stayAwake = require('stay-awake');
+  // Set up stay awake
+  stayAwake.prevent((err, data) => {
+    if (err) {
+      console.log("Non-essential module 'stay-awake' not found. Skipping...");
+      return;
+    }
+    console.log(`${data} routines are preventing sleep`);
+  });
+} catch (e) {
+  console.log("Module not found 'stay-awake'. Skipping...");
+}
 
 // Set up middleware
 const jsonParser = bodyParser.json();
@@ -42,14 +53,6 @@ function checkFileType(file, cb) {
   }
 }
 
-// Set up stay awake
-stayAwake.prevent((err, data) => {
-  if (err) {
-    console.log("Non-essential module 'stay-awake' not found. Skipping...");
-    return;
-  }
-  console.log(`${data} routines are preventing sleep`);
-});
 
 // Start express server
 const app = express();
@@ -68,8 +71,8 @@ async function logRequests(req, res, next) {
   }
   const currentTime = new Date();
   const fileDir = `./logs/${currentTime.getFullYear()}/${currentTime.getMonth() + 1}/`;
-  const filePath = fileDir + currentTime.getDate() + '.txt';
-  const data = `${req.ip} - - [${currentTime}] "${req.method} ${req.hostname} ${req.path}" ${res.statusCode}`;
+  const filePath = fileDir + currentTime.getDate() + '.log';
+  const data = `${req.ip} - - [${currentTime}] "${req.method} ${req.headers.host} ${req.path}" ${res.statusCode}`;
   await mkdirp(fileDir);
   fs.appendFile(filePath, data + '\n', err => {
     if (err) {

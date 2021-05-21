@@ -5,11 +5,7 @@ body {
   background-color: #e8e8e8;
   height: 100vh;
   margin: 0 .5vw;
-}
-
-
-#logInOutContainer {
-
+  font-family: 'Century Gothic';
 }
 
 #profileButton {
@@ -81,8 +77,30 @@ body {
 }
 
 .content-item > p {
-  margin: 4px;
+  margin: 0px;
   font-size: 125%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.content-item > p.title {
+  font-weight: bolder;
+}
+.group-desc {
+  color: #333333;
+}
+.group-desc:hover {
+  cursor: default;
+}
+
+a {
+  text-decoration: none;
+  color: blue;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 .content-display {
@@ -90,11 +108,29 @@ body {
 }
 
 .content-item {
+  margin: -1px 6px;
+  padding: 2px;
+  border: 1px solid #aaa;
+}
+
+.content-item:hover {
+  background-color: #d9d9d9;
+}
+
+.content-create-item {
   margin: 6px;
-  padding: 4px;
+  padding: 2px;
   background-color: #b9b9b9;
   border: 2px solid #b9b9b9;
   border-radius: .5rem;
+}
+
+@media (min-aspect-ratio: 1/1) {
+  .content-grid-container {
+    display: grid;
+    grid-template-columns: 24.5% 74.5%;
+    column-gap: 1%;
+  }
 }
 
 p.owner-tag {

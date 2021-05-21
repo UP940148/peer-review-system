@@ -52,7 +52,70 @@ async function createNewGroup(e) {
 }
 
 async function fillPage() {
-  // Get user
+  // Populate user cohorts tab
+  const userCohorts = await getCohorts();
+  console.log(userCohorts);
+  for (let i = 0; i < userCohorts.length; i++) {
+    const group = userCohorts[i];
+    // Create container element
+    const groupContainer = document.createElement('div');
+    groupContainer.classList.add('content-item', 'content-grid-container');
+    const groupName = document.createElement('p');
+    groupName.classList.add('title');
+    const groupLink = document.createElement('a');
+    groupLink.href = '/group?' + group.cohortId;
+    groupLink.textContent = group.name;
+    groupName.appendChild(groupLink);
+    groupContainer.appendChild(groupName);
+
+    const groupDesc = document.createElement('p');
+    groupDesc.textContent = group.description;
+    groupDesc.classList.add('group-desc');
+    groupContainer.appendChild(groupDesc);
+
+    document.getElementById('groupsView').appendChild(groupContainer);
+    // Add event listener to expand group details
+    groupContainer.addEventListener('click', groupItemClicked);
+  }
+  // Populate user posts tab
+
+  // Populate user assignments tab
+}
+
+async function getCohorts() {
+  // Fetch request to get user's cohorts
+  const response = await fetch('/cohorts', {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+  });
+  if (response.status !== 200) {
+    return;
+  }
+  const resData = await response.json();
+  return resData.data;
+}
+
+function groupItemClicked(e) {
+  let target = e.target;
+  if (target.nodeName !== 'DIV') target = target.parentElement;
+
+  // Set all other items back to intended size
+  const gridContainers = document.getElementsByClassName('content-grid-container');
+  for (let i = 0; i < gridContainers.length; i++) {
+    const container = gridContainers[i];
+    for (let j = 0; j < container.childNodes.length; j++) {
+      const node = container.childNodes[j];
+      node.style.whiteSpace = 'nowrap';
+    }
+  }
+
+  // Allow wrapping target content
+  for (let i = 0; i < target.childNodes.length; i++) {
+    const item = target.childNodes[i];
+    item.style.whiteSpace = 'normal';
+  }
 }
 
 addEventListeners();

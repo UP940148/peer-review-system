@@ -89,6 +89,7 @@ exports.getUserCohorts = async function (userId) {
       cohort.cohortId,
       cohort.name,
       cohort.description,
+      cohort.isPrivate,
       registration.rank
     FROM cohort
     INNER JOIN registration
