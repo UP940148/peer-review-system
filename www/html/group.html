@@ -24,7 +24,7 @@
       <p id='groupDesc'></p>
     </div>
     <div id='pageContent'>
-      <div id='groupAdminTools' class='content-create-item'>
+      <div id='groupAdminTools' class='content-create-item hidden'>
         <button id='toggleUpdateGroupMenu'>Toggle edit menu</button><br>
         <form id='updateGroup' class='content-create-item hidden'>
           <label for='updateGroupName'>Group Name:</label><br>
@@ -40,6 +40,10 @@
           <hr>
         </form>
         <button id='toggleInviteUsers'>Invite people to join group</button>
+        <form id='inviteUsers'>
+          <input type='text' id='inviteUsernames' name='userIds'><br>
+          <input type='submit' value='Invite user/s'>
+        </form>
       </div>
     </div>
 

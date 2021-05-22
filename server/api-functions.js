@@ -127,11 +127,8 @@ exports.getUserCohorts = async function (req, res) {
 exports.getCurrentUser = async function (req, res) {
   const response = await db.getRecordByPrimaryKey('user', req.user.id);
   if (response.failed) {
-    // If an error occured: Output to console for debugging
-    console.log('\nERR OUTPUT "database.getRecordByPrimaryKey:"');
-    console.log(req.user);
-    console.log(response.context);
-    console.log();
+    // If an error occured, return 500
+    console.log(response);
     res.sendStatus(500);
     return;
   }
@@ -161,7 +158,6 @@ exports.getCohort = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
   // Get group from database
   const response = await db.getRecordByPrimaryKey('cohort', cohortId);
-  console.log();
 
   // If group not found, return 404
   if (!response.context) {
@@ -200,16 +196,36 @@ exports.getCohort = async function (req, res) {
 };
 
 exports.registerUser = async function (req, res) {
+  // Check if cohort is public or not
   const cohortId = parseInt(req.params.cohortId);
   const response = await db.getPublicCohort(cohortId);
   if (!response.context) {
     res.sendStatus(404);
     return;
   }
+  // If public, register user
   const registerResponse = await insertRegistration(req.user.id, cohortId);
   if (registerResponse.failed) {
     res.sendStatus(500);
     return;
+  }
+  // Check if user has pending invite
+  const checkInvite = await db.checkInvite(cohortId, req.user.id);
+  // If something went wrong, log it
+  if (checkInvite.failed) {
+    res.sendStatus(500);
+    return;
+  }
+  const inviteId = checkInvite.context.inviteId;
+  // If an invite was found
+  if (checkInvite.context) {
+    const decline = await db.deleteInvite(inviteId);
+    // If something went wrong, return 500
+    if (decline.failed) {
+      console.log(decline.context);
+      res.sendStatus(500);
+      return;
+    }
   }
   res.sendStatus(200);
 };
@@ -230,4 +246,102 @@ exports.getRegistration = async function (req, res) {
   res.status(200).json({
     rank: response.context.rank,
   });
+};
+
+exports.inviteUsers = async function (req, res) {
+
+  const cohortId = parseInt(req.params.cohortId);
+  const checkRank = await db.checkRegistration(cohortId, req.user.id);
+  if (!(checkRank.context.rank === 'owner' || checkRank.context.rank === 'admin')) {
+    res.sendStatus(404);
+    return;
+  }
+  const idList = req.body.userIds.replace(/\s+/g, '').split(',');
+
+  for (let i = 0; i < idList.length; i++) {
+    const isUser = await db.getRecordByPrimaryKey('user', idList[i]);
+    if (isUser.context) {
+      // Check if invite already exists
+      const inviteExists = await db.checkInvite(cohortId, idList[i]);
+      if (!inviteExists.context) {
+        const response = await db.createInvite([cohortId, idList[i], '']);
+        if (response.failed) {
+          console.log(response);
+        }
+      }
+    }
+  }
+
+  res.sendStatus(200);
+};
+
+exports.getInvites = async function (req, res) {
+  const response = await db.getUserInvites(req.user.id);
+  if (response.failed) {
+    res.sendStatus(500);
+    return;
+  }
+  if (response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
+exports.acceptInvite = async function (req, res) {
+  // Get invite by id
+  const inviteId = parseInt(req.params.inviteId);
+  const invite = await db.getRecordByPrimaryKey('invite', inviteId);
+
+  // If invite not with this user, return 404
+  if (invite.context.userId !== req.user.id) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If invite belongs to user, add user registration
+  const register = await insertRegistration(invite.context.userId, invite.context.cohortId);
+  // If something went wrong, return 500
+  if (register.failed) {
+    console.log(register.context);
+    res.sendStatus(500);
+    return;
+  }
+
+  // If accepted, delete invite record
+  const decline = await db.deleteInvite(inviteId);
+  // If something went wrong, return 500
+  if (decline.failed) {
+    console.log(decline.context);
+    res.sendStatus(500);
+    return;
+  }
+
+  // If success, return 200
+  res.sendStatus(200);
+};
+
+exports.declineInvite = async function (req, res) {
+  // Get invite by id
+  const inviteId = parseInt(req.params.inviteId);
+  const invite = await db.getRecordByPrimaryKey('invite', inviteId);
+
+  // If invite not with this user, return 404
+  if (invite.context.userId !== req.user.id) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If invite belongs to user, delete
+  const decline = await db.deleteInvite(inviteId);
+  // If something went wrong, return 500
+  if (decline.failed) {
+    console.log(decline.context);
+    res.sendStatus(500);
+    return;
+  }
+  // If success, return 200
+  res.sendStatus(200);
 };

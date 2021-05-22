@@ -77,6 +77,51 @@ async function fillPage() {
     // Add event listener to expand group details
     groupContainer.addEventListener('click', groupItemClicked);
   }
+
+  // Populate group invites
+  const userInvites = await getGroupInvites();
+  if (userInvites) {
+    document.getElementById('groupInvitesButton').classList.remove('hidden');
+    const inviteListContainer = document.getElementById('groupInvites');
+    for (let i = 0; i < userInvites.length; i++) {
+      const currentInvite = userInvites[i];
+      console.log(currentInvite);
+      // Add invite to page
+      const inviteContainer = document.createElement('div');
+      inviteContainer.classList.add('invite-grid-container', 'content-item');
+      inviteListContainer.appendChild(inviteContainer);
+
+      const inviteTitle = document.createElement('p');
+      inviteTitle.classList.add('title');
+      inviteTitle.textContent = currentInvite.name;
+      inviteContainer.appendChild(inviteTitle);
+
+      const inviteDesc = document.createElement('p');
+      inviteDesc.classList.add('group-desc');
+      inviteDesc.textContent = currentInvite.description;
+      inviteContainer.appendChild(inviteDesc);
+
+      const acceptBtn = document.createElement('button');
+      acceptBtn.classList.add('accept-btn', 'selectable', 'invite-button');
+      acceptBtn.textContent = 'Accept';
+      inviteContainer.appendChild(acceptBtn);
+
+      const declineBtn = document.createElement('button');
+      declineBtn.classList.add('decline-btn', 'selectable', 'invite-button');
+      declineBtn.textContent = 'Decline';
+      inviteContainer.appendChild(declineBtn);
+
+      // Add button event listeners
+
+      acceptBtn.addEventListener('click', () => {
+        acceptInvite(currentInvite.inviteId);
+      });
+
+      declineBtn.addEventListener('click', () => {
+        declineInvite(currentInvite.inviteId);
+      });
+    }
+  }
   // Populate user posts tab
 
   // Populate user assignments tab
@@ -130,12 +175,45 @@ async function getGroupInvites() {
       Authorization: 'Bearer ' + idToken,
     },
     credentials: 'same-origin',
+    method: 'GET',
   });
   if (response.status !== 200) {
     return;
   }
   const resData = await response.json();
   return resData.data;
+}
+
+async function acceptInvite(inviteId) {
+  console.log('Accepting:', inviteId);
+  const response = await fetch('/accept-invite/' + inviteId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'POST',
+  });
+  if (!response.ok) {
+    window.alert('Something went wrong');
+    return;
+  }
+  // Reload invite list
+  // Reload group list
+}
+async function declineInvite(inviteId) {
+  console.log('Declining:', inviteId);
+  const response = await fetch('/decline-invite/' + inviteId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    window.alert('Something went wrong');
+    return;
+  }
+  // Reload invite list
 }
 
 addEventListeners();

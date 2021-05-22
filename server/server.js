@@ -93,10 +93,16 @@ app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);
 app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), uploader.none(), api.createUpdateCohort);
 app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
+app.post('/invite/:cohortId', googleAuth.guardMiddleware(), uploader.none(), api.inviteUsers);
+app.post('/accept-invite/:inviteId', googleAuth.guardMiddleware(), api.acceptInvite);
+
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
 app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
 app.get('/cohort/:cohortId', api.getCohort);
 app.get('/registration/:cohortId', api.getRegistration);
+app.get('/invites', googleAuth.guardMiddleware(), api.getInvites);
+
+app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);

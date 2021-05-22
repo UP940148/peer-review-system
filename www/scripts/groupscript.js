@@ -15,7 +15,7 @@ async function fillPage() {
   // If user doesn't have access to group, return
   if (!groupInfo) return;
   if (groupInfo.rank === 'owner' || groupInfo.rank === 'admin') {
-    // Load admin tools
+    // Set up admin tools
     loadAdminTools();
   }
   // Add posts and stuffs
@@ -80,13 +80,15 @@ async function joinGroup() {
   window.location.reload();
 }
 
-async function loadAdminTools() {
+function loadAdminTools() {
+  document.getElementById('groupAdminTools').classList.toggle('hidden');
   document.getElementById('updateGroupName').value = groupInfo.name;
   document.getElementById('updateGroupDesc').value = groupInfo.description;
   document.getElementById('groupPrivate').checked = groupInfo.isPrivate;
 
   document.getElementById('toggleUpdateGroupMenu').addEventListener('click', toggleUpdateMenu);
   document.getElementById('updateGroup').addEventListener('submit', updateGroupDetails);
+  document.getElementById('inviteUsers').addEventListener('submit', inviteUsers);
   // Invite users via their username
   // Toggle group public/private
 }
@@ -111,4 +113,23 @@ async function updateGroupDetails(e) {
     body: formData,
   });
   if (response.ok) location.reload();
+}
+
+async function inviteUsers(e) {
+  e.preventDefault();
+  const formData = new FormData(document.getElementById('inviteUsers'));
+  const response = await fetch('/invite/' + groupId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'POST',
+    body: formData,
+  });
+  document.getElementById('inviteUsernames').value = '';
+  if (!response.ok) {
+    window.alert('Something went wrong');
+  } else {
+    location.reload();
+  }
 }

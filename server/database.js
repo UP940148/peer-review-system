@@ -82,6 +82,18 @@ exports.createRegistration = async function (data) {
   return response;
 };
 
+exports.createInvite = async function (data) {
+  const sql = 'INSERT INTO invite (cohortId, userId, message) VALUES (?, ?, ?);';
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
 // Retrieve all cohorts that user is registered in
 exports.getUserCohorts = async function (userId) {
   const sql = `
@@ -124,6 +136,24 @@ exports.checkRegistration = async function (cohortId, userId) {
   return response;
 };
 
+exports.checkInvite = async function (cohortId, userId) {
+  const sql = `
+    SELECT
+      inviteId
+    FROM invite
+    WHERE cohortId = ?
+    AND userId = ?
+    ;`;
+  const response = await db.get(sql, [cohortId, userId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
 exports.getPublicCohort = async function (cohortId) {
   const sql = 'SELECT * FROM cohort WHERE cohortId = ? AND isPrivate = 0';
   const response = await db.get(sql, [cohortId])
@@ -142,7 +172,7 @@ exports.updateCohort = async function (data) {
     SET
       name = ?,
       description = ?,
-      isPrivate = ? 
+      isPrivate = ?
     WHERE cohortId = ?;`;
   const response = await db.run(sql, data)
     .then(() => {
@@ -153,3 +183,51 @@ exports.updateCohort = async function (data) {
     });
   return response;
 };
+
+exports.getUserInvites = async function (userId) {
+  const sql = `
+    SELECT
+      invite.inviteId,
+      invite.message,
+      cohort.name,
+      cohort.description
+    FROM invite
+    INNER JOIN cohort
+      ON invite.cohortId = cohort.cohortId
+    WHERE invite.userId = ?
+    ORDER BY invite.inviteId DESC
+    ;`;
+  const response = await db.all(sql, [userId])
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.deleteInvite = async function (inviteId) {
+  const sql = 'DELETE FROM invite WHERE inviteId = ?;';
+  const response = await db.run(sql, [inviteId])
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+/*
+exports.checkInvite = async function (cohortId, inviteId) {
+  const sql = 'SELECT inviteId FROM invite WHERE cohortId = ? AND inviteId = ?;';
+  const response = await db.get(sql, [cohortId, inviteId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+*/
