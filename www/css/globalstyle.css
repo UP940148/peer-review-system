@@ -24,7 +24,7 @@ body {
 #profileButton {
   margin: .5rem;
   padding: .5rem;
-  position: fixed;
+  position: absolute;
   right: 0;
   display: flex;
   justify-content: flex-end;
@@ -122,5 +122,23 @@ textarea.large {
 
 #pageContent {
   flex-grow: 1;
-  max-height: 86vh;
+  overflow-y: auto;
 }
+/*
+::-webkit-scrollbar {
+  width: 100px;
+  border-top: 1px solid #e8e8e8;
+}
+
+::-webkit-scrollbar-track {
+  background: #cecece;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+/* Handle on hover
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+*/
