@@ -124,6 +124,16 @@ textarea.large {
   flex-grow: 1;
   overflow-y: auto;
 }
+
+.link {
+  color: blue;
+}
+.link:hover {
+  color: darkblue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /*
 ::-webkit-scrollbar {
   width: 100px;

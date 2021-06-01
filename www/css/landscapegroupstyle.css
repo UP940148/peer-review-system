@@ -31,3 +31,146 @@
 #toggleInviteUsers, #toggleUpdateGroupMenu {
   padding: .25rem .5rem;
 }
+
+.post-profile {
+  grid-area: profile;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+.post-profile > p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.post-title {
+  grid-area: title;
+  text-align: center;
+  margin: .25rem;
+  padding: 0;
+}
+.post-desc {
+  grid-area: desc;
+  padding: 0 0 1rem 0;
+}
+.post-time {
+  grid-area: time;
+  text-align: right;
+}
+.post-link {
+  grid-area: link;
+}
+
+.post-container {
+  background-color: #ffffff;
+  border-radius: .5rem;
+  padding: 1rem;
+}
+
+.post-profile-pic {
+  width: 10%;
+  border-radius: 50%;
+  margin-right: 1%;
+  object-fit: contain;
+}
+
+#postTitle {
+  width: 50%;
+}
+
+#criteriaBox {
+  margin-top: 1rem;
+}
+
+.criteria-label {
+  width: 100%;
+  margin-bottom: .25rem;
+}
+
+.criteria-content {
+  margin-top: 0;
+}
+
+fieldset {
+  border-radius: .5rem;
+}
+legend > h2 {
+  margin: 0;
+}
+
+input[type='submit'] {
+  margin-top: .5rem;
+}
+
+.criteria-label::before {
+  content: '⯈ ';
+}
+
+.criteria-label.expanded::before {
+  content: '▼ ';
+}
+
+@media (min-aspect-ratio: 1/1) {
+  .post-container.grid-container {
+    display: grid;
+    grid-template-columns: 19.5% 29% 29% 19.5%;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "profile title title time"
+      "desc desc desc desc"
+      ". link link .";
+    column-gap: 1%;
+    margin: .5rem 0;
+  }
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .post-container.grid-container {
+    display: grid;
+    grid-template-columns: 49.5% 24% 24.5%;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "profile . time"
+      "title title title"
+      "desc desc desc"
+      "link link link";
+    column-gap: 1%;
+    font-size: 90%;
+    margin: .5rem 0;
+  }
+}
+
+.criteria-container {
+  display: grid;
+  padding: .25rem;;
+  margin-bottom: .5rem;
+  background-color: #ccc;
+  grid-template-columns: 89.5% 9.5%;
+  column-gap: 1%;
+  grid-template-rows: auto;
+  grid-template-areas:
+    "expand delete"
+    "main main";
+}
+
+.new-criteria-container {
+  padding: .25rem;;
+  margin-bottom: .5rem;
+  background-color: #ccc;
+}
+
+.criteria-label {
+  margin: 0;
+}
+
+.criteria-container > p {
+  grid-area: expand;
+}
+
+.criteria-container > button {
+  grid-area: delete;
+}
+
+.criteria-container > div {
+  grid-area: main;
+}

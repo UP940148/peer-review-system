@@ -31,7 +31,7 @@ const uploader = multer({
   limits: {
     fields: 10,
     fileSize: 1024 * 1024 * 30,
-    files: 5,
+    files: 10,
   },
   fileFilter: function (_req, file, cb) {
     checkFileType(file, cb);
@@ -95,14 +95,21 @@ app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), uploader.none(), ap
 app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
 app.post('/invite/:cohortId', googleAuth.guardMiddleware(), uploader.none(), api.inviteUsers);
 app.post('/accept-invite/:inviteId', googleAuth.guardMiddleware(), api.acceptInvite);
-
+app.post('/post/:cohortId', googleAuth.guardMiddleware(), uploader.array('files'), api.createPost);
+app.post('/response/:postId', googleAuth.guardMiddleware(), uploader.none(), api.createResponse);
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
 app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
 app.get('/cohort/:cohortId', api.getCohort);
+app.get('/post/:postId', api.getPost);
+app.get('/posts/:cohortId?', api.getPosts);
 app.get('/registration/:cohortId', api.getRegistration);
 app.get('/invites', googleAuth.guardMiddleware(), api.getInvites);
+app.get('/criteria/:criteriaId', api.getCriteria);
 
 app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);
+app.get('/file/:fileId', api.getFile);
+app.get('/download/:fileId', api.downloadFile);
+app.get('/downloadAll/:postId', api.downloadAll);

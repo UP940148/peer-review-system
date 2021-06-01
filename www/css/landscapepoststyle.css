@@ -1,0 +1,152 @@
+body {
+  margin: 0;
+}
+#pageContent {
+  display: grid;
+  grid-template-columns: 10% 79% 10%;
+  grid-template-rows: 100% 100%;
+  column-gap: .5%;
+  grid-template-areas:
+    'files main owner'
+    'files feedback owner';
+}
+
+#fileWindow {
+  position: fixed;
+  width: 10%;
+  top: 10%;
+  height: 90%;
+  grid-area: files;
+  overflow-y: hidden;
+  background-color: #202020;
+  display: flex;
+  flex-direction: column;
+}
+
+#fileContainer {
+  overflow-y: auto;
+  max-height: 100%;
+  padding: 0 .5rem;
+}
+
+#fileContainer > div {
+  margin: .5rem 0;
+}
+
+#fileDetails {
+  height: 100%;
+  width: 50%;
+  overflow-y: auto
+}
+
+.file-display {
+  object-fit: contain;
+  max-height: 100%;
+  max-width: 100%;
+  float: left;
+  border-radius: .5rem .5rem 0 0;
+}
+
+.download-button {
+  width: 100%;
+  height: 2rem;
+}
+
+.individual-download {
+  border-radius: 0 0 .5rem .5rem;
+  border: 0;
+  background-color: #1e90ff;
+}
+
+.individual-download.selectable:hover {
+  background-color: #00bfff !important;
+}
+
+#mainPost {
+  overflow-y: auto;
+  margin-top: 1%;
+  grid-area: main;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 9.5% 39% 39% 9.5%;
+  grid-template-rows: 5% auto;
+  column-gap: 1%;
+  grid-template-areas:
+    'user user date date'
+    'desc desc desc desc';
+}
+#mainPost > .desc {
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: .5rem;
+  grid-area: desc;
+}
+#mainPost > .user {
+  grid-area: user;
+}
+#mainPost > .date {
+  grid-area: date;
+  margin: 0;
+  padding: auto;
+  text-align: right;
+}
+#pageContent > .feedback {
+  grid-area: feedback;
+}
+
+.post-profile {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  height: 5vh;
+}
+.post-profile > p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.post-profile-pic {
+  width: 5%;
+  border-radius: 50%;
+  margin-right: 1%;
+  object-fit: contain;
+}
+
+
+
+.criteria-label {
+  width: 100%;
+}
+
+.criteria-label::before {
+  content: '⯈ ';
+}
+
+.criteria-label.expanded::before {
+  content: '▼ ';
+}
+
+.criteria-content {
+  margin-top: 0;
+}
+
+.question-container {
+  background-color: #cccccc;
+  border: 1px solid #cccccc;
+  box-sizing: content-box;
+  margin: .5rem 0;
+  border-radius: .25rem;
+}
+
+.question-container > div > textarea {
+  margin-bottom: 0;
+}
+
+.question-container > p {
+  margin: 0;
+}
+
+.question-container > div {
+  padding: .5rem;
+}

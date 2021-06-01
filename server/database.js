@@ -121,6 +121,7 @@ exports.getUserCohorts = async function (userId) {
 exports.checkRegistration = async function (cohortId, userId) {
   const sql = `
     SELECT
+      registrationId,
       rank
     FROM registration
     WHERE cohortId = ?
@@ -218,6 +219,149 @@ exports.deleteInvite = async function (inviteId) {
     });
   return response;
 };
+
+exports.getCohortPosts = async function (cohortId) {
+  const sql = `
+    SELECT
+      post.postId,
+      post.criteriaId,
+      post.title,
+      post.description,
+      post.files,
+      post.timeCreated,
+      user.username,
+      user.picture
+    FROM post
+    INNER JOIN registration
+      ON post.registrationId = registration.registrationId
+    INNER JOIN user
+      ON registration.userId = user.userId
+    WHERE registration.cohortId = ?
+    ORDER BY post.timeCreated DESC;
+  `;
+  const response = await db.all(sql, [cohortId])
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.createPost = async function (data) {
+  const sql = 'INSERT INTO post (registrationId, criteriaId, title, description, files, timeCreated) VALUES (?, ?, ?, ?, ?, ?);';
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.createQuestion = async function (data) {
+  const sql = 'INSERT INTO question (questionContent, type, answers) VALUES (?, ?, ?);';
+  const response = await db.run(sql, data)
+    .then(details => {
+      return { failed: false, context: { id: details.lastID } };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.createCriteria = async function (questions) {
+  const sql = 'INSERT INTO criteria (questions) VALUES (?);';
+  const response = await db.run(sql, questions)
+    .then(details => {
+      return { failed: false, context: { id: details.lastID } };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.getPost = async function (postId) {
+  const sql = `
+  SELECT
+    postId,
+    criteriaId,
+    title,
+    description,
+    files,
+    timeCreated,
+    registration.cohortId,
+    registration.userId,
+    user.username,
+    user.picture
+  FROM post
+  INNER JOIN registration
+    ON post.registrationId = registration.registrationId
+  INNER JOIN user
+    ON registration.userId = user.userId
+  WHERE postId = ?;
+  `;
+  const response = await db.get(sql, [postId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getUserResponse = async function (userId, questionId) {
+  const sql = `
+  SELECT
+    responseId
+  FROM response
+  WHERE userId = ?
+  AND questionId = ?
+  ;`;
+  const response = await db.get(sql, [userId, questionId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.updateResponse = async function (responseId, answer) {
+  const sql = `
+  UPDATE response
+  SET
+    answer = ?
+  WHERE responseId = ?
+  ;`;
+  const response = await db.run(sql, [answer, responseId])
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.createResponse = async function (data) {
+  const sql = 'INSERT INTO response (userId, questionId, answer) VALUES (?, ?, ?);';
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
 /*
 exports.checkInvite = async function (cohortId, inviteId) {
   const sql = 'SELECT inviteId FROM invite WHERE cohortId = ? AND inviteId = ?;';

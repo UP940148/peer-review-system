@@ -46,6 +46,71 @@
           <input type='submit' value='Invite user/s'>
         </form>
       </div>
+
+      <div id='createNewPost' class='content-create-item selectable'>
+        <h2>+ New Post</h2>
+      </div>
+
+      <div id='createNewPostContent' class='content-create-item hidden'>
+        <form id='createPostForm'>
+          <p>Creating post in group: Test Group</p>
+
+          <label for='postTitle'>Title:</label>
+          <input type='text' id='newPostTitle' name='postTitle' class='large'><br><br>
+
+          <label for='postDesc'>Description:</label>
+          <textarea id='newPostDesc' name='postDesc' class='large'></textarea><br>
+
+          <label for='postFiles'>Files:</label><br>
+          <input type='file' id='newPostFiles' name='files' accept='.pdf, image/*, audio/*' multiple><br>
+
+        </form>
+        <fieldset id='criteriaBox'>
+          <legend><h2>Feedback options:</h2></legend>
+          <form id='criteriaForm'>
+            <!--
+            <div class='criteria-container'>
+              <p class='criteria-label expanded'>General Comments</p>
+              <div>
+                <br>
+                <textarea name='comments' class='large criteria-content' disabled></textarea>
+              </div>
+            </div>
+            -->
+          </form>
+          <form id='createCriteriaForm'>
+            <div class='new-criteria-container'>
+              <h2>New Question</h2>
+              <label>Question Type:</label>
+              <select id='newQuestionType' name='questionType'>
+                <option value='text'>Free text</option>
+                <option value='radio'>Radio buttons</option>
+                <option value='checkbox'>Checkboxes</option>
+              </select>
+
+              <br><br>
+
+              <label>Question Text:</label>
+              <textarea id='questionText' name='questionText' class='large criteria-content'></textarea>
+
+              <fieldset id='allowedResponses' class='hidden'>
+                <legend>Allowed Responses</legend>
+                <label>Response:</label>
+                <input type='text' id='newResponse'></input>
+                <input type='button' id='createResponse' value='Add Response'></input>
+                <br><br>
+                <div id='responsesList'></div>
+              </fieldset>
+
+              <input type='submit' value='Add Question'>
+            </div>
+          </form>
+        </fieldset>
+        <input id='createPostButton' type='button' value='Create Post'>
+
+      </div>
+
+      <div id='postList' class='content-display'></div>
     </div>
 
 

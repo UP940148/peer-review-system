@@ -1,12 +1,16 @@
 const config = require('../config');
 const db = require('./database.js');
 
+const zip = require('express-zip');
+const fs = require('fs');
+const { promisify } = require('util');
+const renameAsync = promisify(fs.rename);
+
 // ADMIN FUNCTIONS
 
 exports.getAllInTable = async function (req, res) {
   const response = await db.getAllInTable(req.params.table);
   if (response.failed) {
-    console.log(response.context);
     res.sendStatus(500);
   } else {
     res.status(200).json({
@@ -19,7 +23,6 @@ exports.getFromTableWherePrimaryKey = async function (req, res) {
   const response = await db.getRecordByPrimaryKey(req.params.table, req.params.value);
   if (response.failed || response.code) {
     const httpCode = response.code || 500;
-    console.log(httpCode + ':', response.context);
     res.sendStatus(httpCode);
   } else {
     res.status(200).json({
@@ -38,11 +41,6 @@ exports.createNewUser = async function (req, res) {
   const data = [req.user.id, username, name, email, picture, ''];
   const response = await db.createUser(data);
   if (response.failed) {
-    // If an error occured: Output to console for debugging
-    console.log('\nERR OUTPUT "database.createUser:"');
-    console.log(req.user);
-    console.log(response.context);
-    console.log();
     res.sendStatus(500);
   } else {
     res.sendStatus(201);
@@ -78,23 +76,12 @@ exports.createUpdateCohort = async function (req, res) {
   // Create cohort
   const response = await db.createCohort(data);
   if (response.failed) {
-    // If an error occured: Output to console for debugging
-    console.log('\nERR OUTPUT "database.createCohort:"');
-    console.log(req.body);
-    console.log(response.context);
-    console.log();
     res.sendStatus(500);
     return;
   }
   // Add current user to cohort registration
   const registration = await insertRegistration(req.user.id, response.context.id, 'owner');
   if (registration.failed) {
-    // If an error occured: Output to console for debugging
-    console.log('\nERR OUTPUT "database.createRegistration:"');
-    console.log('User:\n', req.user);
-    console.log('Cohort ID:', response.context.id);
-    console.log(registration.context);
-    console.log();
     res.sendStatus(500);
     return;
   }
@@ -111,11 +98,6 @@ async function insertRegistration(userId, cohortId, rank = 'member') {
 exports.getUserCohorts = async function (req, res) {
   const response = await db.getUserCohorts(req.user.id);
   if (response.failed) {
-    // If an error occured: Output to console for debugging
-    console.log('\nERR OUTPUT "database.getUserCohorts:"');
-    console.log(req.user);
-    console.log(response.context);
-    console.log();
     res.sendStatus(500);
   } else {
     res.status(200).json({
@@ -128,7 +110,6 @@ exports.getCurrentUser = async function (req, res) {
   const response = await db.getRecordByPrimaryKey('user', req.user.id);
   if (response.failed) {
     // If an error occured, return 500
-    console.log(response);
     res.sendStatus(500);
     return;
   }
@@ -181,10 +162,8 @@ exports.getCohort = async function (req, res) {
 
   // If group private and user logged in, check registration
   const registrationResponse = await db.checkRegistration(cohortId, req.user.id);
-  console.log(registrationResponse);
   // If user not registered, return 404
   if (!registrationResponse.context) {
-    console.log('Not registered');
     res.sendStatus(404);
     return;
   }
@@ -222,7 +201,6 @@ exports.registerUser = async function (req, res) {
     const decline = await db.deleteInvite(inviteId);
     // If something went wrong, return 500
     if (decline.failed) {
-      console.log(decline.context);
       res.sendStatus(500);
       return;
     }
@@ -305,7 +283,6 @@ exports.acceptInvite = async function (req, res) {
   const register = await insertRegistration(invite.context.userId, invite.context.cohortId);
   // If something went wrong, return 500
   if (register.failed) {
-    console.log(register.context);
     res.sendStatus(500);
     return;
   }
@@ -314,7 +291,6 @@ exports.acceptInvite = async function (req, res) {
   const decline = await db.deleteInvite(inviteId);
   // If something went wrong, return 500
   if (decline.failed) {
-    console.log(decline.context);
     res.sendStatus(500);
     return;
   }
@@ -338,10 +314,435 @@ exports.declineInvite = async function (req, res) {
   const decline = await db.deleteInvite(inviteId);
   // If something went wrong, return 500
   if (decline.failed) {
-    console.log(decline.context);
     res.sendStatus(500);
     return;
   }
   // If success, return 200
   res.sendStatus(200);
 };
+
+exports.getPosts = async function (req, res) {
+  // If attempting to get own posts but not logged in, return 404;
+  if (!req.params.cohortId && !req.user) {
+    res.sendStatus(404);
+    return;
+  }
+  // If requesting group posts
+  if (req.params.cohortId) {
+    const cohortId = parseInt(req.params.cohortId);
+    // Check if group is public
+    const getPublic = await db.getPublicCohort(cohortId);
+    if (!getPublic.context) {
+      // Check if user is registered
+      if (!req.user) {
+        res.sendStatus(404);
+        return;
+      }
+      // If not registered with group, return 404
+      const checkRank = await db.checkRegistration(cohortId, req.user.id);
+      if (!checkRank.context) {
+        res.sendStatus(404);
+        return;
+      }
+    }
+    // Group is either public, or user is member of group, so display posts
+    const posts = await db.getCohortPosts(cohortId);
+    if (posts.failed) {
+      res.sendStatus(500);
+      return;
+    }
+    res.status(200).json({
+      data: posts.context,
+    });
+  } else {
+    // If requesting own posts
+    const posts = await db.getUserPosts(req.user.id);
+    if (posts.failed) {
+      res.sendStatus(500);
+      return;
+    }
+    res.status(200).json({
+      data: posts.context,
+    });
+  }
+};
+
+exports.createPost = async function (req, res) {
+  // If group ID invalid, return 404
+  const cohortId = parseInt(req.params.cohortId);
+  if (isNaN(cohortId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If not registered with group, return 404
+  const checkRank = await db.checkRegistration(cohortId, req.user.id);
+  if (!checkRank.context) {
+    res.sendStatus(404);
+    return;
+  }
+  const registrationId = checkRank.context.registrationId;
+
+  const fileString = await handleFileUpload(req.files);
+
+  const criteriaData = JSON.parse(req.body.questions);
+
+  // List to store Ids to put in criteria record
+  const questionIds = [];
+  // Get question data
+  for (let i = 0; i < criteriaData.questions.length; i++) {
+    const currentQuestion = criteriaData.questions[i];
+    const data = [];
+    data.push(currentQuestion.question);
+    data.push(currentQuestion.type);
+
+    if (currentQuestion.type === 'text') {
+      // If free text, no answers needed
+      data.push(null);
+    } else if (currentQuestion.type === 'radio' || currentQuestion.type === 'checkbox') {
+      // If multiple choice, add answer strings
+      const answerString = answerListToString(currentQuestion.answers);
+      answerStringToList(answerString);
+      data.push(answerString);
+    } else {
+      // If type not valid, return 404
+      res.sendStatus(404);
+      return;
+    }
+
+    // Insert question
+    const questionCreation = await db.createQuestion(data);
+    if (questionCreation.failed) {
+      res.sendStatus(500);
+      return;
+    }
+    // Add ID to list
+    questionIds.push(questionCreation.context.id);
+  }
+
+  // Insert criteria record
+  const questionIdString = questionIds.toString();
+  const criteriaCreation = await db.createCriteria([questionIdString]);
+  if (criteriaCreation.failed) {
+    res.sendStatus(500);
+    return;
+  }
+  const criteriaId = criteriaCreation.context.id;
+
+  // Insert post data
+  const datum = new Date();
+  const unixTime = datum.getTime();
+  const data = [registrationId, criteriaId, req.body.postTitle, req.body.postDesc, fileString, unixTime];
+
+  const postCreation = await db.createPost(data);
+  if (postCreation.failed) {
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(201);
+};
+
+exports.getPost = async function (req, res) {
+  // Check postId is valid
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const postRetrieval = await db.getPost(postId);
+  if (postRetrieval.failed || !postRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const getPublic = await db.getPublicCohort(postRetrieval.context.cohortId);
+  // If cohort private
+  if (!getPublic.context) {
+    // If not logged in, return 404
+    if (!req.user) {
+      res.sendStatus(404);
+      return;
+    }
+    // If not registered with group, return 404
+    const checkRank = await db.checkRegistration(postRetrieval.context.cohortId, req.user.id);
+    if (!checkRank.context) {
+      res.sendStatus(404);
+      return;
+    }
+  }
+
+  // If all good, send post data
+  res.status(200).json({
+    data: postRetrieval.context,
+  });
+};
+
+exports.getCriteria = async function (req, res) {
+  const criteriaId = parseInt(req.params.criteriaId);
+  if (isNaN(criteriaId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Retrieve questions
+  const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', criteriaId);
+  if (criteriaRetrieval.failed) {
+    res.sendStatus(404);
+    return;
+  }
+
+
+  const questionList = criteriaRetrieval.context.questions.split(',');
+  const questions = [];
+  for (let i = 0; i < questionList.length; i++) {
+    const currentQuestion = parseInt(questionList[i]);
+    // Retrieve the question from the database
+    const questionRetrieval = await db.getRecordByPrimaryKey('question', currentQuestion);
+    if (questionRetrieval.failed) {
+      res.sendStatus(500);
+      return;
+    }
+    // Create a JSON object
+    const questionObj = questionRetrieval.context;
+    if (questionObj.answers) {
+      const answers = answerStringToList(questionObj.answers);
+      questionObj.answers = answers;
+    }
+    // Add to main object
+    questions.push(questionObj);
+  }
+
+  // Return data to client
+  res.status(200).json({
+    data: questions,
+  });
+};
+
+exports.createResponse = async function (req, res) {
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If post doesn't exist, return 404
+  const postRetrieval = await db.getPost(postId);
+  if (postRetrieval.failed || !postRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Can't leave feedback on your own work
+  if (postRetrieval.context.userId === req.user.id) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const getPublic = await db.getPublicCohort(postRetrieval.context.cohortId);
+  // If cohort private
+  if (!getPublic.context) {
+    // If not logged in, return 404
+    if (!req.user) {
+      res.sendStatus(404);
+      return;
+    }
+    // If not registered with group, return 404
+    const checkRank = await db.checkRegistration(postRetrieval.context.cohortId, req.user.id);
+    if (!checkRank.context) {
+      res.sendStatus(404);
+      return;
+    }
+  }
+
+  // Get Criteria record
+  const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', postRetrieval.context.criteriaId);
+  if (criteriaRetrieval.failed || !criteriaRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Get questions from criteria
+  const questionList = criteriaRetrieval.context.questions.split(',');
+
+
+  // Check values in FormData
+  const questionNumList = [];
+  const answers = [];
+  const body = Object.keys(req.body);
+  for (let i = 0; i < body.length; i++) {
+
+    // Get question number
+    const questionNum = body[i].match(/\d+/)[0];
+    // If this question doesn't already have an answer, create a new reference in list
+    if (!questionNumList.includes(questionNum)) {
+      questionNumList.push(questionNum);
+    }
+    // Was it a checkbox question
+    const matchList = body[i].match(/\d+/g);
+    if (matchList.length > 1) {
+      // Get the index of the question
+      const indexPos = questionNumList.indexOf(questionNum);
+      // Check if the question has an answer already
+      if (answers.length < indexPos + 1) {
+        // If not, then create a list object for it
+        answers.push([]);
+      }
+      // Else append to pre-existing list
+      answers[indexPos].push(matchList[1]);
+    } else {
+      // Push answer
+      answers.push(req.body[body[i]]);
+    }
+  }
+
+  // Loop through all questions
+  for (let i = 0; i < questionNumList.length; i++) {
+    // Get current question
+    const questionId = questionList[parseInt(questionNumList[i])];
+    const currentQuestion = await db.getRecordByPrimaryKey('question', questionId);
+    console.log(`Question ${questionId}`);
+    console.log(currentQuestion.context);
+    if (currentQuestion.failed || !currentQuestion.context) {
+      res.sendStatus(404);
+      return;
+    }
+
+    // If question has multiple answers, convert indexes to actual answers
+    if (typeof answers[i] !== 'string') {
+      if (currentQuestion.context.type !== 'checkbox') {
+        res.sendStatus(404);
+        return;
+      }
+
+      // Get answers from question
+      const answerList = answerStringToList(currentQuestion.context.answers);
+      // Convert indexes to answers
+      for (let j = 0; j < answers[i].length; j++) {
+        answers[i][j] = answerList[parseInt(answers[i][j])];
+      }
+
+      // Convert answers to single string
+      answers[i] = answerListToString(answers[i]);
+    }
+
+    // If answer is blank, skip
+    if (answers[i].length !== 0) {
+      // Check if response already exists for question
+      const checkResponse = await db.getUserResponse(req.user.id, questionId);
+      if (checkResponse.failed) {
+        res.sendStatus(500);
+        return;
+      }
+      if (checkResponse.context) {
+        const responseId = checkResponse.context.responseId;
+        // Update response
+        const updateResponse = await db.updateResponse(responseId, answers[i]);
+        if (updateResponse.failed) {
+          res.sendStatus(500);
+          return;
+        }
+      } else {
+        // Create new response
+        const data = [req.user.id, questionId, answers[i]];
+        const newResponse = await db.createResponse(data);
+        if (newResponse.failed) {
+          console.log(newResponse.context);
+          res.sendStatus(500);
+          return;
+        }
+      }
+    }
+  }
+
+  res.sendStatus(201);
+};
+
+exports.getFile = function (req, res) {
+  res.sendFile(config.docStore + req.params.fileId);
+};
+
+exports.downloadFile = function (req, res) {
+  res.download(config.docStore + req.params.fileId);
+};
+
+exports.downloadAll = async function (req, res) {
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(404);
+    return;
+  }
+  // Get files from post
+  const postRetrieval = await db.getPost(postId);
+  if (postRetrieval.failed || !postRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+  const files = postRetrieval.context.files.split(',');
+  const fileObjs = [];
+  files.forEach(file => {
+    const object = {
+      path: config.docStore + file,
+      name: file,
+    };
+    fileObjs.push(object);
+  });
+  const datum = new Date();
+  const unixTime = datum.getTime();
+  res.zip(fileObjs, `LPRS-${postId}_${unixTime}.zip`);
+};
+
+async function handleFileUpload(files) {
+  // Handle document upload
+  const newFilenames = [];
+
+  // Loop through every file
+  for (const file of files) {
+    // Get the file extension and add it to the random file name
+    const fileExtList = file.originalname.split('.');
+    const fileExt = fileExtList[fileExtList.length - 1];
+    const newFilename = file.filename + '.' + fileExt;
+    // Move file and rename it with extension
+    await renameAsync(file.path, config.docStore + newFilename);
+    // Add file to list
+    newFilenames.push(newFilename);
+  }
+
+  // Return file list as string to store in database
+  return newFilenames.toString();
+}
+
+function answerListToString(subjectList) {
+  // Encode answer strings, then comma separate
+
+  const newList = [];
+
+  subjectList.forEach(subjectString => {
+    // I need to make sure the last character in each string isn't a backslash
+    subjectString += ' ';
+    // Storing separate strings as comma separated in my database means that
+    // I need a way to separate the commas in the string/s from the comma separations
+    const newString = subjectString.replace(/,/g, '/,');
+
+    newList.push(newString);
+  });
+
+  return newList.toString();
+}
+
+function answerStringToList(subjectString) {
+  // Remove whitespace from end of string
+  subjectString = subjectString.replace(/\s+$/, '');
+  // Convert string to list
+  const subjectList = subjectString.split(' ,');
+
+  const newList = [];
+  // Put all commas back where they should be
+  subjectList.forEach(item => {
+    const newString = item.replace(/\/,/g, ',');
+    newList.push(newString);
+  });
+
+  return newList;
+}

@@ -74,3 +74,14 @@ window.addEventListener('load', () => {
   }
   initialise();
 });
+
+
+function getDateStringFromUnix(unixTime) {
+  const dateObj = new Date(unixTime);
+  const dateStr = dateObj.toString();
+  const splitDate = dateStr.split(' ');
+  const dateArr = splitDate.slice(1, 5);
+  dateArr[3] = dateArr[3].slice(0, 5);
+  const dateTime = `${dateArr[0]} ${dateArr[1]} ${dateArr[2]}\n${dateArr[3]}`;
+  return dateTime;
+}
