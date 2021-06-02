@@ -84,10 +84,21 @@ async function getFilePreview(fileId) {
     return null;
   }
   const fileTypeList = response.headers.get('content-type').split('/');
+  const fileExtList = fileId.split('.');
+  const fileExt = fileExtList[fileExtList.length - 1];
   // If image, then preview as itself
   if (fileTypeList[0] === 'image') {
     return '/file/' + fileId;
   }
+  // If image, then preview audio image
+  if (fileTypeList[0] === 'audio') {
+    return '/img/audio-icon.png';
+  }
+  // If pdf, then preview pdf image
+  if (fileExt === 'pdf') {
+    return '/img/pdf-icon.png';
+  }
+  // Currently the system only supports the three types listed above, however this catch will future-proof somewhat
   // Else return preview not available image
   return '/img/preview-unavailable.png';
 }
