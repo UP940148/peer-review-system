@@ -29,16 +29,6 @@ async function fillPage() {
   displayPost(resData.data);
 }
 
-/*
-Load post content
-  (Maybe load rendered content)
-Load review ability
-
-If own post
-  View reviews
-  Delete post
-*/
-
 function displayPost(post) {
   const fileList = post.files.split(',');
   displayFiles(fileList);
@@ -148,6 +138,10 @@ function displayPostContent(post) {
 }
 
 async function displayFeedbackForm(criteriaId) {
+  const guide = document.createElement('h2');
+  guide.textContent = '🢃 Give Feedback 🢃';
+  guide.classList.add('guide');
+  mainPost.appendChild(guide);
   const response = await fetch('/criteria/' + criteriaId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
@@ -392,7 +386,46 @@ function displayFeedbackStats(stats) {
         container.appendChild(noResponseMessage);
         continue;
       }
+
+      const chartContainer = document.createElement('div');
+      chartContainer.classList.add('text-response', 'chart-container');
+      container.appendChild(chartContainer);
       // Create bar chart
+      const barCanvas = document.createElement('canvas');
+      barCanvas.classList.add('bar-chart');
+      const barLabels = question.answers;
+      const barData = {
+        labels: barLabels,
+        datasets: [{
+          backgroundColor: 'rgba(0, 0, 0, .2)',
+          borderColor: 'rgb(0, 0, 0)',
+          data: question.totals,
+          borderWidth: 1,
+        }],
+      };
+      const barConfig = {
+        type: 'bar',
+        data: barData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      };
+      const barChart = new Chart(
+        barCanvas,
+        barConfig,
+      );
+      chartContainer.appendChild(barCanvas);
     }
   }
 }

@@ -85,3 +85,13 @@ function getDateStringFromUnix(unixTime) {
   const dateTime = `${dateArr[0]} ${dateArr[1]} ${dateArr[2]}\n${dateArr[3]}`;
   return dateTime;
 }
+
+function generateUniqueColours(numColours) {
+  const colourList = [];
+
+  for (let i = 0; i < numColours; i++) {
+    const colour = Math.floor(Math.random() * 16777215).toString(16);
+    colourList.push('#' + colour);
+  }
+  return colourList;
+}

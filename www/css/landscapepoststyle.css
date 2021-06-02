@@ -69,11 +69,12 @@ body {
   width: 100%;
   display: grid;
   grid-template-columns: 9.5% 39% 39% 9.5%;
-  grid-template-rows: 5% auto;
+  grid-template-rows: 5% 80% auto;
   column-gap: 1%;
   grid-template-areas:
     'user user date date'
-    'desc desc desc desc';
+    'desc desc desc desc'
+    'guide guide guide guide';
 }
 #mainPost > .desc {
   overflow-y: auto;
@@ -91,9 +92,14 @@ body {
   padding: auto;
   text-align: right;
 }
+#mainPost > .guide {
+  grid-area: guide;
+}
+
 #pageContent > .feedback {
   grid-area: feedback;
 }
+
 
 .post-profile {
   display: flex;
@@ -120,7 +126,7 @@ body {
 }
 
 .criteria-label::before {
-  content: '⯈ ';
+  content: '➤ ';
 }
 
 .criteria-label.expanded::before {
@@ -182,8 +188,4 @@ body {
 
 .no-wrapping {
   white-space: nowrap;
-}
-
-fieldset {
-  width:inherit;
 }

@@ -241,7 +241,9 @@ exports.inviteUsers = async function (req, res) {
     if (isUser.context) {
       // Check if invite already exists
       const inviteExists = await db.checkInvite(cohortId, idList[i]);
-      if (!inviteExists.context) {
+      // Check if user already registered with cohort
+      const isRegistered = await db.checkRegistration(cohortId, idList[i]);
+      if (!inviteExists.context && !isRegistered.context) {
         const response = await db.createInvite([cohortId, idList[i], '']);
         if (response.failed) {
           console.log(response);
@@ -572,7 +574,6 @@ exports.createResponse = async function (req, res) {
   const answers = [];
   const body = Object.keys(req.body);
   for (let i = 0; i < body.length; i++) {
-
     // Get question number
     const questionNum = body[i].match(/\d+/)[0];
     // If this question doesn't already have an answer, create a new reference in list

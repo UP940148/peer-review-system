@@ -1,4 +1,6 @@
 /* global userProfile, idToken */
+const groupsView = document.getElementById('groupsView');
+
 function addEventListeners() {
   // Add event listeners to tab selectors
   const tabMarkers = document.getElementsByClassName('tab-marker');
@@ -53,13 +55,19 @@ async function createNewGroup(e) {
 }
 
 async function fillPage() {
+  // Clear records
+  const recordList = document.getElementsByClassName('group-record');
+  for (let i = 0; i < recordList.length; i++) {
+    recordList[i].remove();
+  }
+
   // Populate user cohorts tab
   const userCohorts = await getCohorts();
   for (let i = 0; i < userCohorts.length; i++) {
     const group = userCohorts[i];
     // Create container element
     const groupContainer = document.createElement('div');
-    groupContainer.classList.add('content-item', 'content-grid-container');
+    groupContainer.classList.add('group-record', 'content-item', 'content-grid-container');
     const groupName = document.createElement('p');
     groupName.classList.add('title');
     const groupLink = document.createElement('a');
@@ -73,7 +81,7 @@ async function fillPage() {
     groupDesc.classList.add('group-desc');
     groupContainer.appendChild(groupDesc);
 
-    document.getElementById('groupsView').appendChild(groupContainer);
+    groupsView.appendChild(groupContainer);
     // Add event listener to expand group details
     groupContainer.addEventListener('click', groupItemClicked);
   }
@@ -114,10 +122,12 @@ async function fillPage() {
       // Add button event listeners
 
       acceptBtn.addEventListener('click', () => {
+        inviteContainer.remove();
         acceptInvite(currentInvite.inviteId);
       });
 
       declineBtn.addEventListener('click', () => {
+        inviteContainer.remove();
         declineInvite(currentInvite.inviteId);
       });
     }
@@ -199,6 +209,7 @@ async function acceptInvite(inviteId) {
   }
   // Reload invite list
   // Reload group list
+  fillPage();
 }
 async function declineInvite(inviteId) {
   console.log('Declining:', inviteId);
