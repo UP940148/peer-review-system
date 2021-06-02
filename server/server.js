@@ -106,6 +106,7 @@ app.get('/posts/:cohortId?', api.getPosts);
 app.get('/registration/:cohortId', api.getRegistration);
 app.get('/invites', googleAuth.guardMiddleware(), api.getInvites);
 app.get('/criteria/:criteriaId', api.getCriteria);
+app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponseStats);
 
 app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
 

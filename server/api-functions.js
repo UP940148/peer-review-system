@@ -659,6 +659,97 @@ exports.createResponse = async function (req, res) {
   res.sendStatus(201);
 };
 
+exports.getResponseStats = async function (req, res) {
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If post doesn't exist, return 404
+  const postRetrieval = await db.getPost(postId);
+  if (postRetrieval.failed || !postRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Can only view stats on your own post
+  if (postRetrieval.context.userId !== req.user.id) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Retrieve criteria info
+  const criteriaId = postRetrieval.context.criteriaId;
+  const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', criteriaId);
+  if (criteriaRetrieval.failed) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Get stats for each question
+  const questionList = criteriaRetrieval.context.questions.split(',');
+  const data = [];
+  for (let i = 0; i < questionList.length; i++) {
+    const questionId = questionList[i];
+    const questionStats = await getQuestionStats(questionId);
+    data.push(questionStats);
+  }
+
+  // Return data
+  res.status(200).json({
+    data: data,
+  });
+};
+
+async function getQuestionStats(questionId) {
+  // Retrieve question
+  const questionRetrieval = await db.getRecordByPrimaryKey('question', questionId);
+  const questionStats = {
+    question: questionRetrieval.context.questionContent,
+    type: questionRetrieval.context.type,
+  };
+
+  if (questionRetrieval.context.type === 'text') {
+    questionStats.responses = [];
+    // Retrieve all responses to question
+    const responses = await db.getAllResponses(questionId);
+    for (let i = 0; i < responses.context.length; i++) {
+      questionStats.responses.push(responses.context[i].answer);
+    }
+  } else {
+    // Retrieve totals for each answer
+    // Get all possible answers
+    const answers = questionRetrieval.context.answers;
+    const answerList = answerStringToList(answers);
+    questionStats.answers = answerList;
+    questionStats.totals = [];
+    for (let i = 0; i < answerList.length; i++) {
+      const currentAnswer = answerList[i];
+      let countResponse;
+      // If checkbox type, then regex is needed to match answer strings
+      if (questionRetrieval.context.type === 'checkbox') {
+        const formattedAnswer = currentAnswer + ' ';
+        // Create list for regex strings
+        const sqliteRegexList = [];
+        sqliteRegexList.push(`${formattedAnswer},%`); // Starts with
+        sqliteRegexList.push(`% ,${formattedAnswer},%`); // Contains
+        sqliteRegexList.push(`% ,${formattedAnswer}`); // Ends with
+        const data = [questionId, sqliteRegexList[0], sqliteRegexList[1], sqliteRegexList[2], formattedAnswer];
+        countResponse = await db.getCheckboxResponseCount(data);
+        console.log(countResponse);
+      } else {
+        // If radio type, then just match answer
+        countResponse = await db.getRadioResponseCount(questionId, currentAnswer);
+      }
+      // Get total from response
+      const totalCount = countResponse.context.total;
+      questionStats.totals.push(totalCount);
+    }
+  }
+  return questionStats;
+}
+
 exports.getFile = function (req, res) {
   res.sendFile(config.docStore + req.params.fileId);
 };

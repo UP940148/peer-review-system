@@ -205,6 +205,7 @@ async function displayFeedbackForm(criteriaId) {
     mainContainer.appendChild(container);
 
     const questionText = document.createElement('label');
+    questionText.classList.add('feedback-question');
     questionText.textContent = question.questionContent;
     container.appendChild(questionText);
     container.appendChild(document.createElement('br'));
@@ -285,35 +286,113 @@ async function submitFeedback(e) {
   location.reload();
 }
 
-async function displayAsAuthor(post) {
+async function displayAsAuthor() {
   console.log('Author');
-  const criteriaResponse = await fetch('/criteria/' + post.criteriaId, {
+
+  const response = await fetch('/response-stats/' + postId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
     },
     credentials: 'same-origin',
     method: 'GET',
   });
-  if (!criteriaResponse.ok) {
-    console.log(criteriaResponse);
+  if (!response.ok) {
+    console.log(response);
     return;
   }
-  const resData = await criteriaResponse.json();
-  const questions = resData.data;
+  const resData = await response.json();
+  displayFeedbackStats(resData.data);
+}
 
-  if (questions.length === 0) {
-    return;
-  }
-  console.log(questions);
-  const responseStats = [];
-  for (let i = 0; i < questions.length; i++) {
-    const questionId = questions[i].questionId;
-    const statsResponse = await fetch('/response-stats/' + questionId, {
-      headers: {
-        Authorization: 'Bearer ' + idToken,
-      },
-      credentials: 'same-origin',
-      method: 'GET',
+function displayFeedbackStats(stats) {
+  console.log(stats);
+  // Create feedback form
+  const feedbackForm = document.createElement('form');
+  feedbackForm.classList.add('feedback');
+  feedbackForm.id = 'feedbackForm';
+  const formHeader = document.createElement('fieldset');
+  feedbackForm.appendChild(formHeader);
+
+  const legend = document.createElement('legend');
+  legend.textContent = 'Responses:';
+  formHeader.appendChild(legend);
+  pageContent.appendChild(feedbackForm);
+
+  // Loop through questions
+  for (let i = 0; i < stats.length; i++) {
+    const question = stats[i];
+    const mainContainer = document.createElement('div');
+    mainContainer.classList.add('question-container');
+    formHeader.appendChild(mainContainer);
+
+    // Create hideable view
+    const heading = document.createElement('p');
+    heading.classList.add('selectable', 'criteria-label');
+    heading.textContent = 'Question ' + (i + 1);
+    mainContainer.appendChild(heading);
+
+    const container = document.createElement('div');
+    container.classList.toggle('hidden');
+    mainContainer.appendChild(container);
+
+    // Add question text
+    const questionText = document.createElement('label');
+    questionText.classList.add('feedback-question');
+    questionText.textContent = question.question;
+    container.appendChild(questionText);
+    container.appendChild(document.createElement('br'));
+
+    // Add event listener to toggle visibility
+    heading.addEventListener('click', () => {
+      container.classList.toggle('hidden');
+      heading.classList.toggle('expanded');
     });
+
+    if (question.type === 'text') {
+      // If no responses, then skip iteration
+      if (question.responses.length === 0) {
+        const noResponseMessage = document.createElement('p');
+        noResponseMessage.classList.add('indented-text');
+        noResponseMessage.textContent = 'No feedback available for this question';
+        container.appendChild(noResponseMessage);
+        continue;
+      }
+      const mainResponseContainer = document.createElement('div');
+      mainResponseContainer.classList.add('text-response-container');
+      container.appendChild(mainResponseContainer);
+      // Create divs to contain response content
+      for (let j = 0; j < question.responses.length; j++) {
+        const responseContainer = document.createElement('div');
+        responseContainer.classList.add('text-response');
+
+        const responseText = document.createElement('p');
+        responseText.classList.add('no-wrapping');
+        responseText.innerText = question.responses[j];
+
+        // Append elements
+        responseContainer.appendChild(responseText);
+        mainResponseContainer.appendChild(responseContainer);
+
+        // Add event listener to show/hide expanded view
+        responseContainer.addEventListener('click', () => {
+          responseText.classList.toggle('no-wrapping');
+        });
+      }
+    } else {
+      // Check if question has any responses
+      let checkSum = 0;
+      for (let j = 0; j < question.totals.length; j++) {
+        checkSum += question.totals[j];
+      }
+      // If no responses, then skip iteration
+      if (checkSum === 0) {
+        const noResponseMessage = document.createElement('p');
+        noResponseMessage.classList.add('indented-text');
+        noResponseMessage.textContent = 'No feedback available for this question';
+        container.appendChild(noResponseMessage);
+        continue;
+      }
+      // Create bar chart
+    }
   }
 }

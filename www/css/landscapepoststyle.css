@@ -150,3 +150,40 @@ body {
 .question-container > div {
   padding: .5rem;
 }
+
+.feedback-question {
+  font-weight: bold;
+}
+.feedback-question::after {
+  content: ':';
+}
+
+.indented-text {
+  text-indent: 1rem;
+}
+
+
+.text-response {
+  background-color: #eee;
+  margin: .1rem 6px;
+  padding: .25rem 1rem;
+  border: 1px solid #aaa;
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-areas: '.';
+}
+
+.text-response > p {
+  margin: 0px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+}
+
+.no-wrapping {
+  white-space: nowrap;
+}
+
+fieldset {
+  width:inherit;
+}

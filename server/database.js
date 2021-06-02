@@ -362,6 +362,60 @@ exports.createResponse = async function (data) {
   return response;
 };
 
+exports.getAllResponses = async function (questionId) {
+  const sql = 'SELECT * FROM response WHERE questionId = ?;';
+  const response = await db.all(sql, [questionId])
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getCheckboxResponseCount = async function (data) {
+  const sql = `
+    SELECT
+      COUNT(responseId) as total
+    FROM response
+    WHERE questionId = ?
+    AND
+    (
+      answer LIKE ? -- Starts with expression
+      OR answer LIKE ? -- Contains expression
+      OR answer LIKE ? -- Ends with expression
+      OR answer = ? -- Is equal to expression
+    )
+  ;`;
+  const response = await db.get(sql, data)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getRadioResponseCount = async function (questionId, answer) {
+  const sql = `
+    SELECT
+      COUNT(responseId) as total
+    FROM response
+    WHERE questionId = ?
+    AND answer = ?
+  ;`;
+  const response = await db.get(sql, [questionId, answer])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
 /*
 exports.checkInvite = async function (cohortId, inviteId) {
   const sql = 'SELECT inviteId FROM invite WHERE cohortId = ? AND inviteId = ?;';
