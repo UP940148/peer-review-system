@@ -603,8 +603,6 @@ exports.createResponse = async function (req, res) {
     // Get current question
     const questionId = questionList[parseInt(questionNumList[i])];
     const currentQuestion = await db.getRecordByPrimaryKey('question', questionId);
-    console.log(`Question ${questionId}`);
-    console.log(currentQuestion.context);
     if (currentQuestion.failed || !currentQuestion.context) {
       res.sendStatus(404);
       return;
@@ -738,7 +736,6 @@ async function getQuestionStats(questionId) {
         sqliteRegexList.push(`% ,${formattedAnswer}`); // Ends with
         const data = [questionId, sqliteRegexList[0], sqliteRegexList[1], sqliteRegexList[2], formattedAnswer];
         countResponse = await db.getCheckboxResponseCount(data);
-        console.log(countResponse);
       } else {
         // If radio type, then just match answer
         countResponse = await db.getRadioResponseCount(questionId, currentAnswer);

@@ -261,9 +261,6 @@ async function submitFeedback(e) {
 
   const feedbackData = new FormData(document.getElementById('feedbackForm'));
 
-  for (const entry of feedbackData.entries()) {
-    console.log(entry);
-  }
   // Post formdata
   const response = await fetch('/response/' + postId, {
     headers: {
@@ -281,7 +278,6 @@ async function submitFeedback(e) {
 }
 
 async function displayAsAuthor() {
-  console.log('Author');
 
   const response = await fetch('/response-stats/' + postId, {
     headers: {
@@ -299,7 +295,6 @@ async function displayAsAuthor() {
 }
 
 function displayFeedbackStats(stats) {
-  console.log(stats);
   // Create feedback form
   const feedbackForm = document.createElement('form');
   feedbackForm.classList.add('feedback');
