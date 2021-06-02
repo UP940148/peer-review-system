@@ -753,7 +753,10 @@ exports.getFile = function (req, res) {
 };
 
 exports.downloadFile = function (req, res) {
-  res.download(config.docStore + req.params.fileId);
+  // Takes the document id specified in req.params and makes the client download it
+  const id = req.params.fileId;
+  const file = `${config.docStore}${id}`;
+  res.download(file);
 };
 
 exports.downloadAll = async function (req, res) {
