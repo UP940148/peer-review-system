@@ -748,8 +748,16 @@ async function getQuestionStats(questionId) {
   return questionStats;
 }
 
+exports.getImage = function (req, res) {
+  const id = req.params.imageId;
+  const image = `${config.imageStore}${id}`;
+  res.sendFile(image);
+};
+
 exports.getFile = function (req, res) {
-  res.sendFile(config.docStore + req.params.fileId);
+  const id = req.params.fileId;
+  const file = `${config.docStore}${id}`;
+  res.sendFile(file);
 };
 
 exports.downloadFile = function (req, res) {

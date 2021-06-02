@@ -111,6 +111,7 @@ app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponse
 app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);
+app.get('/img/:imageId', api.getImage);
 app.get('/file/:fileId', api.getFile);
 app.get('/download/:fileId', api.downloadFile);
 app.get('/downloadAll/:postId', api.downloadAll);

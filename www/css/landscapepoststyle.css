@@ -49,7 +49,7 @@ body {
 
 .download-button {
   width: 100%;
-  height: 2rem;
+  padding: 2% 0;
 }
 
 .individual-download {
@@ -188,4 +188,8 @@ body {
 
 .no-wrapping {
   white-space: nowrap;
+}
+
+.file-display.selectable:hover {
+  background-color: #303030 !important;
 }

@@ -35,7 +35,7 @@ function displayPost(post) {
   displayPostContent(post);
 }
 
-function displayFiles(fileList) {
+async function displayFiles(fileList) {
   for (let i = 0; i < fileList.length; i++) {
     if (fileList[i].length !== 0) {
       // If the post has file/s
@@ -47,11 +47,18 @@ function displayFiles(fileList) {
       document.getElementById('fileContainer').appendChild(container);
 
       const display = document.createElement('object');
-      display.data = '/file/' + fileList[i];
-      display.classList.add('file-display');
+      display.data = await getFilePreview(fileList[i]);
+      display.classList.add('file-display', 'selectable');
+
+      display.addEventListener('click', () => {
+        window.open('/file/' + fileList[i]);
+      });
+      const fileExtList = fileList[i].split('.');
+      const fileExt = fileExtList[fileExtList.length - 1];
+
       const downloadBtn = document.createElement('button');
       downloadBtn.classList.add('download-button', 'individual-download', 'selectable');
-      downloadBtn.textContent = 'Download';
+      downloadBtn.innerText = 'Download\n( .' + fileExt + ' file )';
       downloadBtn.addEventListener('click', () => {
         downloadFile(fileList[i]);
       });
@@ -62,6 +69,27 @@ function displayFiles(fileList) {
     }
   }
   document.getElementById('fileWindow').classList.remove('hidden');
+}
+
+async function getFilePreview(fileId) {
+  const response = await fetch('/file/' + fileId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    method: 'HEAD',
+    credentials: 'same-origin',
+  });
+  if (!response.ok) {
+    console.log(response);
+    return null;
+  }
+  const fileTypeList = response.headers.get('content-type').split('/');
+  // If image, then preview as itself
+  if (fileTypeList[0] === 'image') {
+    return '/file/' + fileId;
+  }
+  // Else return preview not available image
+  return '/img/preview-unavailable.png';
 }
 
 function downloadFile(file) {
