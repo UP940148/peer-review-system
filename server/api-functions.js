@@ -848,8 +848,10 @@ exports.downloadAll = async function (req, res) {
   res.zip(fileObjs, `LPRS-${postId}_${unixTime}.zip`);
 };
 
+// Get redundant files from file
 exports.clearUnused = function () {
-  // Get redundant files from file
+  // I considered using fs.readdir to get all the saved files, then cycle through each one and check if it appears in a database post
+  // However I changed my mind and took this following approach because it felt like it would scale better to a bigger system
   fs.readFile(redundantPath, 'utf8', (err, data) => {
     if (!err) {
       const failedUnlinks = [];
