@@ -109,9 +109,13 @@ app.get('/criteria/:criteriaId', api.getCriteria);
 app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponseStats);
 
 app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
+app.delete('/post/:postId', googleAuth.guardMiddleware(), api.deletePost);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);
 app.get('/img/:imageId', api.getImage);
 app.get('/file/:fileId', api.getFile);
 app.get('/download/:fileId', api.downloadFile);
 app.get('/downloadAll/:postId', api.downloadAll);
+
+// Every 10 minutes, delete unused documents
+setInterval(api.clearUnused, 600000);

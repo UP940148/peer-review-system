@@ -6,6 +6,8 @@ const fs = require('fs');
 const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
 
+const redundantPath = './server/redundants.txt';
+
 // ADMIN FUNCTIONS
 
 exports.getAllInTable = async function (req, res) {
@@ -748,6 +750,59 @@ async function getQuestionStats(questionId) {
   return questionStats;
 }
 
+exports.deletePost = async function (req, res) {
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If post doesn't exist, return 404
+  const postRetrieval = await db.getPost(postId);
+  if (postRetrieval.failed || !postRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Can only delete your own post
+  if (postRetrieval.context.userId !== req.user.id) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Delete post
+  db.deletePost(postId);
+
+  // fs.unlink takes a long time, and until I can figure out why, I'm not going to unlink the files
+  // (DELETE /post/:postId took 16 seconds with fs.unlink. Without it, it took 70milliseconds)
+  // Delete files
+  // const fileList = postRetrieval.context.files.split(',');
+  // for (let i = 0; i < fileList.length; i++) {
+  //   fs.unlink(config.docStore + fileList[i], (err) => {
+  //     console.log(err);
+  //   });
+  // }
+
+  // Mark files for deletion
+  const fileList = postRetrieval.context.files.split(',');
+  fs.appendFile(redundantPath, fileList.toString(), (err) => {
+    if (err) throw err;
+  });
+
+
+  // Delete criteria
+  const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', postRetrieval.context.criteriaId);
+  db.deleteCriteria(postRetrieval.context.criteriaId);
+
+  // Delete questions and responses
+  const questionList = criteriaRetrieval.context.questions.split(',');
+  for (let i = 0; i < questionList.length; i++) {
+    db.deleteQuestion(questionList[i]);
+  }
+
+  res.sendStatus(200);
+};
+
 exports.getImage = function (req, res) {
   const id = req.params.imageId;
   const image = `${config.imageStore}${id}`;
@@ -791,6 +846,41 @@ exports.downloadAll = async function (req, res) {
   const datum = new Date();
   const unixTime = datum.getTime();
   res.zip(fileObjs, `LPRS-${postId}_${unixTime}.zip`);
+};
+
+exports.clearUnused = function () {
+  // Get redundant files from file
+  fs.readFile(redundantPath, 'utf8', (err, data) => {
+    if (!err) {
+      const failedUnlinks = [];
+      // Clear file
+      fs.writeFile(redundantPath, '', (err) => {
+        if (err) throw err;
+      });
+      // Get individual file names
+      const fileList = data.split(',');
+      // Unlink all redundant files
+      for (let i = 0; i < fileList.length; i++) {
+        const currentFile = fileList[i];
+        // Attempt to unlink
+        try {
+          fs.unlinkSync(config.docStore + currentFile);
+        } catch (e) {
+          // If failed, add file back to list
+          failedUnlinks.push(currentFile);
+          continue;
+        }
+      }
+      // Convert file list to string
+      const failedUnlinksStr = failedUnlinks.toString();
+      // Put filenames back into redundants file
+      fs.appendFile(redundantPath, failedUnlinksStr, (err) => {
+        if (err) throw err;
+      });
+    } else {
+      console.log('Err:', err);
+    }
+  });
 };
 
 async function handleFileUpload(files) {

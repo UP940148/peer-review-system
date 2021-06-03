@@ -4,6 +4,7 @@ exports.files = path.join(__dirname, '/server/saved/');
 exports.uploads = path.join(__dirname, '/server/uploads/');
 
 exports.docStore = module.exports.files + 'docs/';
+exports.redundantStore = module.exports.files + 'redundant/';
 exports.imageStore = module.exports.files + 'img/';
 exports.replyStore = module.exports.files + 'replies/';
 
