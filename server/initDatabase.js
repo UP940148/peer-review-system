@@ -36,7 +36,6 @@ database.open(DBSOURCE)
         description text,
         isPrivate integer NOT NULL
       );
-      INSERT INTO cohort (name, description, isPrivate) VALUES ("Public", "Public Group", 0);
     `)
       .then(() => {
         // Table created
@@ -47,15 +46,26 @@ database.open(DBSOURCE)
         success = false;
       });
 
+    // Insert public group
+    await db.run('INSERT INTO cohort (name, description, isPrivate) VALUES ("Public", "Public Group", 0);')
+      .then(() => {
+        // Public group created
+        console.log('Public group created!');
+      })
+      .catch(err => {
+        console.log('Error creating public group:', err.message);
+        success = false;
+      });
+
+
     // Create registration table
     await db.run(`
       CREATE TABLE IF NOT EXISTS registration (
         registrationId integer PRIMARY KEY AUTOINCREMENT,
         cohortId references cohort(cohortId) NOT NULL,
-        userId text NOT NULL, -- Removed user table FK here to allow a main public group to be owned by nobody
+        userId references user(userId) NOT NULL,
         rank text NOT NULL
       );
-      INSERT INTO registration (userId, cohortId, rank) VALUES ("-1", 1, "owner");
     `)
       .then(() => {
         // Table created

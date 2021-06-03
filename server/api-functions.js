@@ -33,6 +33,38 @@ exports.getFromTableWherePrimaryKey = async function (req, res) {
   }
 };
 
+exports.checkUniqueUsername = async function (req, res) {
+  // Get current user profile to compare username
+  const user = await db.getRecordByPrimaryKey('user', req.user.id);
+  if (user.failed) {
+    res.sendStatus(404);
+    return;
+  }
+
+  if (user.context.username === req.params.username) {
+    res.sendStatus(200);
+    return;
+  }
+  const isUnique = checkUsername(req.params.username);
+  if (isUnique) {
+    res.sendStatus(200).json({
+      unique: true,
+    });
+  } else {
+    res.sendStatus(200).json({
+      unique: false,
+    });
+  }
+};
+
+async function checkUsername(username) {
+  const lookup = await db.checkUsername(username);
+  if (lookup.context.total === 0) {
+    return true;
+  }
+  return false;
+}
+
 
 exports.createNewUser = async function (req, res) {
   const name = req.user.name.givenName;
@@ -46,7 +78,12 @@ exports.createNewUser = async function (req, res) {
     res.sendStatus(500);
     return;
   }
-
+  // Add user to main public group
+  const regResponse = await db.createRegistration([req.user.id, 1, 'member']);
+  if (regResponse.failed) {
+    res.sendStatus(500);
+    return;
+  }
   res.sendStatus(201);
 };
 

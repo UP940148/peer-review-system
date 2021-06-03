@@ -46,6 +46,7 @@ async function getGroupInfo() {
   document.title = groupInfo.name;
   htmlTitle.textContent = groupInfo.name;
   groupDesc.textContent = groupInfo.description;
+  document.querySelector('#createPostForm > p').textContent = 'Creating post in group: ' + groupInfo.name;
 
   if (!userProfile) return;
 
