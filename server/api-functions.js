@@ -40,13 +40,14 @@ exports.createNewUser = async function (req, res) {
   const username = 'User' + req.user.id;
   const picture = req.user.photos[0].value;
 
-  const data = [req.user.id, username, name, email, picture, ''];
-  const response = await db.createUser(data);
+  const userData = [req.user.id, username, name, email, picture, ''];
+  const response = await db.createUser(userData);
   if (response.failed) {
     res.sendStatus(500);
-  } else {
-    res.sendStatus(201);
+    return;
   }
+
+  res.sendStatus(201);
 };
 
 exports.createUpdateCohort = async function (req, res) {

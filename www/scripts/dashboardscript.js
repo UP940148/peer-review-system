@@ -10,6 +10,7 @@ function addEventListeners() {
   document.getElementById('createNewGroup').addEventListener('click', newGroupButtonClicked);
   document.getElementById('createNewGroupContent').addEventListener('submit', createNewGroup);
   document.getElementById('groupInvitesButton').addEventListener('click', invitesButtonClicked);
+  document.getElementById('joinedGroupSearch').addEventListener('keyup', searchJoinedGroups);
 }
 
 function tabClicked(e) {
@@ -224,7 +225,36 @@ async function declineInvite(inviteId) {
     window.alert('Something went wrong');
     return;
   }
-  // Reload invite list
+  // Hide invite list if empty
+  if (document.getElementById('groupInvites').childNodes.length === 0) {
+    document.getElementById('groupInvites').classList.add('hidden');
+  }
+}
+
+function searchJoinedGroups(e) {
+  const searchString = e.target.value.toUpperCase();
+  // Get all group-record elements
+  const groupRecords = document.getElementsByClassName('group-record');
+  for (let i = 0; i < groupRecords.length; i++) {
+    const record = groupRecords[i];
+    // Compare search string to
+    //  el > p1 > a.textContent
+    //  el > p2.textContent
+    const recordName = record.childNodes[0].childNodes[0].textContent.toUpperCase();
+    const recordDesc = record.childNodes[1].textContent.toUpperCase();
+    // If these are both equal to -1 then string not found
+    const nameIndex = recordName.indexOf(searchString);
+    const descIndex = recordDesc.indexOf(searchString);
+
+    // If not found in either, hide record
+    // Otherwise, show record
+    const totalIndex = nameIndex + descIndex;
+    if (totalIndex > -2) {
+      record.classList.remove('hidden');
+    } else {
+      record.classList.add('hidden');
+    }
+  }
 }
 
 addEventListeners();

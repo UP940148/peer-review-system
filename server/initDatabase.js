@@ -36,6 +36,7 @@ database.open(DBSOURCE)
         description text,
         isPrivate integer NOT NULL
       );
+      INSERT INTO cohort (name, description, isPrivate) VALUES ("Public", "Public Group", 0);
     `)
       .then(() => {
         // Table created
@@ -51,9 +52,10 @@ database.open(DBSOURCE)
       CREATE TABLE IF NOT EXISTS registration (
         registrationId integer PRIMARY KEY AUTOINCREMENT,
         cohortId references cohort(cohortId) NOT NULL,
-        userId references user(userId) NOT NULL,
+        userId text NOT NULL, -- Removed user table FK here to allow a main public group to be owned by nobody
         rank text NOT NULL
       );
+      INSERT INTO registration (userId, cohortId, rank) VALUES ("-1", 1, "owner");
     `)
       .then(() => {
         // Table created

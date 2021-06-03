@@ -29,6 +29,22 @@ exports.getAllInTable = async function (tableName) {
 
 // GENERAL QUERIES
 
+// Count how many records exist in table
+exports.recordCount = async function (tableName) {
+  if (!tableNames.includes(tableName)) {
+    return { failed: true, code: 404, context: `Bad data: tableName = ${tableName}` };
+  }
+  const sql = `SELECT COUNT(*) as total FROM ${tableName};`;
+  const response = await db.get(sql)
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, code: 500, context: err };
+    });
+  return response;
+};
+
 // Retrieve single record with a given primary key value from a given table
 exports.getRecordByPrimaryKey = async function (tableName, pKeyValue) {
   if (!tableNames.includes(tableName)) {

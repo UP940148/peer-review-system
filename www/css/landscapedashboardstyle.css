@@ -83,6 +83,14 @@ p.admin-tag {
   border-color: green;
 }
 
+.search-bar {
+  margin: .5rem;
+  width: 50%;
+  box-sizing: border-box;
+  height: 2rem;
+  padding: .5rem;
+}
+
 #tabView {
   overflow-y: auto;
   height: 100%;
