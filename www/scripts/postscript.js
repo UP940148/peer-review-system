@@ -1,4 +1,4 @@
-/* global idToken */
+/* global idToken, userProfile, getDateStringFromUnix, profileButtonClicked, Chart, */
 
 // Constant document values
 const topSection = document.getElementById('topSection');
@@ -8,6 +8,7 @@ const mainPost = document.getElementById('mainPost');
 
 const queryString = window.location.search;
 const postId = queryString.substring(1);
+let post;
 
 async function fillPage() {
   // Attempt to retrieve post from database
@@ -29,10 +30,11 @@ async function fillPage() {
   displayPost(resData.data);
 }
 
-function displayPost(post) {
+function displayPost(data) {
+  post = data;
   const fileList = post.files.split(',');
   displayFiles(fileList);
-  displayPostContent(post);
+  displayPostContent();
 }
 
 async function displayFiles(fileList) {
@@ -141,7 +143,7 @@ function downloadAllFiles() {
   window.open('/downloadAll/' + postId);
 }
 
-function displayPostContent(post) {
+function displayPostContent() {
   // Author details
   const profileContainer = document.createElement('div');
   profileContainer.classList.add('post-profile', 'user');
@@ -170,7 +172,7 @@ function displayPostContent(post) {
   mainPost.appendChild(description);
 
   if (post.userId === userProfile.userId) {
-    displayAsAuthor(post);
+    displayAsAuthor();
   } else {
     displayFeedbackForm(post.criteriaId);
   }
@@ -317,7 +319,6 @@ async function submitFeedback(e) {
 }
 
 async function displayAsAuthor() {
-
   const response = await fetch('/response-stats/' + postId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
@@ -330,6 +331,7 @@ async function displayAsAuthor() {
     return;
   }
   const resData = await response.json();
+  displayAuthorControls();
   displayFeedbackStats(resData.data);
 }
 
@@ -462,4 +464,35 @@ function displayFeedbackStats(stats) {
       chartContainer.appendChild(barCanvas);
     }
   }
+}
+
+function displayAuthorControls() {
+  // Create container
+  const adminPanel = document.createElement('div');
+  adminPanel.classList.add('owner');
+  pageContent.appendChild(adminPanel);
+
+  // Create delete post button
+  const deletePostBtn = document.createElement('button');
+  deletePostBtn.id = 'deletePost';
+  deletePostBtn.classList.add('delete-btn');
+  deletePostBtn.textContent = 'Delete Post';
+  adminPanel.appendChild(deletePostBtn);
+  deletePostBtn.addEventListener('click', () => {
+    deletePost();
+  });
+}
+
+function deletePost() {
+  if (!window.confirm('Do you really want to delete this post?')) {
+    return;
+  }
+  fetch('/post/' + postId, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'DELETE',
+  });
+  location.href = '/group?' + post.cohortId;
 }

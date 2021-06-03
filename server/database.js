@@ -416,6 +416,45 @@ exports.getRadioResponseCount = async function (questionId, answer) {
   return response;
 };
 
+exports.deletePost = async function (postId) {
+  const sql = 'DELETE FROM post WHERE postId = ?;';
+  const response = await db.get(sql, [postId])
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.deleteCriteria = async function (criteriaId) {
+  const sql = 'DELETE FROM criteria WHERE criteriaId = ?;';
+  const response = await db.get(sql, [criteriaId])
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.deleteQuestion = async function (questionId) {
+  const sql = `
+    DELETE FROM response WHERE questionId = ?;
+    DELETE FROM question WHERE questionId = ?;
+  `;
+  const response = await db.get(sql, [questionId, questionId])
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
 /*
 exports.checkInvite = async function (cohortId, inviteId) {
   const sql = 'SELECT inviteId FROM invite WHERE cohortId = ? AND inviteId = ?;';

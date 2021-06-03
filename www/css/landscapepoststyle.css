@@ -4,11 +4,12 @@ body {
 #pageContent {
   display: grid;
   grid-template-columns: 10% 79% 10%;
-  grid-template-rows: 100% 100%;
+  grid-template-rows: 10% 90% 100%;
   column-gap: .5%;
   grid-template-areas:
+    'files main .'
     'files main owner'
-    'files feedback owner';
+    'files feedback .';
 }
 
 #fileWindow {
@@ -100,6 +101,23 @@ body {
   grid-area: feedback;
 }
 
+#pageContent > .owner {
+  grid-area: owner;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.delete-btn {
+  background-color: #e34242;
+  border: 1px solid #e34242;
+  height: 2rem;
+  border-radius: .25rem;
+}
+.delete-btn:hover {
+  cursor: pointer;
+  background-color: #e3424299;
+}
 
 .post-profile {
   display: flex;
