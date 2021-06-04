@@ -1,0 +1,105 @@
+#pageTitle {
+  font-size: 300%;
+}
+
+@media (min-aspect-ratio: 5/4) {
+  #pageContent {
+    display: grid;
+    grid-template-columns: 20% 60% 20%;
+    grid-template-rows: 50% 50%;
+    grid-template-areas:
+    '. form .'
+    '. signOut .';
+  }
+
+}
+#profileForm {
+  grid-area: form;
+  place-self: start center;
+  height: 25rem;
+  width: 100%;
+  padding: 2rem;
+
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 15% 12% 12% 12% 10% 19% 20%;;
+  row-gap: 4%;
+
+  background-color: #b9b9b9;
+  font-size: 150%;
+  border-radius: .5rem;
+  box-sizing: border-box;
+}
+
+#profileForm > h3 {
+  margin: 0;
+}
+
+.sign-out-container {
+  font-size: 175%;
+  text-align: center;
+  grid-area: signOut;
+}
+
+a > h4 {
+  margin: 0;
+}
+
+#profileForm > div {
+  display: grid;
+  grid-template-columns: 20% 58% 20%;
+  column-gap: 1%;
+  box-sizing: border-box;
+  height: 2rem;
+}
+
+#profileForm > div > p {
+  text-align: right;
+  margin: 0;
+  height: 100%;
+}
+
+#profileForm > div > input {
+  height: 2rem;
+  font-size: 90%;
+}
+
+#profileForm > input {
+  height: 4rem;
+  border-radius: .25rem;
+  border: 1px solid #999;
+  background-color: #e9e9e9;
+  box-sizing: border-box;
+}
+
+#profileForm > input:hover {
+  cursor: pointer;
+  background-color: #d9d9d9;
+}
+
+input:disabled {
+  background-color: #d9d9d9;
+}
+
+input:invalid {
+  border: 2px solid red;
+  background-color: #ffeeee;
+}
+
+form:invalid > input[type='submit'] {
+  pointer-events: none;
+  background-color: #b9b9b9 !important;
+  border: 0 !important;
+  color: #b9b9b9;
+}
+
+.alert-text {
+  text-align: left !important;
+  font-size: 90%;
+}
+
+@media (max-aspect-ratio: 4/3) {
+  #navSignOutLink {
+    display: none;
+  }
+}

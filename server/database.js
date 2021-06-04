@@ -74,6 +74,18 @@ exports.createUser = async function (data) {
   return response;
 };
 
+exports.checkUsername = async function (username) {
+  const sql = 'SELECT COUNT(*) as total FROM user WHERE username = ?';
+  const response = await db.get(sql, [username])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
 exports.createCohort = async function (data) {
   const sql = 'INSERT INTO cohort (name, description, isPrivate) VALUES (?, ?, ?);';
   const response = await db.run(sql, data)
@@ -124,6 +136,24 @@ exports.getUserCohorts = async function (userId) {
       ON cohort.cohortId = registration.cohortId
     WHERE registration.userId = ?
     ;`;
+  const response = await db.all(sql, [userId])
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getUserPosts = async function (userId) {
+  const sql = `
+    SELECT *
+    FROM post
+    INNER JOIN registration
+      ON post.registrationId = registration.registrationId
+    WHERE registration.userId = ?
+  ;`;
   const response = await db.all(sql, [userId])
     .then(rows => {
       return { failed: false, context: rows };
@@ -464,6 +494,95 @@ exports.deleteQuestion = async function (questionId) {
   const response = await db.get(sql, [questionId, questionId])
     .then(() => {
       return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.updateUser = async function (data) {
+  const sql = `
+    UPDATE
+      user
+    SET
+      username = ?,
+      name = ?
+    WHERE userId = ?
+  ;`;
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.searchInviteableUsers = async function (query, cohortId) {
+  const sql = `
+    SELECT DISTINCT
+      user.userId,
+      user.username,
+      user.picture,
+      (
+        SELECT
+          COUNT(*)
+        FROM registration
+        WHERE registration.userId = user.userId
+        AND registration.cohortId = ?
+      ) AS registrationCount,
+      (
+        SELECT
+          COUNT(*)
+        FROM invite
+        WHERE invite.userId = user.userId
+        AND invite.cohortId = ?
+      ) AS inviteCount
+    FROM user
+    WHERE
+    (
+      username LIKE ?
+      OR email LIKE ?
+    )
+    AND registrationCount = 0 -- Don't return if user already registered
+    AND inviteCount = 0 -- Don't return if user has pending invite
+    ORDER BY username
+    LIMIT 10
+  ;`;
+  const response = await db.all(sql, [cohortId, cohortId, query, query])
+    .then(rows => {
+      return { failed: false, context: rows };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.searchCohorts = async function (query, userId) {
+  const sql = `
+    SELECT DISTINCT
+      cohort.cohortId,
+      cohort.name,
+      cohort.description,
+      (
+        SELECT
+          COUNT(*)
+        FROM registration
+        WHERE registration.cohortId = cohort.cohortId
+        AND registration.userId = ?
+      ) AS registrationCount
+    FROM cohort
+    WHERE cohort.name LIKE ?
+    AND cohort.isPrivate = 0
+    AND registrationCount = 0 -- Don't return if already registered
+    ORDER BY cohort.name
+  ;`;
+  const response = await db.all(sql, [userId, query])
+    .then(rows => {
+      return { failed: false, context: rows };
     })
     .catch(err => {
       return { failed: true, context: err };

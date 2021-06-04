@@ -171,7 +171,7 @@ function displayPostContent() {
   description.classList.add('desc');
   mainPost.appendChild(description);
 
-  if (post.userId === userProfile.userId) {
+  if (userProfile && post.userId === userProfile.userId) {
     displayAsAuthor();
   } else {
     displayFeedbackForm(post.criteriaId);
@@ -179,10 +179,6 @@ function displayPostContent() {
 }
 
 async function displayFeedbackForm(criteriaId) {
-  const guide = document.createElement('h2');
-  guide.textContent = '🢃 Give Feedback 🢃';
-  guide.classList.add('guide');
-  mainPost.appendChild(guide);
   const response = await fetch('/criteria/' + criteriaId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
@@ -200,6 +196,10 @@ async function displayFeedbackForm(criteriaId) {
   if (questions.length === 0) {
     return;
   }
+  const guide = document.createElement('h2');
+  guide.textContent = '🢃 Give Feedback 🢃';
+  guide.classList.add('guide');
+  mainPost.appendChild(guide);
 
   // Create feedback form
   const feedbackForm = document.createElement('form');

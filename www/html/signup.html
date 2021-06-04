@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Welcome</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content='708615793330-085t8nucql4ft884ld0e35j8i29fl8ek.apps.googleusercontent.com'>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='/css/globalstyle.css' rel='stylesheet' type='text/css'>
+    <link href='/css/landscapewelcomestyle.css' rel='stylesheet' type='text/css'>
+  </head>
+
+  <body>
+    <div id='googleSignInButton' class="g-signin2" data-onsuccess="onSignIn" hidden=true></div>
+    <div id='topSection'>
+      <div id='logInOutContainer'>
+        <div id='profileButton' class='selectable'>
+          <img id='profilePic' class='profile-picture' src='/profile-pic/'></img>
+          <div id='usernameContainer'><p>Login/Sign Up!</p></div>
+        </div>
+      </div>
+      <h1 id='pageTitle'>Welcome</h1>
+    </div>
+  <div id='pageContent'>
+    <div id='loginText'>
+      <h2>Please <a id='loginLink' class='link'>Log in/Sign up</a> to load your dashboard</h2>
+      <p>(This system is not yet fully optimised for use on mobile devices)</p>
+    </div>
+    <div id='warningText'>
+      <h1><u>READ ME:</u></h1>
+      <h3>If you are here to help me test & populate the system, please be mindful of the fact that this is <u>coursework</u> and will be handed in to my lecturers.</h3>
+      <h3 class='alert-text'>Any explicit names/posts will result in you being permanently blacklisted from this system and any future systems!</h3>
+      <h3>If you would like me to remove your email, Google profile picture, and/or name from the system before I hand it in, please create a post in the group 'Public' and tell me which you would like removed</h3>
+    </div>
+  </div>
+</body>
+</html>
+<script src='/scripts/globalscript.js'></script>
+<script src='/scripts/welcomescript.js'></script>

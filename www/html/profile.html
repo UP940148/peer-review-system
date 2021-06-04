@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Welcome</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content='708615793330-085t8nucql4ft884ld0e35j8i29fl8ek.apps.googleusercontent.com'>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='/css/globalstyle.css' rel='stylesheet' type='text/css'>
+    <link href='/css/landscapeprofilestyle.css' rel='stylesheet' type='text/css'>
+  </head>
+
+  <body>
+    <div id='googleSignInButton' class="g-signin2" data-onsuccess="onSignIn" hidden=true></div>
+    <div id='topSection'>
+      <div id='homeButton' class='selectable'>Dashboard</div>
+      <div id='logInOutContainer'>
+        <a id='navSignOutLink' class='link'><h4>Click to Sign out</h4></a>
+        <div id='profileButton' class='selectable'>
+          <img id='profilePic' class='profile-picture' src='/profile-pic/'></img>
+          <div id='usernameContainer'><p>Login/Sign Up!</p></div>
+        </div>
+      </div>
+      <em><h1 id='pageTitle'>User Profile</h1></em>
+    </div>
+  <div id='pageContent'>
+    <form id='profileForm' class='hidden'>
+      <h3>Update your details:</h3>
+      <div>
+        <p>Username:</p>
+        <input type='text' id='usernameField' name='newUsername' maxlength='20' required>
+        <p id='invalidUsernameAlert' class='alert-text hidden'>Username taken!</p>
+      </div>
+      <div>
+        <p>Name:</p>
+        <input type='text' id='nameField' name='newName' required>
+      </div>
+      <div>
+        <p>Email:</p>
+        <input type='email' id='emailField' disabled>
+      </div>
+      <br>
+      <input type='submit' value='Update!'>
+    </form>
+    <div class='sign-out-container'><a id='signOutLink' class='link'><h4>Click to Sign out</h4></a></div>
+  </div>
+</body>
+</html>
+<script src='/scripts/globalscript.js'></script>
+<script src='/scripts/profilescript.js'></script>

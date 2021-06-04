@@ -1,5 +1,11 @@
 /* global gapi, fillPage */
 
+try {
+  document.getElementById('homeButton').addEventListener('click', () => {
+    location.href = '/dashboard';
+  });
+} catch {}
+
 let userProfile, idToken;
 
 function initialise() {
@@ -9,7 +15,6 @@ function initialise() {
     fillPage();
   } catch {}
 }
-
 
 // Google Auth
 async function onSignIn(googleUser) {
@@ -54,7 +59,7 @@ async function onSignIn(googleUser) {
 async function signOut() {
   await gapi.auth2.getAuthInstance().signOut();
   localStorage.removeItem('LPRS_loggedIn');
-  location.reload();
+  location.href = '/';
 }
 
 function profileButtonClicked() {
@@ -64,7 +69,7 @@ function profileButtonClicked() {
     document.getElementById('googleSignInButton').firstChild.click();
   } else {
     // Else load user profile page
-    signOut();
+    location.href = '/profile';
   }
 }
 

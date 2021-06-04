@@ -1,6 +1,11 @@
+body {
+  margin: 0;
+}
 #tabSelector {
+  padding: 0 .5rem;
   border-top: 6px solid #cecece;
   background-color: #cecece;
+  box-sizing: border-box;
 }
 
 #groupInvitesButton {
@@ -13,6 +18,9 @@
 
 .tab-marker > h2 {
   margin: .25em;
+}
+.tab-marker {
+  border-radius: .5rem .5rem 0 0;
 }
 
 #tabSelector > div {
@@ -37,21 +45,13 @@
   cursor: default;
 }
 
-a {
-  text-decoration: none;
-  color: blue;
-}
-
-a:hover {
-  text-decoration: underline;
-}
 @media (min-aspect-ratio: 1/1) {
-  #groupsView > div.content-grid-container {
+  .content-grid-container {
     display: grid;
     grid-template-columns: 24.5% 74.5%;
     column-gap: 1%;
   }
-  #groupInvites > div.invite-grid-container {
+  .invite-grid-container {
     display: grid;
     grid-template-columns: 19.5% 59% 9% 9.5%;
     column-gap: 1%;
@@ -83,15 +83,87 @@ p.admin-tag {
   border-color: green;
 }
 
-.search-bar {
-  margin: .5rem;
-  width: 50%;
-  box-sizing: border-box;
-  height: 2rem;
-  padding: .5rem;
-}
-
 #tabView {
   overflow-y: auto;
   height: 100%;
+}
+
+.post-title {
+  grid-area: title;
+  text-align: center;
+  margin: .25rem;
+  padding: 0;
+}
+.post-desc {
+  grid-area: desc;
+  padding: 0;
+}
+.post-time {
+  grid-area: time;
+  text-align: right;
+}
+.post-link {
+  grid-area: link;
+}
+
+.post-container {
+  background-color: #ffffff;
+  border-radius: .5rem;
+  padding: 1rem;
+}
+.post-container > .post-desc {
+  line-height: 1.25rem;
+  max-height: 5rem;
+  margin-bottom: 1rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.post-profile-pic {
+  width: 10%;
+  border-radius: 50%;
+  margin-right: 1%;
+  object-fit: contain;
+}
+
+.post-profile {
+  grid-area: profile;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+.post-profile > p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@media (min-aspect-ratio: 1/1) {
+  .post-container.grid-container {
+    display: grid;
+    grid-template-columns: 19.5% 29% 29% 19.5%;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "profile title title time"
+      "desc desc desc desc"
+      ". link link .";
+    column-gap: 1%;
+    margin: .5rem 0;
+  }
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .post-container.grid-container {
+    display: grid;
+    grid-template-columns: 49.5% 24% 24.5%;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "profile . time"
+      "title title title"
+      "desc desc desc"
+      "link link link";
+    column-gap: 1%;
+    font-size: 90%;
+    margin: .5rem 0;
+  }
 }

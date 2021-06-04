@@ -40,21 +40,17 @@ exports.checkUniqueUsername = async function (req, res) {
     res.sendStatus(404);
     return;
   }
-
+  // If username is owned by current user, then return 200
   if (user.context.username === req.params.username) {
-    res.sendStatus(200);
-    return;
-  }
-  const isUnique = checkUsername(req.params.username);
-  if (isUnique) {
-    res.sendStatus(200).json({
+    res.status(200).json({
       unique: true,
     });
-  } else {
-    res.sendStatus(200).json({
-      unique: false,
-    });
+    return;
   }
+  const isUnique = await checkUsername(req.params.username);
+  res.status(200).json({
+    unique: isUnique,
+  });
 };
 
 async function checkUsername(username) {
@@ -89,6 +85,16 @@ exports.createNewUser = async function (req, res) {
 
 exports.createUpdateCohort = async function (req, res) {
   // Format data correctly
+  if (req.body.cohortName.length > 32) {
+    const name = req.body.cohortName.substring(0, 32);
+    req.body.cohortName = name;
+  }
+
+  if (req.body.cohortDesc.length > 128) {
+    const desc = req.body.cohortDesc.substring(0, 128);
+    req.body.cohortDesc = desc;
+  }
+
   let isPrivate = 0;
   if (req.body.isPrivate) {
     isPrivate = 1;
@@ -235,9 +241,9 @@ exports.registerUser = async function (req, res) {
     res.sendStatus(500);
     return;
   }
-  const inviteId = checkInvite.context.inviteId;
   // If an invite was found
   if (checkInvite.context) {
+    const inviteId = checkInvite.context.inviteId;
     const decline = await db.deleteInvite(inviteId);
     // If something went wrong, return 500
     if (decline.failed) {
@@ -408,6 +414,7 @@ exports.getPosts = async function (req, res) {
     });
   }
 };
+
 
 exports.createPost = async function (req, res) {
   // If group ID invalid, return 404
@@ -839,6 +846,71 @@ exports.deletePost = async function (req, res) {
   }
 
   res.sendStatus(200);
+};
+
+exports.updateUser = async function (req, res) {
+  // Get current user profile to compare username
+  const user = await db.getRecordByPrimaryKey('user', req.user.id);
+  if (user.failed) {
+    res.sendStatus(404);
+    return;
+  }
+  // If username not owned by current user, check if unique
+  if (user.context.username !== req.body.newUsername) {
+    const isUnique = await checkUsername(req.body.newUsername);
+    // If not unique, return 400
+    if (!isUnique) {
+      res.sendStatus(400);
+      return;
+    }
+  }
+
+  // Update database
+  const data = [req.body.newUsername, req.body.newName, req.user.id];
+  const update = await db.updateUser(data);
+  // If failed, return 500
+  if (update.failed) {
+    console.log(update);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(201);
+};
+
+exports.searchInviteableUsers = async function (req, res) {
+  const cohortId = parseInt(req.params.cohortId);
+  if (isNaN(cohortId)) {
+    res.sendStatus(404);
+    return;
+  }
+  // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
+  // However future additions might benefit
+  console.log(cohortId);
+  const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
+  const response = await db.searchInviteableUsers(searchQuery, cohortId);
+  if (response.failed) {
+    res.sendStatus(204);
+    return;
+  }
+  res.status(200).json({
+    results: response.context,
+  });
+};
+
+exports.searchCohorts = async function (req, res) {
+  // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
+  // However future additions might benefit
+  const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
+  const response = await db.searchCohorts(searchQuery, req.user.id);
+  if (response.failed) {
+    console.log(response);
+    res.sendStatus(204);
+    return;
+  }
+  res.status(200).json({
+    results: response.context,
+  });
 };
 
 exports.getImage = function (req, res) {

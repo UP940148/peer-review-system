@@ -30,8 +30,8 @@ const uploader = multer({
   dest: config.uploads,
   limits: {
     fields: 10,
-    fileSize: 1024 * 1024 * 30,
-    files: 10,
+    fileSize: 1024 * 1024 * 50,
+    files: 20,
   },
   fileFilter: function (_req, file, cb) {
     checkFileType(file, cb);
@@ -40,7 +40,7 @@ const uploader = multer({
 
 function checkFileType(file, cb) {
   // Allowed types
-  const filetypes = /image|audio|pdf/;
+  const filetypes = /image|audio|pdf|application\/zip/;
   // Check mime
   const mimetype = filetypes.test(file.mimetype);
 
@@ -84,7 +84,7 @@ async function logRequests(req, res, next) {
 app.use(logRequests);
 app.use(auth);
 
-app.use('/', express.static(config.www + 'html/', { index: 'dashboard.html', extensions: ['html'] }));
+app.use('/', express.static(config.www + 'html/', { index: 'signup.html', extensions: ['html'] }));
 app.use('/', express.static(config.www));
 
 app.get('/admin/all/:table', api.getAllInTable);
@@ -107,6 +107,11 @@ app.get('/registration/:cohortId', api.getRegistration);
 app.get('/invites', googleAuth.guardMiddleware(), api.getInvites);
 app.get('/criteria/:criteriaId', api.getCriteria);
 app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponseStats);
+app.get('/username/:username', googleAuth.guardMiddleware(), api.checkUniqueUsername);
+app.get('/inviteable-users/:cohortId/:query', googleAuth.guardMiddleware(), api.searchInviteableUsers);
+app.get('/cohorts/:query', googleAuth.guardMiddleware(), api.searchCohorts);
+
+app.patch('/user', googleAuth.guardMiddleware(), uploader.none(), api.updateUser);
 
 app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
 app.delete('/post/:postId', googleAuth.guardMiddleware(), api.deletePost);

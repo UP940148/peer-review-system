@@ -67,7 +67,11 @@ async function getGroupInfo() {
     joinBtn.textContent = 'Join Group!';
     joinBtn.addEventListener('click', joinGroup);
     topSection.appendChild(joinBtn);
+    document.getElementById('createNewPost').remove();
+    document.getElementById('createNewPostContent').remove();
+    return;
   }
+  document.getElementById('createNewPost').classList.remove('hidden');
 }
 
 async function getPosts() {
@@ -84,6 +88,14 @@ async function getPosts() {
   }
   const resData = await postsResponse.json();
   const postsList = resData.data;
+  if (postsList.length === 0) {
+    // No posts found
+    const message = document.createElement('p');
+    message.classList.add('soft-alert');
+    message.textContent = '-- Nobody has posted yet --';
+    document.getElementById('postList').appendChild(message);
+    return;
+  }
   for (let i = 0; i < postsList.length; i++) {
     const currentPost = postsList[i];
     const postContainer = document.createElement('div');
@@ -155,7 +167,7 @@ function loadAdminTools() {
 
   document.getElementById('toggleUpdateGroupMenu').addEventListener('click', toggleUpdateMenu);
   document.getElementById('updateGroup').addEventListener('submit', updateGroupDetails);
-  document.getElementById('inviteUsers').addEventListener('submit', inviteUsers);
+  document.getElementById('inviteUsers').addEventListener('keyup', getInviteableUsers);
   // Invite users via their username
   // Toggle group public/private
 }
@@ -182,9 +194,9 @@ async function updateGroupDetails(e) {
   if (response.ok) location.reload();
 }
 
-async function inviteUsers(e) {
-  e.preventDefault();
-  const formData = new FormData(document.getElementById('inviteUsers'));
+async function inviteUser(userId) {
+  const formData = new FormData();
+  formData.append('userIds', userId);
   const response = await fetch('/invite/' + groupId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
@@ -193,11 +205,11 @@ async function inviteUsers(e) {
     method: 'POST',
     body: formData,
   });
-  document.getElementById('inviteUsernames').value = '';
   if (!response.ok) {
-    window.alert('Something went wrong');
+    console.log(response);
+    return false;
   } else {
-    location.reload();
+    return true;
   }
 }
 
@@ -484,6 +496,83 @@ function getSingleCriteria(containerElement) {
   }
 
   return object;
+}
+
+async function getInviteableUsers() {
+  const userList = document.getElementById('searchUsersList');
+  const searchBar = document.getElementById('inviteUsers');
+
+  // Clear existing entries
+  while (userList.childNodes.length > 0) {
+    userList.firstChild.remove();
+  }
+  // If search search blank, show no results
+  if (searchBar.value === '') {
+    userList.classList.add('hidden');
+    return;
+  }
+
+  // Encode string to allow it in query parameter
+  const searchString = encodeURIComponent(searchBar.value);
+
+  const responses = await fetch('/inviteable-users/' + groupId + '/' + searchString, {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'GET',
+  });
+  let results;
+  if (responses.status === 204) {
+    // Display no results
+    results = 'No results';
+    userList.classList.add('hidden');
+    return;
+  } else {
+    const resData = await responses.json();
+    if (resData.results.length === 0) {
+      results = 'No Results';
+      userList.classList.add('hidden');
+      return;
+    } else {
+      results = resData.results;
+    }
+  }
+  console.log(results);
+  // Create new list entry for each result
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    // Create container
+    const container = document.createElement('div');
+    container.classList.add('user-record', 'content-item', 'content-grid-container');
+    userList.appendChild(container);
+    // Add profile picture
+    const pic = document.createElement('img');
+    pic.classList.add('post-profile-pic');
+    pic.src = result.picture;
+    container.appendChild(pic);
+    // Add username
+    const name = document.createElement('p');
+    name.classList.add('post-username');
+    name.textContent = result.username;
+    container.appendChild(name);
+
+    const inviteBtn = document.createElement('button');
+    inviteBtn.classList.add('accept-btn');
+    inviteBtn.textContent = 'Invite';
+    container.appendChild(inviteBtn);
+
+    // Add invite event listener
+    inviteBtn.addEventListener('click', async () => {
+      const success = await inviteUser(result.userId);
+      if (!success) {
+        window.alert('Something went wrong');
+      }
+      getInviteableUsers();
+    });
+  }
+
+  userList.classList.remove('hidden');
 }
 
 document.getElementById('createResponse').addEventListener('click', addCriteriaResponse);

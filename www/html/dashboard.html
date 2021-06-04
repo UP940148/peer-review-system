@@ -33,6 +33,11 @@
       <div id='tabView' class='full-width'>
 
         <div id='groupsView' class='content-display'>
+          <input type='text' id='newGroupSearch' class='content-item search-bar' placeholder='Find new groups...' title='Search for new groups'>
+          <div id='findGroupsList' class='hidden'></div>
+
+          <hr>
+
           <div id='groupInvitesButton' class='content-create-item selectable hidden'>
             <h3>New Group Invites! 🕭</h3>
           </div>
@@ -45,10 +50,10 @@
 
           <form id='createNewGroupContent' class='content-create-item hidden'>
             <label for='groupName'>Group Name:</label><br>
-            <input type='text' id='groupName' name='cohortName'><br>
+            <input type='text' id='groupName' name='cohortName' maxlength='32'><br>
 
             <label for='groupDesc'>Group Description:</label><br>
-            <textarea id='groupDesc' name='cohortDesc' class='large'></textarea><br>
+            <textarea id='groupDesc' name='cohortDesc' class='large' maxlength='128'></textarea><br>
 
             <label for='groupPrivate'>Private</label>
             <input type='checkbox' name='isPrivate'><br>
@@ -56,14 +61,11 @@
             <input type='submit' value='Create Group!'>
           </form>
 
-          
           <input type='text' id='joinedGroupSearch' class='content-item search-bar' placeholder='Search my groups...' title='Search joined groups'>
+
         </div>
 
-        <div id='postsView' class='content-display hidden'>
-          <h2>WIP</h2>
-          <h3>To view your posts, currently you need to navigate to them via the groups page</h3>
-        </div>
+        <div id='postsView' class='content-display hidden'></div>
 
         <div id='assignmentsView' class='content-display hidden'>
           <h2>WIP</h2>

@@ -14,6 +14,7 @@
   <body>
     <div id='googleSignInButton' class="g-signin2" data-onsuccess="onSignIn" hidden=true></div>
     <div id='topSection'>
+      <div id='homeButton' class='selectable'>Dashboard</div>
       <div id='logInOutContainer'>
         <div id='profileButton' class='selectable'>
           <img id='profilePic' class='profile-picture' src='/profile-pic/'></img>
@@ -40,14 +41,12 @@
           <input type='submit' value='Update Details'>
           <hr>
         </form>
-        <button id='toggleInviteUsers'>Invite people to join group</button>
-        <form id='inviteUsers'>
-          <input type='text' id='inviteUsernames' name='userIds'><br>
-          <input type='submit' value='Invite user/s'>
-        </form>
+
+        <input type='text' id='inviteUsers' class='content-item search-bar' placeholder='Invite users...' title='Invite users to join'>
+        <div id='searchUsersList' class='hidden'></div>
       </div>
 
-      <div id='createNewPost' class='content-create-item selectable'>
+      <div id='createNewPost' class='content-create-item selectable hidden'>
         <h2>+ New Post</h2>
       </div>
 
@@ -62,8 +61,8 @@
           <textarea id='newPostDesc' name='postDesc' class='large'></textarea><br>
 
           <label for='postFiles'>Files:</label><br>
-          <input type='file' id='newPostFiles' name='files' accept='.pdf, image/*, audio/*' multiple><br>
-
+          <input type='file' id='newPostFiles' name='files' accept='.zip, .pdf, image/*, audio/*' multiple><br>
+          <label for='postFiles'>(Limits - 20 files, maximum 50MB each)</label>
         </form>
         <fieldset id='criteriaBox'>
           <legend><h2>Feedback options:</h2></legend>

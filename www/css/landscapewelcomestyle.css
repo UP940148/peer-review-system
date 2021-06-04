@@ -1,0 +1,28 @@
+#pageContent {
+  display: grid;
+  grid-template-columns: 25% 48% 25%;
+  column-gap: 1%;
+  grid-template-rows: 10% 25% 25%;
+  grid-template-areas:
+  '. . .'
+  '. mid .'
+  '. warning .';
+}
+
+#pageTitle {
+  font-size: 300%;
+}
+
+#pageContent > div {
+  text-align: center;
+}
+
+#loginText {
+  grid-area: mid;
+  margin: 1rem;
+}
+
+#warningText {
+  grid-area: warning;
+  margin: 1rem;
+}
