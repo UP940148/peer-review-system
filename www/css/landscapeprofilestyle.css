@@ -21,9 +21,21 @@
   padding: 2rem;
 
   display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: 15% 12% 12% 12% 10% 19% 20%;;
-  row-gap: 4%;
+  grid-template-columns: 69% 29%;
+  grid-template-rows: 15% 4% 12% 4% 12% 4% 12% 4% 10% 4% 19%;
+  grid-template-areas:
+  'header image'
+  '. image'
+  'username image'
+  '. image'
+  'name image'
+  '. image'
+  'email image'
+  '. image'
+  'br image'
+  '. .'
+  'submit delete';
+  column-gap: 2%;
 
   background-color: #b9b9b9;
   font-size: 150%;
@@ -31,17 +43,81 @@
   box-sizing: border-box;
 }
 
-#profileForm > h3 {
+
+#profileForm > .profile-header {
   margin: 0;
+  grid-area: header;
+}
+
+#profileForm > .profile-username {
+  grid-area: username;
+}
+
+#profileForm > .profile-name {
+  grid-area: name;
+}
+
+#profileForm > .profile-email {
+  grid-area: email;
+}
+
+#profileForm > br {
+  grid-area: br;
+}
+
+#profileForm > .profile-submit {
+  grid-area: submit;
+}
+
+#profileForm > .delete-pic {
+  grid-area: delete;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #e86464;
+  border-radius: .25rem;
+}
+
+#profileForm > .delete-pic:hover {
+  background-color: #ae4b4b !important;
+}
+
+#deletePictureText {
+  text-align: center;
+  margin: auto;
+}
+
+#profileForm > .profile-image {
+  grid-area: image;
+  grid-template-columns: 100%;
+  grid-template-rows: 100%;
+  place-items: center;
+  background-color: #ffffff;
+  height: 100%;
+  width: 100%;
+}
+
+.profile-image > img {
+  object-fit: contain;
+  height: 100%;
+  width: 100%;
 }
 
 .sign-out-container {
+  grid-area: signOut;
+  display: flex;
+  align-self: start;
+  justify-content: center;
   font-size: 175%;
   text-align: center;
-  grid-area: signOut;
 }
 
-a > h4 {
+a {
+}
+
+a > p {
   margin: 0;
 }
 
@@ -53,7 +129,7 @@ a > h4 {
   height: 2rem;
 }
 
-#profileForm > div > p {
+#profileForm > div > .profile-label {
   text-align: right;
   margin: 0;
   height: 100%;

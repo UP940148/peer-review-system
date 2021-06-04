@@ -4,13 +4,13 @@ body {
 #pageContent {
   display: grid;
   grid-template-columns: 10% 79% 10%;
-  grid-template-rows: 10% 90% 100%;
+  grid-template-rows: 100% 100%;
   column-gap: .5%;
   grid-template-areas:
-    'files main .'
     'files main owner'
     'files feedback .';
 }
+
 
 #fileWindow {
   position: fixed;
@@ -79,11 +79,17 @@ body {
 }
 #mainPost > .desc {
   overflow-y: auto;
-  padding: 1rem;
-  background-color: #ffffff;
-  border-radius: .5rem;
   grid-area: desc;
+  border-radius: .5rem;
 }
+
+.desc-text {
+  margin: 0;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: .5rem;
+}
+
 #mainPost > .user {
   grid-area: user;
 }
@@ -106,6 +112,7 @@ body {
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
+  padding: 3.75rem 0;
 }
 
 .delete-btn {

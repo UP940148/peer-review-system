@@ -75,7 +75,7 @@ exports.createUser = async function (data) {
 };
 
 exports.checkUsername = async function (username) {
-  const sql = 'SELECT COUNT(*) as total FROM user WHERE username = ?';
+  const sql = 'SELECT COUNT(*) as total FROM user WHERE username = ?;';
   const response = await db.get(sql, [username])
     .then(row => {
       return { failed: false, context: row };
@@ -202,7 +202,7 @@ exports.checkInvite = async function (cohortId, userId) {
 };
 
 exports.getPublicCohort = async function (cohortId) {
-  const sql = 'SELECT * FROM cohort WHERE cohortId = ? AND isPrivate = 0';
+  const sql = 'SELECT * FROM cohort WHERE cohortId = ? AND isPrivate = 0;';
   const response = await db.get(sql, [cohortId])
     .then(row => {
       return { failed: false, context: row };
@@ -276,7 +276,7 @@ exports.getCohortPosts = async function (cohortId) {
       post.files,
       post.timeCreated,
       user.username,
-      user.picture
+      user.userId
     FROM post
     INNER JOIN registration
       ON post.registrationId = registration.registrationId
@@ -342,8 +342,7 @@ exports.getPost = async function (postId) {
     timeCreated,
     registration.cohortId,
     registration.userId,
-    user.username,
-    user.picture
+    user.username
   FROM post
   INNER JOIN registration
     ON post.registrationId = registration.registrationId
@@ -525,7 +524,6 @@ exports.searchInviteableUsers = async function (query, cohortId) {
     SELECT DISTINCT
       user.userId,
       user.username,
-      user.picture,
       (
         SELECT
           COUNT(*)
@@ -586,6 +584,36 @@ exports.searchCohorts = async function (query, userId) {
     })
     .catch(err => {
       return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.getUserPicture = async function (userId) {
+  const sql = 'SELECT picture FROM user WHERE userId = ?;';
+  const response = await db.get(sql, [userId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
+exports.updateUserPicture = async function (data) {
+  const sql = `
+    UPDATE
+      user
+    SET
+      picture = ?
+    WHERE userId = ?
+  ;`;
+  const response = await db.run(sql, data)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
     });
   return response;
 };

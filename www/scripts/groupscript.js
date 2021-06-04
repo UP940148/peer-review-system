@@ -109,7 +109,8 @@ async function getPosts() {
 
     const profileImg = document.createElement('img');
     profileImg.classList.add('post-profile-pic');
-    profileImg.src = currentPost.picture;
+    console.log(currentPost);
+    profileImg.src = '/profile-pic/' + currentPost.userId;
     profileContainer.appendChild(profileImg);
 
     const username = document.createElement('p');
@@ -549,7 +550,7 @@ async function getInviteableUsers() {
     // Add profile picture
     const pic = document.createElement('img');
     pic.classList.add('post-profile-pic');
-    pic.src = result.picture;
+    pic.src = '/profile-pic/' + result.userId;
     container.appendChild(pic);
     // Add username
     const name = document.createElement('p');

@@ -157,7 +157,7 @@ async function fillPage() {
 
     const profileImg = document.createElement('img');
     profileImg.classList.add('post-profile-pic');
-    profileImg.src = userProfile.picture;
+    profileImg.src = '/profile-pic/' + userProfile.userId;
     profileContainer.appendChild(profileImg);
 
     const username = document.createElement('p');

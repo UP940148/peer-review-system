@@ -51,7 +51,7 @@ async function onSignIn(googleUser) {
   userProfile = resData.data;
 
   // Update profile button
-  document.getElementById('profilePic').src = userProfile.picture;
+  document.getElementById('profilePic').src = '/profile-pic/' + userProfile.userId;
   document.getElementById('usernameContainer').classList.add('hidden');
   initialise();
 }

@@ -151,7 +151,7 @@ function displayPostContent() {
 
   const profileImg = document.createElement('img');
   profileImg.classList.add('post-profile-pic');
-  profileImg.src = post.picture;
+  profileImg.src = '/profile-pic/' + post.userId;
   profileContainer.appendChild(profileImg);
 
   const username = document.createElement('p');
@@ -166,10 +166,13 @@ function displayPostContent() {
   mainPost.appendChild(postTime);
 
   // Post content
+  const descriptionContainer = document.createElement('div');
+  descriptionContainer.classList.add('desc');
+  mainPost.appendChild(descriptionContainer);
   const description = document.createElement('p');
+  description.classList.add('desc-text');
   description.innerText = post.description;
-  description.classList.add('desc');
-  mainPost.appendChild(description);
+  descriptionContainer.appendChild(description);
 
   if (userProfile && post.userId === userProfile.userId) {
     displayAsAuthor();
@@ -336,6 +339,15 @@ async function displayAsAuthor() {
 }
 
 function displayFeedbackStats(stats) {
+  if (stats[0].length === 0) {
+    return;
+  }
+
+  const guide = document.createElement('h2');
+  guide.textContent = '🢃 View Feedback 🢃';
+  guide.classList.add('guide');
+  mainPost.appendChild(guide);
+
   // Create feedback form
   const feedbackForm = document.createElement('form');
   feedbackForm.classList.add('feedback');

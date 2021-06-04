@@ -26,21 +26,48 @@ try {
 // Set up middleware
 const jsonParser = bodyParser.json();
 const auth = googleAuth(config.CLIENT_ID);
-const uploader = multer({
+const docUploader = multer({
   dest: config.uploads,
   limits: {
-    fields: 10,
     fileSize: 1024 * 1024 * 50,
     files: 20,
   },
   fileFilter: function (_req, file, cb) {
-    checkFileType(file, cb);
+    checkDocType(file, cb);
   },
 });
 
-function checkFileType(file, cb) {
+function checkDocType(file, cb) {
   // Allowed types
   const filetypes = /image|audio|pdf|application\/zip/;
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype) {
+    // If file is accepted, return true
+    return cb(null, true);
+  } else {
+    // Else skip the file
+    return cb(null, false);
+  }
+}
+
+const profileUploader = multer({
+  dest: config.uploads,
+  limits: {
+    fields: 5,
+    fileSize: 1024 * 1024 * 25,
+    files: 1,
+  },
+  fileFilter: function (_req, file, cb) {
+    checkProfileType(file, cb);
+  },
+});
+
+function checkProfileType(file, cb) {
+  // Allowed types
+  // Maybe make this more specific at some point, I already know that .jfif files don't load nicely
+  const filetypes = /image/;
   // Check mime
   const mimetype = filetypes.test(file.mimetype);
 
@@ -91,12 +118,12 @@ app.get('/admin/all/:table', api.getAllInTable);
 app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 
 app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);
-app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), uploader.none(), api.createUpdateCohort);
+app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), docUploader.none(), api.createUpdateCohort);
 app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
-app.post('/invite/:cohortId', googleAuth.guardMiddleware(), uploader.none(), api.inviteUsers);
+app.post('/invite/:cohortId', googleAuth.guardMiddleware(), docUploader.none(), api.inviteUsers);
 app.post('/accept-invite/:inviteId', googleAuth.guardMiddleware(), api.acceptInvite);
-app.post('/post/:cohortId', googleAuth.guardMiddleware(), uploader.array('files'), api.createPost);
-app.post('/response/:postId', googleAuth.guardMiddleware(), uploader.none(), api.createResponse);
+app.post('/post/:cohortId', googleAuth.guardMiddleware(), docUploader.array('files'), api.createPost);
+app.post('/response/:postId', googleAuth.guardMiddleware(), docUploader.none(), api.createResponse);
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
 app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
@@ -111,10 +138,12 @@ app.get('/username/:username', googleAuth.guardMiddleware(), api.checkUniqueUser
 app.get('/inviteable-users/:cohortId/:query', googleAuth.guardMiddleware(), api.searchInviteableUsers);
 app.get('/cohorts/:query', googleAuth.guardMiddleware(), api.searchCohorts);
 
-app.patch('/user', googleAuth.guardMiddleware(), uploader.none(), api.updateUser);
+app.patch('/user', googleAuth.guardMiddleware(), profileUploader.none(), api.updateUser);
+app.patch('/profile-pic/', googleAuth.guardMiddleware(), profileUploader.single('picture'), api.updateProfilePic);
 
 app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
 app.delete('/post/:postId', googleAuth.guardMiddleware(), api.deletePost);
+app.delete('/profile-pic/', googleAuth.guardMiddleware(), api.updateProfilePic);
 
 app.get('/profile-pic/:userId?', api.getProfilePic);
 app.get('/img/:imageId', api.getImage);

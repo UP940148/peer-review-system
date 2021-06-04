@@ -1,6 +1,9 @@
 const config = require('../config');
 const db = require('./database.js');
 
+
+const { DownloaderHelper } = require('node-downloader-helper');
+
 const zip = require('express-zip');
 const fs = require('fs');
 const { promisify } = require('util');
@@ -68,7 +71,23 @@ exports.createNewUser = async function (req, res) {
   const username = 'User' + req.user.id;
   const picture = req.user.photos[0].value;
 
-  const userData = [req.user.id, username, name, email, picture, ''];
+  // Extract adapted from https://www.geeksforgeeks.org/how-to-download-a-file-using-node-js/
+  let file;
+  // Download Google profile picture
+  const dl = new DownloaderHelper(picture, config.uploads);
+  dl.on('end', data => {
+    file = data;
+  });
+  await dl.start();
+
+  // Move and rename image file
+  const fileExtList = file.fileName.split('.');
+  const fileExt = fileExtList[fileExtList.length - 1];
+  const newFilename = req.user.id + '.' + fileExt;
+  await renameAsync(file.filePath, config.imageStore + newFilename);
+
+
+  const userData = [req.user.id, username, name, email, newFilename, ''];
   const response = await db.createUser(userData);
   if (response.failed) {
     res.sendStatus(500);
@@ -177,8 +196,18 @@ exports.getProfilePic = async function (req, res) {
     res.sendFile(config.imageStore + 'default-profile-pic.jpg');
     return;
   }
-  // Currently no need for anything else as I'm using google profile pictures which have external urls
-  res.sendStatus(418);
+
+
+  const response = await db.getUserPicture(req.params.userId);
+  // If something went wrong, or picture not found, return default picture
+  if (response.failed || !response.context || response.context.picture === '') {
+    res.sendFile(config.imageStore + 'default-profile-pic.jpg');
+    return;
+  }
+
+  // Send profile picture
+  const file = response.context.picture;
+  res.sendFile(config.imageStore + file);
 };
 
 exports.getCohort = async function (req, res) {
@@ -555,6 +584,9 @@ exports.getCriteria = async function (req, res) {
     }
     // Create a JSON object
     const questionObj = questionRetrieval.context;
+    if (!questionObj) {
+      continue;
+    }
     if (questionObj.answers) {
       const answers = answerStringToList(questionObj.answers);
       questionObj.answers = answers;
@@ -751,6 +783,9 @@ exports.getResponseStats = async function (req, res) {
 async function getQuestionStats(questionId) {
   // Retrieve question
   const questionRetrieval = await db.getRecordByPrimaryKey('question', questionId);
+  if (!questionRetrieval.context) {
+    return [];
+  }
   const questionStats = {
     question: questionRetrieval.context.questionContent,
     type: questionRetrieval.context.type,
@@ -830,7 +865,11 @@ exports.deletePost = async function (req, res) {
 
   // Mark files for deletion
   const fileList = postRetrieval.context.files.split(',');
-  fs.appendFile(redundantPath, fileList.toString(), (err) => {
+  for (let i = 0; i < fileList.length; i++) {
+    fileList[i] = config.docStore + fileList[i];
+  }
+
+  fs.appendFile(redundantPath, fileList.toString() + ',', (err) => {
     if (err) throw err;
   });
 
@@ -958,6 +997,47 @@ exports.downloadAll = async function (req, res) {
   res.zip(fileObjs, `LPRS-${postId}_${unixTime}.zip`);
 };
 
+exports.updateProfilePic = async function (req, res) {
+  // Get picture from database ready to fs.unlink it
+  const picRetrieval = await db.getUserPicture(req.user.id);
+  if (picRetrieval.failed) {
+    console.log(picRetrieval.context);
+    res.sendStatus(500);
+    return;
+  }
+  let picture = picRetrieval.context.picture;
+
+  if (picture.length !== 0) {
+    // Mark old picture for deletion
+    fs.appendFile(redundantPath, config.imageStore + picture + ',', (err) => {
+      if (err) throw err;
+    });
+  }
+
+  picture = '';
+  if (req.method === 'PATCH' && req.file) {
+    // If updating picture, handle file upload
+    const file = req.file;
+    // Get the file extension and add it to the random file name
+    const fileExtList = file.originalname.split('.');
+    const fileExt = fileExtList[fileExtList.length - 1];
+    picture = file.filename + '.' + fileExt;
+    // Move file and rename it with extension
+    await renameAsync(file.path, config.imageStore + picture);
+  }
+
+  // Change database entry
+  const data = [picture, req.user.id];
+  const update = await db.updateUserPicture(data);
+  if (update.failed) {
+    console.log(update.context);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(200);
+};
+
 // Get redundant files from file
 exports.clearUnused = function () {
   // I considered using fs.readdir to get all the saved files, then cycle through each one and check if it appears in a database post
@@ -974,19 +1054,24 @@ exports.clearUnused = function () {
       // Unlink all redundant files
       for (let i = 0; i < fileList.length; i++) {
         const currentFile = fileList[i];
+        // If file string is blank, skip
+        if (currentFile.length === 0) {
+          continue;
+        }
         // Attempt to unlink
         try {
-          fs.unlinkSync(config.docStore + currentFile);
+          fs.unlinkSync(currentFile);
         } catch (e) {
           // If failed, add file back to list
-          failedUnlinks.push(currentFile);
+          failedUnlinks.push(currentFile + ',');
           continue;
         }
       }
       // Convert file list to string
       const failedUnlinksStr = failedUnlinks.toString();
+      const finalString = failedUnlinksStr.replace(',,', ',');
       // Put filenames back into redundants file
-      fs.appendFile(redundantPath, failedUnlinksStr, (err) => {
+      fs.appendFile(redundantPath, finalString, (err) => {
         if (err) throw err;
       });
     } else {
