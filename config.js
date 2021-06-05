@@ -1,12 +1,16 @@
 const path = require('path');
+exports.root = __dirname;
 exports.www = path.join(__dirname, '/www/');
 exports.files = path.join(__dirname, '/server/saved/');
 exports.uploads = path.join(__dirname, '/server/uploads/');
 
-exports.docStore = module.exports.files + 'docs/';
-exports.redundantStore = module.exports.files + 'redundant/';
-exports.imageStore = module.exports.files + 'img/';
-exports.replyStore = module.exports.files + 'replies/';
+// Setting relative path variables allows redundant files to be deleted, even if whole system changes directory
+exports.docPath = '/server/saved/docs/';
+exports.docStore = __dirname + exports.docPath;
+exports.imagePath = '/server/saved/img/';
+exports.imageStore = __dirname + exports.imagePath;
+
+exports.redundants = module.exports.files + 'redundants.txt';
 
 exports.PORT = 8080;
 

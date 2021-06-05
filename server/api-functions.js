@@ -9,8 +9,6 @@ const fs = require('fs');
 const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
 
-const redundantPath = './server/redundants.txt';
-
 // ADMIN FUNCTIONS
 
 exports.getAllInTable = async function (req, res) {
@@ -877,10 +875,10 @@ exports.deletePost = async function (req, res) {
   // Mark files for deletion
   const fileList = postRetrieval.context.files.split(',');
   for (let i = 0; i < fileList.length; i++) {
-    fileList[i] = config.docStore + fileList[i];
+    fileList[i] = config.docPath + fileList[i];
   }
 
-  fs.appendFile(redundantPath, fileList.toString() + ',', (err) => {
+  fs.appendFile(config.redundants, fileList.toString() + ',', (err) => {
     if (err) throw err;
   });
 
@@ -1020,7 +1018,7 @@ exports.updateProfilePic = async function (req, res) {
 
   if (picture.length !== 0) {
     // Mark old picture for deletion
-    fs.appendFile(redundantPath, config.imageStore + picture + ',', (err) => {
+    fs.appendFile(config.redundants, config.imagePath + picture + ',', (err) => {
       if (err) throw err;
     });
   }
@@ -1053,11 +1051,11 @@ exports.updateProfilePic = async function (req, res) {
 exports.clearUnused = function () {
   // I considered using fs.readdir to get all the saved files, then cycle through each one and check if it appears in a database post
   // However I changed my mind and took this following approach because it felt like it would scale better to a bigger system
-  fs.readFile(redundantPath, 'utf8', (err, data) => {
+  fs.readFile(config.redundants, 'utf8', (err, data) => {
     if (!err) {
       const failedUnlinks = [];
       // Clear file
-      fs.writeFile(redundantPath, '', (err) => {
+      fs.writeFile(config.redundants, '', (err) => {
         if (err) throw err;
       });
       // Get individual file names
@@ -1071,7 +1069,7 @@ exports.clearUnused = function () {
         }
         // Attempt to unlink
         try {
-          fs.unlinkSync(currentFile);
+          fs.unlinkSync(config.root + currentFile);
         } catch (e) {
           // If failed, add file back to list
           failedUnlinks.push(currentFile + ',');
@@ -1082,7 +1080,7 @@ exports.clearUnused = function () {
       const failedUnlinksStr = failedUnlinks.toString();
       const finalString = failedUnlinksStr.replace(',,', ',');
       // Put filenames back into redundants file
-      fs.appendFile(redundantPath, finalString, (err) => {
+      fs.appendFile(config.redundants, finalString, (err) => {
         if (err) throw err;
       });
     } else {
