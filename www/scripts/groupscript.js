@@ -22,15 +22,18 @@ const groupId = queryString.substring(1);
 async function fillPage() {
   /* eslint-enable no-unused-vars */
   await getGroupInfo();
-  // Create file upload utilities, to avoid new lines in html file counting as elements
-  resetFileInput();
-  const html = "<img id='newFileBtn' class='file-holder selectable' src='/img/upload-file-dark.png'>";
-  document.getElementById('filePreviewContainer').insertAdjacentHTML('beforeend', html);
-  // Add file event listeners
-  document.getElementById('newFileBtn').addEventListener('click', () => {
-    document.getElementById('newPostFiles').click();
-  });
-  document.getElementById('newPostFiles').addEventListener('change', handleFiles);
+
+  if (groupInfo.rank !== 'guest') {
+    // Create file upload utilities, to avoid new lines in html file counting as elements
+    resetFileInput();
+    const html = "<img id='newFileBtn' class='file-holder selectable' src='/img/upload-file-dark.png'>";
+    document.getElementById('filePreviewContainer').insertAdjacentHTML('beforeend', html);
+    // Add file event listeners
+    document.getElementById('newFileBtn').addEventListener('click', () => {
+      document.getElementById('newPostFiles').click();
+    });
+    document.getElementById('newPostFiles').addEventListener('change', handleFiles);
+  }
 
   // If user doesn't have access to group, return
   if (!groupInfo) return;
