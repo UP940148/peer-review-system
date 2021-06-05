@@ -104,7 +104,7 @@ legend > h2 {
 }
 
 input[type='submit'] {
-  margin-top: .5rem;
+  margin: 0 0 .5rem 0;
 }
 
 .criteria-label::before {
@@ -113,6 +113,18 @@ input[type='submit'] {
 
 .criteria-label.expanded::before {
   content: '▼ ';
+}
+
+#createPostButton {
+  margin: .5rem 0;
+  font-size: 125%;
+  height: 2.5rem;
+  border-radius: .5rem;
+  border: 2px solid rgba(0, 0, 0, .5);
+}
+
+#createPostButton:hover {
+  background-color: #ffffff !important;
 }
 
 @media (min-aspect-ratio: 1/1) {
@@ -126,6 +138,9 @@ input[type='submit'] {
       ". link link .";
     column-gap: 1%;
     margin: .5rem 0;
+  }
+  #createPostButton {
+    width: 50%;
   }
   #searchUsersList {
     width: 50%;
@@ -146,7 +161,7 @@ input[type='submit'] {
     font-size: 90%;
     margin: .5rem 0;
   }
-  #searchUsersList {
+  #searchUsersList, #createPostButton {
     width: 100%;
   }
 }

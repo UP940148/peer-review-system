@@ -131,6 +131,22 @@ p.admin-tag {
   white-space: nowrap;
 }
 
+#createNewGroupContent > input[type='submit'] {
+  margin-top: .5rem;
+  height: 2rem;
+  border-radius: .5rem;
+  border: 2px solid rgba(0, 0, 0, .5);
+}
+
+#createNewGroupContent > input[type='submit']:hover {
+  background-color: #ffffff;
+}
+
+#groupName {
+  box-sizing: border-box;
+  height: 1.75rem;
+}
+
 @media (min-aspect-ratio: 1/1) {
   .post-container.grid-container {
     display: grid;
@@ -142,6 +158,12 @@ p.admin-tag {
       ". link link .";
     column-gap: 1%;
     margin: .5rem 0;
+  }
+  #createNewGroupContent > input[type='submit'] {
+    width: 25%;
+  }
+  #groupName {
+    width: 40%;
   }
 }
 
@@ -158,5 +180,8 @@ p.admin-tag {
     column-gap: 1%;
     font-size: 90%;
     margin: .5rem 0;
+  }
+  #createNewGroupContent > input[type='submit'], #groupName {
+    width: 100%;
   }
 }
