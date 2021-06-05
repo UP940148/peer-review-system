@@ -1,4 +1,4 @@
-/* global userProfile, idToken */
+/* global userProfile, idToken, getDateStringFromUnix */
 
 if (!localStorage.getItem('LPRS_loggedIn')) {
   window.location.href = '/';
@@ -144,6 +144,9 @@ async function fillPage() {
 
   // Populate user posts tab
   const userPosts = await getPosts();
+  if (userPosts.length > 0) {
+    postsView.innerHTML = '';
+  }
   for (let i = 0; i < userPosts.length; i++) {
     const currentPost = userPosts[i];
     const postContainer = document.createElement('div');

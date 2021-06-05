@@ -215,3 +215,46 @@ input[type='submit'] {
 .user-record > img {
   place-self: center;
 }
+
+#filePreviewContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  margin: .25rem 0;
+  padding: 0 .5rem;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.file-holder {
+  object-fit: contain;
+  width: 6rem;
+  height: 8rem;
+  box-sizing: border-box;
+  margin: 0 .25rem;
+  border-radius: .25rem;
+  background-color: rgba(255, 255, 255, .5);
+
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 6.5rem 1.5rem;
+}
+
+.file-preview {
+  object-fit: contain;
+  width: 6rem;
+  height: 6.5rem;
+  float: left;
+}
+
+.remove-button {
+  background-color: #e86464;
+  width: 6rem;
+  height: 1.5rem;
+  margin: 0;
+  text-align: center;
+  border-radius: 0 0 .25rem .25rem;
+}
+.remove-button:hover {
+  background-color: #ae4b4b !important;
+}

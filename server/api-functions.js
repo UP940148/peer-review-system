@@ -4,7 +4,7 @@ const db = require('./database.js');
 
 const { DownloaderHelper } = require('node-downloader-helper');
 
-const zip = require('express-zip');
+require('express-zip');
 const fs = require('fs');
 const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
@@ -302,7 +302,6 @@ exports.getRegistration = async function (req, res) {
 };
 
 exports.inviteUsers = async function (req, res) {
-
   const cohortId = parseInt(req.params.cohortId);
   const checkRank = await db.checkRegistration(cohortId, req.user.id);
   if (!(checkRank.context.rank === 'owner' || checkRank.context.rank === 'admin')) {

@@ -61,8 +61,8 @@
           <textarea id='newPostDesc' name='postDesc' class='large'></textarea><br>
 
           <label for='postFiles'>Files:</label><br>
-          <input type='file' id='newPostFiles' name='files' accept='.zip, .pdf, image/*, audio/*' multiple><br>
-          <label for='postFiles'>(Limits - 20 files, maximum 50MB each)</label>
+          <div id='filePreviewContainer'></div>
+          <label id='restrictionsText' for='postFiles'>(20 files left, maximum 50MB each)</label>
         </form>
         <fieldset id='criteriaBox'>
           <legend><h2>Feedback options:</h2></legend>

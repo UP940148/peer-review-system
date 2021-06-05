@@ -111,36 +111,3 @@ app.get('/profile-pic/u/:userId?/', api.sendPic);
 app.get('/profile-pic/g/:groupId?/', api.sendPic);
 
 // app.get('/test/', api.getComments);
-
-
-// TINKERING
-/*
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  secure: false, // use SSL
-  port: 25, // port for secure SMTP
-  auth: {
-    user: 'insertUsername',
-    pass: 'insertPassword',
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-const mailOptions = {
-  from: 'insertUsername',
-  to: 'up940148@myport.ac.uk',
-  subject: 'Test NodeJS Email',
-  html: "<h1>Hello World!</h1><h3>Foo Bar</h3><p><a href='www.lenniegames.co.uk'>Test Link!</a></p>",
-};
-transporter.sendMail(mailOptions, (err, info) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('Email Sent: ' + info.response);
-  }
-});
-*/

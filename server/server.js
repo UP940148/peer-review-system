@@ -1,6 +1,5 @@
 // Required modules
 const express = require('express');
-const bodyParser = require('body-parser');
 const config = require('../config');
 const googleAuth = require('simple-google-openid');
 const multer = require('multer');
@@ -24,13 +23,12 @@ try {
 }
 
 // Set up middleware
-const jsonParser = bodyParser.json();
 const auth = googleAuth(config.CLIENT_ID);
 const docUploader = multer({
   dest: config.uploads,
   limits: {
     fileSize: 1024 * 1024 * 50,
-    files: 20,
+    files: 25,
   },
   fileFilter: function (_req, file, cb) {
     checkDocType(file, cb);
@@ -122,7 +120,7 @@ app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), docUploader.none(),
 app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
 app.post('/invite/:cohortId', googleAuth.guardMiddleware(), docUploader.none(), api.inviteUsers);
 app.post('/accept-invite/:inviteId', googleAuth.guardMiddleware(), api.acceptInvite);
-app.post('/post/:cohortId', googleAuth.guardMiddleware(), docUploader.array('files'), api.createPost);
+app.post('/post/:cohortId', googleAuth.guardMiddleware(), docUploader.array('file'), api.createPost);
 app.post('/response/:postId', googleAuth.guardMiddleware(), docUploader.none(), api.createResponse);
 
 app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);

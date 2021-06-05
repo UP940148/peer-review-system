@@ -1,6 +1,11 @@
 /* global userProfile, idToken, getDateStringFromUnix */
 
 document.getElementById('createNewPost').addEventListener('click', openNewPostForm);
+document.getElementById('createResponse').addEventListener('click', addCriteriaResponse);
+document.getElementById('newQuestionType').addEventListener('change', responseTypeChanged);
+document.getElementById('createCriteriaForm').addEventListener('submit', submitQuestion);
+document.getElementById('createPostButton').addEventListener('click', submitPost);
+
 
 // Constant document values
 const topSection = document.getElementById('topSection');
@@ -8,6 +13,7 @@ const htmlTitle = document.getElementById('pageTitle');
 const groupDesc = document.getElementById('groupDesc');
 let groupInfo;
 let questionCount = 0;
+const fileList = [];
 
 
 const queryString = window.location.search;
@@ -15,6 +21,16 @@ const groupId = queryString.substring(1);
 
 async function fillPage() {
   await getGroupInfo();
+  // Create file upload utilities, to avoid new lines in html file counting as elements
+  resetFileInput();
+  const html = "<img id='newFileBtn' class='file-holder selectable' src='/img/upload-file-dark.png'>";
+  document.getElementById('filePreviewContainer').insertAdjacentHTML('beforeend', html);
+  // Add file event listeners
+  document.getElementById('newFileBtn').addEventListener('click', () => {
+    document.getElementById('newPostFiles').click();
+  });
+  document.getElementById('newPostFiles').addEventListener('change', handleFiles);
+
   // If user doesn't have access to group, return
   if (!groupInfo) return;
   if (groupInfo.rank === 'owner' || groupInfo.rank === 'admin') {
@@ -385,7 +401,6 @@ function addCriteriaResponse() {
   document.getElementById('responsesList').appendChild(container);
 }
 
-
 function responseTypeChanged() {
   const responseType = document.getElementById('newQuestionType').value;
   if (responseType === 'text') {
@@ -437,6 +452,12 @@ async function submitPost() {
     window.alert('Please fill in all fields');
     return;
   }
+  // Append files to form data
+  fileList.forEach(file => {
+    if (file) {
+      formData.append('file', file);
+    }
+  });
 
   const criteriaJSON = getCriteriaData();
   formData.append('questions', JSON.stringify(criteriaJSON));
@@ -576,7 +597,114 @@ async function getInviteableUsers() {
   userList.classList.remove('hidden');
 }
 
-document.getElementById('createResponse').addEventListener('click', addCriteriaResponse);
-document.getElementById('newQuestionType').addEventListener('change', responseTypeChanged);
-document.getElementById('createCriteriaForm').addEventListener('submit', submitQuestion);
-document.getElementById('createPostButton').addEventListener('click', submitPost);
+function handleFiles(e) {
+  const files = e.target.files;
+  console.log(files);
+
+  const fileCount = document.getElementById('filePreviewContainer').childNodes.length - 2;
+
+  // Make sure restrictions are honoured
+  if (fileCount + files.length > 20) {
+    alert(`Maximum 20 files allowed!\nOnly ${20 - fileList.length} more files allowed`);
+    return;
+  }
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fileSizeInMB = file.size / (1024 * 1024);
+    if (fileSizeInMB >= 50) {
+      alert('Max file size is 50MB!');
+      return;
+    }
+  }
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function () {
+      /*
+        When the reader has loaded the file,
+        attempt to append the file to the list and display it on screen
+        */
+      try {
+        createNewFileHolder(reader, file.name, file.type);
+        fileList.push(file);
+        checkReadyFileCount();
+      } catch (e) {
+        console.log(e);
+      }
+      resetFileInput();
+    };
+  }
+}
+
+function createNewFileHolder(file, name, type) {
+  const container = document.createElement('div');
+  container.classList.add('file-holder');
+  const image = document.createElement('img');
+  image.classList.add('file-preview');
+  image.title = name;
+  container.appendChild(image);
+  document.getElementById('filePreviewContainer').appendChild(container);
+  // Check file type to see how to preview
+  if (type.match(/^image\//)) {
+    // Then file is image
+    image.src = file.result;
+  } else if (type.match(/^audio\//)) {
+    // Then file is audio
+    image.src = '/img/audio-icon-dark.png';
+  } else if (type.match(/\/pdf$/)) {
+    // Then file is pdf
+    image.src = '/img/pdf-icon-dark.png';
+  } else {
+    // Any other type
+    image.src = '/img/preview-unavailable-dark.png';
+  }
+  // Create remove button
+  const delButton = document.createElement('div');
+  delButton.classList.add('selectable', 'remove-button');
+  delButton.textContent = 'Remove';
+  container.appendChild(delButton);
+
+  // Add delete event listener
+  const currentFileNum = fileList.length;
+  delButton.addEventListener('click', (e) => {
+    removeFileFromPost(e.target, currentFileNum);
+  });
+}
+
+// Check how many files are prepped to be posted so a limit can be enforced
+function checkReadyFileCount() {
+  const fileCount = document.getElementById('filePreviewContainer').childNodes.length - 2;
+  // Show or hide new file upload button
+  if (fileCount >= 20) {
+    document.getElementById('newFileBtn').classList.add('hidden');
+  } else {
+    document.getElementById('newFileBtn').classList.remove('hidden');
+  }
+  document.getElementById('restrictionsText').textContent = `(${20 - fileCount} files left, maximum 50MB each)`;
+}
+
+function resetFileInput() {
+  // Delete file input if it exists
+  let fileUploader = document.getElementById('newPostFiles');
+  if (fileUploader) {
+    fileUploader.remove();
+  }
+
+  // Create new file input
+  const html = "<input type='file' id='newPostFiles' class='hidden' name='files' accept='.zip, .pdf, image/*, audio/*' multiple>";
+
+  document.getElementById('filePreviewContainer').insertAdjacentHTML('afterbegin', html);
+
+  // Add event listener again
+  fileUploader = document.getElementById('newPostFiles');
+  fileUploader.addEventListener('change', handleFiles);
+}
+
+function removeFileFromPost(target, fileNum) {
+  target.parentElement.remove();
+  fileList[fileNum] = undefined;
+  checkReadyFileCount();
+}

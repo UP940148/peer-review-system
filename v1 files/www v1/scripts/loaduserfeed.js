@@ -1,4 +1,4 @@
-/* global getElementForFile gapi */
+/* global getElementForFile gapi, userProfile */
 
 const newsFeedContainer = document.getElementById('newsFeed');
 
