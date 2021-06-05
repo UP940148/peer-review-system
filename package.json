@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/appeng-m30222/appeng2020-UP940148#readme",
   "dependencies": {
-    "eslint-config-portsoc": "^0.8.1",
     "express": "^4.17.1",
     "express-zip": "^3.0.0",
     "mkdirp": "^1.0.4",
@@ -33,6 +32,7 @@
   },
   "devDependencies": {
     "eslint": "^7.23.0",
+    "eslint-config-portsoc": "^0.8.1",
     "nodemon": "^2.0.7"
   },
   "eslintConfig": {
