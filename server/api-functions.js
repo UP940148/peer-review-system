@@ -934,7 +934,6 @@ exports.searchInviteableUsers = async function (req, res) {
   }
   // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
   // However future additions might benefit
-  console.log(cohortId);
   const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
   const response = await db.searchInviteableUsers(searchQuery, cohortId);
   if (response.failed) {

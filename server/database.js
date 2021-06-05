@@ -13,7 +13,6 @@ database.open(DBSOURCE)
   });
 
 // ADMIN FUNCTION/S
-/* UP940148 Creds */
 // Retrieve all records from a given table
 exports.getAllInTable = async function (tableName) {
   const sql = `SELECT * FROM ${tableName};`;
@@ -153,6 +152,7 @@ exports.getUserPosts = async function (userId) {
     INNER JOIN registration
       ON post.registrationId = registration.registrationId
     WHERE registration.userId = ?
+    ORDER BY post.timeCreated DESC
   ;`;
   const response = await db.all(sql, [userId])
     .then(rows => {
