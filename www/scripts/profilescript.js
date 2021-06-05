@@ -5,12 +5,12 @@ profileForm.addEventListener('submit', updateDetails);
 const submitButton = document.querySelector('#profileForm > .profile-submit');
 document.getElementById('usernameField').addEventListener('focusout', checkValidUsername);
 document.getElementById('signOutLink').addEventListener('click', signOut);
-document.getElementById('navSignOutLink').addEventListener('click', signOut);
 
 const queryString = window.location.search;
 const profileId = queryString.substring(1);
-
+/* eslint-disable no-unused-vars */
 function fillPage() {
+  /* eslint-enable no-unused-vars */
   profileForm.classList.remove('hidden');
   if (profileId === userProfile.userId) {
     window.history.pushState('', '', '/profile');
@@ -86,7 +86,7 @@ async function checkValidUsername() {
     document.getElementById('invalidUsernameAlert').classList.add('hidden');
     document.querySelector('#profileForm > input').disabled = false;
   }
-};
+}
 
 
 document.getElementById('deletePictureBtn').addEventListener('click', deleteProfilePic);
