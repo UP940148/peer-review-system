@@ -1,26 +1,11 @@
 // Required modules
-const express = require('express');
 const config = require('../config');
+const api = require('./api-functions.js');
+const express = require('express');
 const googleAuth = require('simple-google-openid');
 const multer = require('multer');
-const api = require('./api-functions.js');
 const mkdirp = require('mkdirp');
 const fs = require('fs');
-// const { promisify } = require('util');
-// const renameAsync = promisify(fs.rename);
-try {
-  const stayAwake = require('stay-awake');
-  // Set up stay awake
-  stayAwake.prevent((err, data) => {
-    if (err) {
-      console.log("Non-essential module 'stay-awake' not found. Skipping...");
-      return;
-    }
-    console.log(`${data} routines are preventing sleep`);
-  });
-} catch (e) {
-  console.log("Module not found 'stay-awake'. Skipping...");
-}
 
 // Set up middleware
 const auth = googleAuth(config.CLIENT_ID);

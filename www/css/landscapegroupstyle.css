@@ -258,3 +258,19 @@ input[type='submit'] {
 .remove-button:hover {
   background-color: #ae4b4b !important;
 }
+
+input:disabled {
+  background-color: #d9d9d9;
+}
+
+input:invalid {
+  border: 2px solid red;
+  background-color: #ffeeee;
+}
+
+form:invalid > input[type='submit'] {
+  pointer-events: none;
+  background-color: #b9b9b9 !important;
+  border: 0 !important;
+  color: #b9b9b9;
+}

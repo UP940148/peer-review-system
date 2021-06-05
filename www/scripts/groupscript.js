@@ -18,8 +18,9 @@ const fileList = [];
 
 const queryString = window.location.search;
 const groupId = queryString.substring(1);
-
+/* eslint-disable no-unused-vars */
 async function fillPage() {
+  /* eslint-enable no-unused-vars */
   await getGroupInfo();
   // Create file upload utilities, to avoid new lines in html file counting as elements
   resetFileInput();

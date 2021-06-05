@@ -1,7 +1,6 @@
 /* global idToken, userProfile, getDateStringFromUnix, profileButtonClicked, Chart, */
 
 // Constant document values
-const topSection = document.getElementById('topSection');
 const htmlTitle = document.getElementById('pageTitle');
 const pageContent = document.getElementById('pageContent');
 const mainPost = document.getElementById('mainPost');
@@ -9,8 +8,9 @@ const mainPost = document.getElementById('mainPost');
 const queryString = window.location.search;
 const postId = queryString.substring(1);
 let post;
-
+/* eslint-disable no-unused-vars */
 async function fillPage() {
+  /* eslint-enable no-unused-vars */
   // Attempt to retrieve post from database
   const postResponse = await fetch('/post/' + postId, {
     headers: {
@@ -469,10 +469,12 @@ function displayFeedbackStats(stats) {
           },
         },
       };
+      /* eslint-disable no-unused-vars */
       const barChart = new Chart(
         barCanvas,
         barConfig,
       );
+      /* eslint-enable no-unused-vars */
       chartContainer.appendChild(barCanvas);
     }
   }

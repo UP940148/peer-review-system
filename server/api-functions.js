@@ -452,6 +452,18 @@ exports.createPost = async function (req, res) {
     return;
   }
 
+  // If no question or description, return 400
+  if (req.body.postTitle === '' || req.body.postDesc === '') {
+    res.sendStatus(400);
+    return;
+  }
+
+  // Format data correctly
+  if (req.body.postTitle.length > 128) {
+    const title = req.body.postTitle.substring(0, 128);
+    req.body.postTitle = title;
+  }
+
   // If not registered with group, return 404
   const checkRank = await db.checkRegistration(cohortId, req.user.id);
   if (!checkRank.context) {
