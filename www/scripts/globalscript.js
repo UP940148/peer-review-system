@@ -1,5 +1,5 @@
 /* global gapi, fillPage */
-
+/* eslint-disable no-unused-vars */
 try {
   document.getElementById('homeButton').addEventListener('click', () => {
     location.href = '/dashboard';

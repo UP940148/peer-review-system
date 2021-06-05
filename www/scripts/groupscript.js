@@ -126,7 +126,6 @@ async function getPosts() {
 
     const profileImg = document.createElement('img');
     profileImg.classList.add('post-profile-pic');
-    console.log(currentPost);
     profileImg.src = '/profile-pic/' + currentPost.userId;
     profileContainer.appendChild(profileImg);
 
@@ -197,9 +196,6 @@ function toggleUpdateMenu() {
 async function updateGroupDetails(e) {
   e.preventDefault();
   const formData = new FormData(document.getElementById('updateGroup'));
-  console.log(formData.get('cohortName'));
-  console.log(formData.get('cohortDesc'));
-  console.log(formData.get('isPrivate'));
 
   const response = await fetch('/cohort/' + groupId, {
     headers: {
@@ -500,8 +496,6 @@ function getSingleCriteria(containerElement) {
 
   // Get question type
   const inputField = containerElement.childNodes[3];
-  console.log(containerElement.childNodes);
-  console.log(inputField);
   if (inputField.tagName === 'TEXTAREA') {
     object.type = 'text';
   } else {
@@ -561,7 +555,6 @@ async function getInviteableUsers() {
       results = resData.results;
     }
   }
-  console.log(results);
   // Create new list entry for each result
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
@@ -600,7 +593,6 @@ async function getInviteableUsers() {
 
 function handleFiles(e) {
   const files = e.target.files;
-  console.log(files);
 
   const fileCount = document.getElementById('filePreviewContainer').childNodes.length - 2;
 

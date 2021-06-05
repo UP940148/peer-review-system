@@ -102,7 +102,6 @@ async function fillPage() {
     const inviteListContainer = document.getElementById('groupInvites');
     for (let i = 0; i < userInvites.length; i++) {
       const currentInvite = userInvites[i];
-      console.log(currentInvite);
       // Add invite to page
       const inviteContainer = document.createElement('div');
       inviteContainer.classList.add('invite-grid-container', 'content-item');
@@ -271,7 +270,6 @@ async function getGroupInvites() {
 }
 
 async function acceptInvite(inviteId) {
-  console.log('Accepting:', inviteId);
   const response = await fetch('/accept-invite/' + inviteId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
@@ -294,7 +292,6 @@ async function acceptInvite(inviteId) {
   fillPage();
 }
 async function declineInvite(inviteId) {
-  console.log('Declining:', inviteId);
   const response = await fetch('/decline-invite/' + inviteId, {
     headers: {
       Authorization: 'Bearer ' + idToken,

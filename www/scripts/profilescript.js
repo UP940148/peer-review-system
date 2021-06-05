@@ -15,7 +15,6 @@ function fillPage() {
   if (profileId === userProfile.userId) {
     window.history.pushState('', '', '/profile');
   }
-  console.log(userProfile);
   // Populate page with user details
   document.getElementById('pageTitle').textContent = userProfile.username;
   document.getElementById('usernameField').value = userProfile.username;
