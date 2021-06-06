@@ -203,9 +203,19 @@ exports.getProfilePic = async function (req, res) {
     return;
   }
 
-  // Send profile picture
   const file = response.context.picture;
-  res.sendFile(config.imageStore + file);
+
+  // Check if file exists
+  fs.access(config.imageStore + file, fs.F_OK, (err) => {
+    if (err) {
+      // If doesn't exists, send default
+      res.sendFile(config.imageStore + 'default-profile-pic.jpg');
+      return;
+    }
+    // Else send file
+    // Send profile picture
+    res.sendFile(config.imageStore + file);
+  });
 };
 
 exports.getCohort = async function (req, res) {
@@ -1088,6 +1098,10 @@ exports.clearUnused = function () {
   });
 };
 
+// exports.downloadPost = async function (req, res) {
+//
+// };
+
 async function handleFileUpload(files) {
   // Handle document upload
   const newFilenames = [];
@@ -1141,3 +1155,14 @@ function answerStringToList(subjectString) {
 
   return newList;
 }
+
+exports.wipeEmails = async function (req, res) {
+  const response = await db.wipeEmails();
+  if (response.failed) {
+    console.log(response);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(200);
+};

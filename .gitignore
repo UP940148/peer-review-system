@@ -1,9 +1,4 @@
 /node_modules/
-/sqlite.db
-/server/saved/
-/server/uploads/
-/server/redundants.txt
 /v1 files/server v1/saved/
 /v1 files/server v1/uploads/
 /logs/
-/backup/

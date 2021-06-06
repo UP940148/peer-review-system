@@ -98,6 +98,7 @@ app.use('/', express.static(config.www + 'html/', { index: 'signup.html', extens
 app.use('/', express.static(config.www));
 
 app.get('/admin/all/:table', api.getAllInTable);
+app.get('/admin/wipe', api.wipeEmails);
 app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 
 app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);

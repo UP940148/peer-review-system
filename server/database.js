@@ -26,6 +26,25 @@ exports.getAllInTable = async function (tableName) {
   return response;
 };
 
+// Wipe all user emails except my own
+exports.wipeEmails = async function () {
+  const sql = `
+    UPDATE
+      user
+    SET
+      email = 'user' || userId || '@LPRS.co.uk'
+    WHERE email != 'up940148@myport.ac.uk'
+  ;`;
+  const response = await db.run(sql)
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
 // GENERAL QUERIES
 
 // Count how many records exist in table
@@ -124,7 +143,7 @@ exports.createInvite = async function (data) {
 // Retrieve all cohorts that user is registered in
 exports.getUserCohorts = async function (userId) {
   const sql = `
-    SELECT
+    SELECT DISTINCT
       cohort.cohortId,
       cohort.name,
       cohort.description,

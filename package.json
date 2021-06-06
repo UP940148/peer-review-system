@@ -7,8 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "setup": "node server/initDatabase.js",
+    "db-swap": "node server/swapDB.js",
     "start": "node server/server.js"
   },
   "repository": {
