@@ -247,7 +247,8 @@ async function createDatabase() {
       console.log();
 
       const sql = 'INSERT INTO cohort (name, description, isPrivate) VALUES (?, ?, ?);';
-
+      
+/*
       // Insert feedback group
       await db.run(sql, ['Feedback', 'Please post any feedback/issues in this group', 0])
         .then(() => {
@@ -257,6 +258,7 @@ async function createDatabase() {
           console.log('Error creating Feedback group:', err.message);
           success = false;
         });
+*/
 
       // Insert general group
       await db.run(sql, ['General', 'General group for all work and topics', 0])
