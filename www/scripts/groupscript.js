@@ -259,8 +259,6 @@ function loadAdminTools() {
   document.getElementById('toggleUpdateGroupMenu').addEventListener('click', toggleUpdateMenu);
   document.getElementById('updateGroup').addEventListener('submit', updateGroupDetails);
   document.getElementById('inviteUsers').addEventListener('keyup', getInviteableUsers);
-  // Invite users via their username
-  // Toggle group public/private
 }
 
 function toggleUpdateMenu() {
@@ -444,9 +442,8 @@ function questionDeleted() {
   }
 }
 
-// e is declared to allow calling with custom parameters from fillPreset() as well as calling from event
-// Without having e declared, the event would go into 'type' and would just break things
-function addCriteriaResponse(e, type = undefined, value = undefined) { // eslint-disable-line no-unused-vars
+
+function addCriteriaResponse(_, type = undefined, value = undefined) {
   const container = document.createElement('div');
   const questionType = type || document.getElementById('newQuestionType').value;
   const responseValue = value || document.getElementById('newResponse').value;

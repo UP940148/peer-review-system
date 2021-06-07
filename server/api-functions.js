@@ -9,17 +9,17 @@ const fs = require('fs');
 const { promisify } = require('util');
 const renameAsync = promisify(fs.rename);
 
-// ADMIN FUNCTIONS
 
-exports.getAllInTable = async function (req, res) {
-  const response = await db.getAllInTable(req.params.table);
+// -- ADMIN FUNCTIONS --
+exports.wipeEmails = async function (req, res) {
+  const response = await db.wipeEmails();
   if (response.failed) {
+    console.log(response);
     res.sendStatus(500);
-  } else {
-    res.status(200).json({
-      data: response.context,
-    });
+    return;
   }
+
+  res.sendStatus(200);
 };
 
 exports.getFromTableWherePrimaryKey = async function (req, res) {
@@ -34,35 +34,19 @@ exports.getFromTableWherePrimaryKey = async function (req, res) {
   }
 };
 
-exports.checkUniqueUsername = async function (req, res) {
-  // Get current user profile to compare username
-  const user = await db.getRecordByPrimaryKey('user', req.user.id);
-  if (user.failed) {
+exports.getAllInTable = async function (req, res) {
+  const response = await db.getAllInTable(req.params.table);
+  if (response.failed) {
     res.sendStatus(500);
-    return;
-  }
-  // If username is owned by current user, then return 200
-  if (user.context.username === req.params.username) {
+  } else {
     res.status(200).json({
-      unique: true,
+      data: response.context,
     });
-    return;
   }
-  const isUnique = await checkUsername(req.params.username);
-  res.status(200).json({
-    unique: isUnique,
-  });
 };
 
-async function checkUsername(username) {
-  const lookup = await db.checkUsername(username);
-  if (lookup.context.total === 0) {
-    return true;
-  }
-  return false;
-}
 
-
+// -- USER FUNCTIONS --
 exports.createNewUser = async function (req, res) {
   const name = req.user.name.givenName;
   const email = req.user.emails[0].value;
@@ -100,6 +84,135 @@ exports.createNewUser = async function (req, res) {
   res.sendStatus(201);
 };
 
+exports.getCurrentUser = async function (req, res) {
+  const response = await db.getRecordByPrimaryKey('user', req.user.id);
+  if (response.failed) {
+    // If an error occured, return 500
+    res.sendStatus(500);
+    return;
+  }
+
+  // If user wasn't found, return 404
+  if (!response.context || response.context.length === 0) {
+    res.sendStatus(404);
+    return;
+  }
+
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
+exports.getProfilePic = async function (req, res) {
+  // If no user specified, return default image
+  if (!req.params.userId) {
+    res.sendFile(config.imageStore + 'default-profile-pic.jpg');
+    return;
+  }
+
+
+  const response = await db.getUserPicture(req.params.userId);
+  // If something went wrong, or picture not found, return default picture
+  if (response.failed || !response.context || response.context.picture === '') {
+    res.sendFile(config.imageStore + 'default-profile-pic.jpg');
+    return;
+  }
+
+  const file = response.context.picture;
+
+  // Check if file exists
+  fs.access(config.imageStore + file, fs.F_OK, (err) => {
+    if (err) {
+      // If doesn't exists, send default
+      res.sendFile(config.imageStore + 'default-profile-pic.jpg');
+      return;
+    }
+    // Else send file
+    // Send profile picture
+    res.sendFile(config.imageStore + file);
+  });
+};
+
+exports.updateUser = async function (req, res) {
+  // Get current user profile to compare username
+  const user = await db.getRecordByPrimaryKey('user', req.user.id);
+  if (user.failed) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If fields not provided, return 404
+  if (!req.body.newUsername || !req.body.newName) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // If username not owned by current user, check if unique
+  if (user.context.username !== req.body.newUsername) {
+    const isUnique = await checkUsername(req.body.newUsername);
+    // If not unique, return 400
+    if (!isUnique) {
+      res.sendStatus(400);
+      return;
+    }
+  }
+
+  // Update database
+  const data = [req.body.newUsername, req.body.newName, req.user.id];
+  const update = await db.updateUser(data);
+  // If failed, return 500
+  if (update.failed) {
+    console.log(update);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(204);
+};
+
+exports.updateProfilePic = async function (req, res) {
+  // Get picture from database ready to fs.unlink it
+  const picRetrieval = await db.getUserPicture(req.user.id);
+  if (picRetrieval.failed) {
+    console.log(picRetrieval.context);
+    res.sendStatus(500);
+    return;
+  }
+  let picture = picRetrieval.context.picture;
+
+  if (picture.length !== 0) {
+    // Mark old picture for deletion
+    fs.appendFile(config.redundants, config.imagePath + picture + ',', (err) => {
+      if (err) throw err;
+    });
+  }
+
+  picture = '';
+  if (req.file) {
+    // If updating picture, handle file upload
+    const file = req.file;
+    // Get the file extension and add it to the random file name
+    const fileExtList = file.originalname.split('.');
+    const fileExt = fileExtList[fileExtList.length - 1];
+    picture = file.filename + '.' + fileExt;
+    // Move file and rename it with extension
+    await renameAsync(file.path, config.imageStore + picture);
+  }
+
+  // Change database entry
+  const data = [picture, req.user.id];
+  const update = await db.updateUserPicture(data);
+  if (update.failed) {
+    console.log(update.context);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(204);
+};
+
+
+// -- COHORT FUNCTIONS --
 exports.createUpdateCohort = async function (req, res) {
   // If required data not found, return 400
   if (!req.body.cohortName || !req.body.cohortDesc) {
@@ -162,75 +275,6 @@ exports.createUpdateCohort = async function (req, res) {
   res.sendStatus(204);
 };
 
-async function insertRegistration(userId, cohortId, rank = 'member') {
-  const data = [userId, cohortId, rank];
-  const response = await db.createRegistration(data);
-  return response;
-}
-
-exports.getUserCohorts = async function (req, res) {
-  const response = await db.getUserCohorts(req.user.id);
-  if (response.failed) {
-    res.sendStatus(500);
-  } else {
-    if (response.context.length === 0) {
-      res.sendStatus(204);
-    }
-    res.status(200).json({
-      data: response.context,
-    });
-  }
-};
-
-exports.getCurrentUser = async function (req, res) {
-  const response = await db.getRecordByPrimaryKey('user', req.user.id);
-  if (response.failed) {
-    // If an error occured, return 500
-    res.sendStatus(500);
-    return;
-  }
-
-  // If user wasn't found, return 404
-  if (!response.context || response.context.length === 0) {
-    res.sendStatus(404);
-    return;
-  }
-
-  res.status(200).json({
-    data: response.context,
-  });
-};
-
-exports.getProfilePic = async function (req, res) {
-  // If no user specified, return default image
-  if (!req.params.userId) {
-    res.sendFile(config.imageStore + 'default-profile-pic.jpg');
-    return;
-  }
-
-
-  const response = await db.getUserPicture(req.params.userId);
-  // If something went wrong, or picture not found, return default picture
-  if (response.failed || !response.context || response.context.picture === '') {
-    res.sendFile(config.imageStore + 'default-profile-pic.jpg');
-    return;
-  }
-
-  const file = response.context.picture;
-
-  // Check if file exists
-  fs.access(config.imageStore + file, fs.F_OK, (err) => {
-    if (err) {
-      // If doesn't exists, send default
-      res.sendFile(config.imageStore + 'default-profile-pic.jpg');
-      return;
-    }
-    // Else send file
-    // Send profile picture
-    res.sendFile(config.imageStore + file);
-  });
-};
-
 exports.getCohort = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
 
@@ -277,6 +321,41 @@ exports.getCohort = async function (req, res) {
   });
 };
 
+exports.getUserCohorts = async function (req, res) {
+  const response = await db.getUserCohorts(req.user.id);
+  if (response.failed) {
+    res.sendStatus(500);
+  } else {
+    if (response.context.length === 0) {
+      res.sendStatus(204);
+    }
+    res.status(200).json({
+      data: response.context,
+    });
+  }
+};
+
+exports.searchCohorts = async function (req, res) {
+  // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
+  // However future additions might benefit
+  const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
+  const response = await db.searchCohorts(searchQuery, req.user.id);
+  if (response.failed) {
+    console.log(response);
+    res.sendStatus(500);
+    return;
+  }
+  if (response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  res.status(200).json({
+    results: response.context,
+  });
+};
+
+
+// -- REGISTRATION FUNCTIONS --
 exports.registerUser = async function (req, res) {
   // If cohortId invalid, return 400
   const cohortId = parseInt(req.params.cohortId);
@@ -344,6 +423,8 @@ exports.getRegistration = async function (req, res) {
   });
 };
 
+
+// -- INVITE FUNCTIONS --
 exports.inviteUsers = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
   const validBody = (req.body.userIds && typeof req.body.userIds === 'string');
@@ -376,21 +457,6 @@ exports.inviteUsers = async function (req, res) {
   }
 
   res.sendStatus(204);
-};
-
-exports.getInvites = async function (req, res) {
-  const response = await db.getUserInvites(req.user.id);
-  if (response.failed) {
-    res.sendStatus(500);
-    return;
-  }
-  if (response.context.length === 0) {
-    res.sendStatus(204);
-    return;
-  }
-  res.status(200).json({
-    data: response.context,
-  });
 };
 
 exports.acceptInvite = async function (req, res) {
@@ -430,6 +496,40 @@ exports.acceptInvite = async function (req, res) {
   res.sendStatus(204);
 };
 
+exports.getInvites = async function (req, res) {
+  const response = await db.getUserInvites(req.user.id);
+  if (response.failed) {
+    res.sendStatus(500);
+    return;
+  }
+  if (response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  res.status(200).json({
+    data: response.context,
+  });
+};
+
+exports.searchInviteableUsers = async function (req, res) {
+  const cohortId = parseInt(req.params.cohortId);
+  if (isNaN(cohortId)) {
+    res.sendStatus(400);
+    return;
+  }
+  // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
+  // However future additions might benefit
+  const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
+  const response = await db.searchInviteableUsers(searchQuery, cohortId);
+  if (response.failed || response.context.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+  res.status(200).json({
+    results: response.context,
+  });
+};
+
 exports.declineInvite = async function (req, res) {
   const inviteId = parseInt(req.params.inviteId);
   // If inviteId invalid, return 400
@@ -457,65 +557,8 @@ exports.declineInvite = async function (req, res) {
   res.sendStatus(204);
 };
 
-exports.getPosts = async function (req, res) {
-  // If attempting to get own posts but not logged in, return 404;
-  if (!req.params.cohortId && !req.user) {
-    res.sendStatus(400);
-    return;
-  }
-  // If requesting group posts
-  if (req.params.cohortId) {
-    const cohortId = parseInt(req.params.cohortId);
-    // Check if group is public
-    const getPublic = await db.getPublicCohort(cohortId);
-    if (!getPublic.context) {
-      // Check if user is registered
-      if (!req.user) {
-        res.sendStatus(404);
-        return;
-      }
-      // If not registered with group, return 404
-      const checkRank = await db.checkRegistration(cohortId, req.user.id);
-      if (!checkRank.context) {
-        res.sendStatus(404);
-        return;
-      }
-    }
-    // Group is either public, or user is member of group, so display posts
-    const posts = await db.getCohortPosts(cohortId);
-    if (posts.failed) {
-      res.sendStatus(500);
-      return;
-    }
-    // If no posts found, return 204
-    if (posts.context.length === 0) {
-      res.sendStatus(204);
-      return;
-    }
-    // Return posts
-    res.status(200).json({
-      data: posts.context,
-    });
-  } else {
-    // If requesting own posts
-    const posts = await db.getUserPosts(req.user.id);
-    if (posts.failed) {
-      res.sendStatus(500);
-      return;
-    }
-    // If no posts found, return 204
-    if (posts.context.length === 0) {
-      res.sendStatus(204);
-      return;
-    }
-    // Return posts
-    res.status(200).json({
-      data: posts.context,
-    });
-  }
-};
 
-
+// -- POST FUNCTIONS -- For user posts, not routes using the POST method
 exports.createPost = async function (req, res) {
   // If group ID invalid, return 404
   const cohortId = parseInt(req.params.cohortId);
@@ -621,6 +664,26 @@ exports.createPost = async function (req, res) {
   res.sendStatus(201);
 };
 
+async function handleFileUpload(files) {
+  // Handle document upload
+  const newFilenames = [];
+
+  // Loop through every file
+  for (const file of files) {
+    // Get the file extension and add it to the random file name
+    const fileExtList = file.originalname.split('.');
+    const fileExt = fileExtList[fileExtList.length - 1];
+    const newFilename = file.filename + '.' + fileExt;
+    // Move file and rename it with extension
+    await renameAsync(file.path, config.docStore + newFilename);
+    // Add file to list
+    newFilenames.push(newFilename);
+  }
+
+  // Return file list as string to store in database
+  return newFilenames.toString();
+}
+
 exports.getPost = async function (req, res) {
   // Check postId is valid
   const postId = parseInt(req.params.postId);
@@ -657,6 +720,118 @@ exports.getPost = async function (req, res) {
   });
 };
 
+exports.getPosts = async function (req, res) {
+  // If attempting to get own posts but not logged in, return 404;
+  if (!req.params.cohortId && !req.user) {
+    res.sendStatus(400);
+    return;
+  }
+  // If requesting group posts
+  if (req.params.cohortId) {
+    const cohortId = parseInt(req.params.cohortId);
+    // Check if group is public
+    const getPublic = await db.getPublicCohort(cohortId);
+    if (!getPublic.context) {
+      // Check if user is registered
+      if (!req.user) {
+        res.sendStatus(404);
+        return;
+      }
+      // If not registered with group, return 404
+      const checkRank = await db.checkRegistration(cohortId, req.user.id);
+      if (!checkRank.context) {
+        res.sendStatus(404);
+        return;
+      }
+    }
+    // Group is either public, or user is member of group, so display posts
+    const posts = await db.getCohortPosts(cohortId);
+    if (posts.failed) {
+      res.sendStatus(500);
+      return;
+    }
+    // If no posts found, return 204
+    if (posts.context.length === 0) {
+      res.sendStatus(204);
+      return;
+    }
+    // Return posts
+    res.status(200).json({
+      data: posts.context,
+    });
+  } else {
+    // If requesting own posts
+    const posts = await db.getUserPosts(req.user.id);
+    if (posts.failed) {
+      res.sendStatus(500);
+      return;
+    }
+    // If no posts found, return 204
+    if (posts.context.length === 0) {
+      res.sendStatus(204);
+      return;
+    }
+    // Return posts
+    res.status(200).json({
+      data: posts.context,
+    });
+  }
+};
+
+exports.deletePost = async function (req, res) {
+  const postId = parseInt(req.params.postId);
+  if (isNaN(postId)) {
+    res.sendStatus(400);
+    return;
+  }
+
+  // If post doesn't exist, return 404
+  const postRetrieval = await db.getPost(postId);
+  if (postRetrieval.failed || !postRetrieval.context) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Can only delete your own post
+  if (postRetrieval.context.userId !== req.user.id) {
+    res.sendStatus(404);
+    return;
+  }
+
+  // Delete post
+  const delResponse = await db.deletePost(postId);
+  if (delResponse.failed) {
+    res.sendStatus(500);
+    return;
+  }
+
+
+  // Mark files for deletion
+  const fileList = postRetrieval.context.files.split(',');
+  for (let i = 0; i < fileList.length; i++) {
+    fileList[i] = config.docPath + fileList[i];
+  }
+
+  fs.appendFile(config.redundants, fileList.toString() + ',', (err) => {
+    if (err) throw err;
+  });
+
+
+  // Delete criteria
+  const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', postRetrieval.context.criteriaId);
+  db.deleteCriteria(postRetrieval.context.criteriaId);
+
+  // Delete question responses
+  const questionList = criteriaRetrieval.context.questions.split(',');
+  for (let i = 0; i < questionList.length; i++) {
+    db.deleteResponses(questionList[i]);
+  }
+
+  res.sendStatus(204);
+};
+
+
+// -- CRITERIA FUNCTIONS --
 exports.getCriteria = async function (req, res) {
   const criteriaId = parseInt(req.params.criteriaId);
   if (isNaN(criteriaId)) {
@@ -712,6 +887,58 @@ exports.getCriteria = async function (req, res) {
   });
 };
 
+exports.getSavedQuestions = async function (req, res) {
+  // Retrieve saved questions from user table
+  const questionStringRetrieval = await db.getSavedQuestions(req.user.id);
+  if (questionStringRetrieval.failed) {
+    console.log(questionStringRetrieval);
+    res.sendStatus(500);
+    return;
+  }
+  // Convert question ids into list
+  const questionList = questionStringRetrieval.context.savedQuestions.split(',');
+  let questionCount = 0;
+  for (let i = 0; i < questionList.length; i++) {
+    if (questionList[i] !== '') questionCount++;
+  }
+  // If no questionIds in list, return 204
+  if (questionCount === 0) {
+    res.sendStatus(204);
+    return;
+  }
+
+  const returnList = [];
+  for (let i = 0; i < questionList.length; i++) {
+    const currentId = questionList[i];
+    // If current ID is blank, skip
+    // (the last entry will always be blank because of the comma at the end of the string)
+    if (currentId === '') {
+      continue;
+    }
+    const question = await db.getRecordByPrimaryKey('question', currentId);
+    // If retrieval failed, skip to next question
+    if (question.failed) {
+      continue;
+    }
+    // Create question object
+    const questionObj = {
+      questionContent: question.context.questionContent,
+      type: question.context.type,
+    };
+    // Get answers for question if applicable
+    if (questionObj.type !== 'text') {
+      questionObj.answers = answerStringToList(question.context.answers);
+    }
+    // Add question to list
+    returnList.push(questionObj);
+  }
+  res.status(200).json({
+    data: returnList,
+  });
+};
+
+
+// -- RESPONSE FUNCTIONS --
 exports.createResponse = async function (req, res) {
   const postId = parseInt(req.params.postId);
   if (isNaN(postId)) {
@@ -949,130 +1176,21 @@ async function getQuestionStats(questionId) {
   return questionStats;
 }
 
-exports.deletePost = async function (req, res) {
-  const postId = parseInt(req.params.postId);
-  if (isNaN(postId)) {
-    res.sendStatus(400);
-    return;
-  }
 
-  // If post doesn't exist, return 404
-  const postRetrieval = await db.getPost(postId);
-  if (postRetrieval.failed || !postRetrieval.context) {
-    res.sendStatus(404);
-    return;
-  }
+// -- FILE FUNCTIONS --
+exports.getFile = function (req, res) {
+  const id = req.params.fileId;
+  const file = `${config.docStore}${id}`;
 
-  // Can only delete your own post
-  if (postRetrieval.context.userId !== req.user.id) {
-    res.sendStatus(404);
-    return;
-  }
-
-  // Delete post
-  const delResponse = await db.deletePost(postId);
-  if (delResponse.failed) {
-    res.sendStatus(500);
-    return;
-  }
-
-
-  // Mark files for deletion
-  const fileList = postRetrieval.context.files.split(',');
-  for (let i = 0; i < fileList.length; i++) {
-    fileList[i] = config.docPath + fileList[i];
-  }
-
-  fs.appendFile(config.redundants, fileList.toString() + ',', (err) => {
-    if (err) throw err;
-  });
-
-
-  // Delete criteria
-  const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', postRetrieval.context.criteriaId);
-  db.deleteCriteria(postRetrieval.context.criteriaId);
-
-  // Delete question responses
-  const questionList = criteriaRetrieval.context.questions.split(',');
-  for (let i = 0; i < questionList.length; i++) {
-    db.deleteResponses(questionList[i]);
-  }
-
-  res.sendStatus(204);
-};
-
-exports.updateUser = async function (req, res) {
-  // Get current user profile to compare username
-  const user = await db.getRecordByPrimaryKey('user', req.user.id);
-  if (user.failed) {
-    res.sendStatus(404);
-    return;
-  }
-
-  // If fields not provided, return 404
-  if (!req.body.newUsername || !req.body.newName) {
-    res.sendStatus(404);
-    return;
-  }
-
-  // If username not owned by current user, check if unique
-  if (user.context.username !== req.body.newUsername) {
-    const isUnique = await checkUsername(req.body.newUsername);
-    // If not unique, return 400
-    if (!isUnique) {
-      res.sendStatus(400);
+  // Check if file exists
+  fs.access(file, fs.F_OK, (err) => {
+    if (err) {
+      // If doesn't exists, return 404
+      res.sendStatus(404);
       return;
     }
-  }
-
-  // Update database
-  const data = [req.body.newUsername, req.body.newName, req.user.id];
-  const update = await db.updateUser(data);
-  // If failed, return 500
-  if (update.failed) {
-    console.log(update);
-    res.sendStatus(500);
-    return;
-  }
-
-  res.sendStatus(204);
-};
-
-exports.searchInviteableUsers = async function (req, res) {
-  const cohortId = parseInt(req.params.cohortId);
-  if (isNaN(cohortId)) {
-    res.sendStatus(400);
-    return;
-  }
-  // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
-  // However future additions might benefit
-  const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
-  const response = await db.searchInviteableUsers(searchQuery, cohortId);
-  if (response.failed || response.context.length === 0) {
-    res.sendStatus(204);
-    return;
-  }
-  res.status(200).json({
-    results: response.context,
-  });
-};
-
-exports.searchCohorts = async function (req, res) {
-  // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
-  // However future additions might benefit
-  const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
-  const response = await db.searchCohorts(searchQuery, req.user.id);
-  if (response.failed) {
-    console.log(response);
-    res.sendStatus(500);
-    return;
-  }
-  if (response.context.length === 0) {
-    res.sendStatus(204);
-    return;
-  }
-  res.status(200).json({
-    results: response.context,
+    // Else send file
+    res.sendFile(file);
   });
 };
 
@@ -1089,22 +1207,6 @@ exports.getImage = function (req, res) {
     }
     // Else send image
     res.sendFile(image);
-  });
-};
-
-exports.getFile = function (req, res) {
-  const id = req.params.fileId;
-  const file = `${config.docStore}${id}`;
-
-  // Check if file exists
-  fs.access(file, fs.F_OK, (err) => {
-    if (err) {
-      // If doesn't exists, return 404
-      res.sendStatus(404);
-      return;
-    }
-    // Else send file
-    res.sendFile(file);
   });
 };
 
@@ -1127,15 +1229,26 @@ exports.downloadFile = function (req, res) {
 exports.downloadAll = async function (req, res) {
   const postId = parseInt(req.params.postId);
   if (isNaN(postId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
   // Get files from post
   const postRetrieval = await db.getPost(postId);
-  if (postRetrieval.failed || !postRetrieval.context) {
+  if (postRetrieval.failed) { // || !postRetrieval.context) {
+    res.sendStatus(500);
+    return;
+  }
+
+  if (!postRetrieval.context) {
     res.sendStatus(404);
     return;
   }
+
+  if (postRetrieval.context.files === '') {
+    res.sendStatus(204);
+    return;
+  }
+
   const files = postRetrieval.context.files.split(',');
   const fileObjs = [];
   files.forEach(file => {
@@ -1150,48 +1263,76 @@ exports.downloadAll = async function (req, res) {
   res.zip(fileObjs, `LPRS-${postId}_${unixTime}.zip`);
 };
 
-exports.updateProfilePic = async function (req, res) {
-  // Get picture from database ready to fs.unlink it
-  const picRetrieval = await db.getUserPicture(req.user.id);
-  if (picRetrieval.failed) {
-    console.log(picRetrieval.context);
+
+// -- MISCELLANEOUS FUNCTIONS --
+exports.checkUniqueUsername = async function (req, res) {
+  // Get current user profile to compare username
+  const user = await db.getRecordByPrimaryKey('user', req.user.id);
+  if (user.failed) {
     res.sendStatus(500);
     return;
   }
-  let picture = picRetrieval.context.picture;
-
-  if (picture.length !== 0) {
-    // Mark old picture for deletion
-    fs.appendFile(config.redundants, config.imagePath + picture + ',', (err) => {
-      if (err) throw err;
+  // If username is owned by current user, then return 200
+  if (user.context.username === req.params.username) {
+    res.status(200).json({
+      unique: true,
     });
-  }
-
-  picture = '';
-  if (req.file) {
-    // If updating picture, handle file upload
-    const file = req.file;
-    // Get the file extension and add it to the random file name
-    const fileExtList = file.originalname.split('.');
-    const fileExt = fileExtList[fileExtList.length - 1];
-    picture = file.filename + '.' + fileExt;
-    // Move file and rename it with extension
-    await renameAsync(file.path, config.imageStore + picture);
-  }
-
-  // Change database entry
-  const data = [picture, req.user.id];
-  const update = await db.updateUserPicture(data);
-  if (update.failed) {
-    console.log(update.context);
-    res.sendStatus(500);
     return;
   }
-
-  res.sendStatus(204);
+  const isUnique = await checkUsername(req.params.username);
+  res.status(200).json({
+    unique: isUnique,
+  });
 };
 
-// Get redundant files from file
+async function checkUsername(username) {
+  const lookup = await db.checkUsername(username);
+  if (lookup.context.total === 0) {
+    return true;
+  }
+  return false;
+}
+
+function answerListToString(subjectList) {
+  // Encode answer strings, then comma separate
+
+  const newList = [];
+
+  subjectList.forEach(subjectString => {
+    // I need to make sure the last character in each string isn't a backslash
+    subjectString += ' ';
+    // Storing separate strings as comma separated in my database means that
+    // I need a way to separate the commas in the string/s from the comma separations
+    const newString = subjectString.replace(/,/g, '/,');
+
+    newList.push(newString);
+  });
+
+  return newList.toString();
+}
+
+function answerStringToList(subjectString) {
+  // Remove whitespace from end of string
+  subjectString = subjectString.replace(/\s+$/, '');
+  // Convert string to list
+  const subjectList = subjectString.split(' ,');
+
+  const newList = [];
+  // Put all commas back where they should be
+  subjectList.forEach(item => {
+    const newString = item.replace(/\/,/g, ',');
+    newList.push(newString);
+  });
+
+  return newList;
+}
+
+async function insertRegistration(userId, cohortId, rank = 'member') {
+  const data = [userId, cohortId, rank];
+  const response = await db.createRegistration(data);
+  return response;
+}
+
 exports.clearUnused = function () {
   // I considered using fs.readdir to get all the saved files, then cycle through each one and check if it appears in a database post
   // However I changed my mind and took this following approach because it felt like it would scale better to a bigger system
@@ -1231,119 +1372,4 @@ exports.clearUnused = function () {
       console.log('Err:', err);
     }
   });
-};
-
-exports.getSavedQuestions = async function (req, res) {
-  // Retrieve saved questions from user table
-  const questionStringRetrieval = await db.getSavedQuestions(req.user.id);
-  if (questionStringRetrieval.failed) {
-    console.log(questionStringRetrieval);
-    res.sendStatus(500);
-    return;
-  }
-  // Convert question ids into list
-  const questionList = questionStringRetrieval.context.savedQuestions.split(',');
-  let questionCount = 0;
-  for (let i = 0; i < questionList.length; i++) {
-    if (questionList[i] !== '') questionCount++;
-  }
-  // If no questionIds in list, return 204
-  if (questionCount === 0) {
-    res.sendStatus(204);
-    return;
-  }
-
-  const returnList = [];
-  for (let i = 0; i < questionList.length; i++) {
-    const currentId = questionList[i];
-    // If current ID is blank, skip
-    // (the last entry will always be blank because of the comma at the end of the string)
-    if (currentId === '') {
-      continue;
-    }
-    const question = await db.getRecordByPrimaryKey('question', currentId);
-    // If retrieval failed, skip to next question
-    if (question.failed) {
-      continue;
-    }
-    // Create question object
-    const questionObj = {
-      questionContent: question.context.questionContent,
-      type: question.context.type,
-    };
-    // Get answers for question if applicable
-    if (questionObj.type !== 'text') {
-      questionObj.answers = answerStringToList(question.context.answers);
-    }
-    // Add question to list
-    returnList.push(questionObj);
-  }
-  res.status(200).json({
-    data: returnList,
-  });
-};
-
-async function handleFileUpload(files) {
-  // Handle document upload
-  const newFilenames = [];
-
-  // Loop through every file
-  for (const file of files) {
-    // Get the file extension and add it to the random file name
-    const fileExtList = file.originalname.split('.');
-    const fileExt = fileExtList[fileExtList.length - 1];
-    const newFilename = file.filename + '.' + fileExt;
-    // Move file and rename it with extension
-    await renameAsync(file.path, config.docStore + newFilename);
-    // Add file to list
-    newFilenames.push(newFilename);
-  }
-
-  // Return file list as string to store in database
-  return newFilenames.toString();
-}
-
-function answerListToString(subjectList) {
-  // Encode answer strings, then comma separate
-
-  const newList = [];
-
-  subjectList.forEach(subjectString => {
-    // I need to make sure the last character in each string isn't a backslash
-    subjectString += ' ';
-    // Storing separate strings as comma separated in my database means that
-    // I need a way to separate the commas in the string/s from the comma separations
-    const newString = subjectString.replace(/,/g, '/,');
-
-    newList.push(newString);
-  });
-
-  return newList.toString();
-}
-
-function answerStringToList(subjectString) {
-  // Remove whitespace from end of string
-  subjectString = subjectString.replace(/\s+$/, '');
-  // Convert string to list
-  const subjectList = subjectString.split(' ,');
-
-  const newList = [];
-  // Put all commas back where they should be
-  subjectList.forEach(item => {
-    const newString = item.replace(/\/,/g, ',');
-    newList.push(newString);
-  });
-
-  return newList;
-}
-
-exports.wipeEmails = async function (req, res) {
-  const response = await db.wipeEmails();
-  if (response.failed) {
-    console.log(response);
-    res.sendStatus(500);
-    return;
-  }
-
-  res.sendStatus(200);
 };

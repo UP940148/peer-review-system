@@ -9,6 +9,8 @@ const fs = require('fs');
 
 // Set up middleware
 const auth = googleAuth(config.CLIENT_ID);
+
+// Uploader and check function for posts
 const docUploader = multer({
   dest: config.uploads,
   limits: {
@@ -35,6 +37,7 @@ function checkDocType(file, cb) {
   }
 }
 
+// Uploader and check function for profile picture changes
 const profileUploader = multer({
   dest: config.uploads,
   limits: {
@@ -63,7 +66,6 @@ function checkProfileType(file, cb) {
   }
 }
 
-
 // Start express server
 const app = express();
 app.listen(config.PORT, (err) => {
@@ -76,9 +78,7 @@ app.listen(config.PORT, (err) => {
 
 async function logRequests(req, res, next) {
   await next();
-  if (req.hostname === 'localhost') {
-    return;
-  }
+
   const currentTime = new Date();
   const fileDir = `./logs/${currentTime.getFullYear()}/${currentTime.getMonth() + 1}/`;
   const filePath = fileDir + currentTime.getDate() + '.log';
@@ -91,12 +91,15 @@ async function logRequests(req, res, next) {
   });
 }
 
+
 app.use(logRequests);
 app.use(auth);
+
 
 app.use('/', express.static(config.www + 'html/', { index: 'signup.html', extensions: ['html'] }));
 app.use('/', express.static(config.www));
 
+// -- ADMIN ROUTES --
 app.get('/admin/all/:table', api.getAllInTable);
 app.get('/admin/wipe', api.wipeEmails);
 app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
@@ -135,7 +138,6 @@ app.delete('/post/:postId', googleAuth.guardMiddleware(), api.deletePost);
 app.get('/questions/:criteriaId', api.getCriteria);
 app.get('/questions', googleAuth.guardMiddleware(), api.getSavedQuestions);
 
-
 // -- RESPONSE ROUTES --
 app.post('/response/:postId', googleAuth.guardMiddleware(), docUploader.none(), api.createResponse);
 app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponseStats);
@@ -148,7 +150,6 @@ app.get('/download-all/:postId', api.downloadAll);
 
 // -- MISCELLANEOUS ROUTES --
 app.get('/username/:username', googleAuth.guardMiddleware(), api.checkUniqueUsername);
-
 
 // Every 10 minutes, delete unused documents
 setInterval(api.clearUnused, 600000);
