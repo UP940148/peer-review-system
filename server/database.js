@@ -637,6 +637,41 @@ exports.updateUserPicture = async function (data) {
   return response;
 };
 
+exports.addSavedQuestions = async function (userId, questionString) {
+  const sql = `
+    UPDATE
+      user
+    SET
+      savedQuestions = savedQuestions || ? || ','
+    WHERE userId = ?
+  ;`;
+  const response = await db.run(sql, [questionString, userId])
+    .then(() => {
+      return { failed: false, context: null };
+    })
+    .catch(err => {
+      return { failed: true, context: err.message };
+    });
+  return response;
+};
+
+exports.getSavedQuestions = async function (userId) {
+  const sql = `
+    SELECT
+      savedQuestions
+    FROM user
+    WHERE userId = ?
+  ;`;
+  const response = await db.get(sql, [userId])
+    .then(row => {
+      return { failed: false, context: row };
+    })
+    .catch(err => {
+      return { failed: true, context: err };
+    });
+  return response;
+};
+
 /*
 exports.checkInvite = async function (cohortId, inviteId) {
   const sql = 'SELECT inviteId FROM invite WHERE cohortId = ? AND inviteId = ?;';

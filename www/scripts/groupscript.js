@@ -1,11 +1,23 @@
 /* global userProfile, idToken, getDateStringFromUnix */
 
+document.addEventListener('keydown', (e) => {
+  if (e.keyCode === 13) {
+    e.preventDefault();
+  }
+});
+
+const presetSelector = document.getElementById('presetSelect');
 document.getElementById('createNewPost').addEventListener('click', openNewPostForm);
+document.getElementById('newResponse').addEventListener('keyup', checkIfAddingNewResponse);
 document.getElementById('createResponse').addEventListener('click', addCriteriaResponse);
 document.getElementById('newQuestionType').addEventListener('change', responseTypeChanged);
+presetSelector.addEventListener('change', fillPreset);
 document.getElementById('createCriteriaForm').addEventListener('submit', submitQuestion);
+document.getElementById('createCriteriaForm').addEventListener('change', (e) => {
+  if (e.target === presetSelector) return;
+  presetSelector.value = '';
+});
 document.getElementById('createPostButton').addEventListener('click', submitPost);
-
 
 // Constant document values
 const topSection = document.getElementById('topSection');
@@ -14,6 +26,7 @@ const groupDesc = document.getElementById('groupDesc');
 let groupInfo;
 let questionCount = 0;
 const fileList = [];
+const savedQuestions = [];
 
 
 const queryString = window.location.search;
@@ -92,6 +105,65 @@ async function getGroupInfo() {
     return;
   }
   document.getElementById('createNewPost').classList.remove('hidden');
+  // Populate question presets
+  // Get saved questions
+  const saved = await fetch('/questions/', {
+    headers: {
+      Authorization: 'Bearer ' + idToken,
+    },
+    credentials: 'same-origin',
+    method: 'GET',
+  });
+  if (!saved.ok) {
+    console.log(saved);
+    return;
+  }
+  const questionData = await saved.json();
+  const questions = questionData.data;
+  const presetContainer = document.getElementById('presetSelect');
+  // If no saved questions, return
+  if (questions.length === 0) {
+    return;
+  }
+  // Option elements have very little by way of styling options, so to stop long questions overflowing, I've set this maximum display length
+  // Ideally I need to come back to this and create my own select box, so that I can style it properly
+  const maxDisplayLength = 60;
+  // Loop through saved questions
+  for (let i = 0; i < questions.length; i++) {
+    const currentQuestion = questions[i];
+    savedQuestions.push(currentQuestion);
+    console.log(currentQuestion);
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = currentQuestion.questionContent.slice(0, maxDisplayLength);
+    if (currentQuestion.questionContent.length > maxDisplayLength) {
+      option.textContent += '…';
+    }
+    option.title = currentQuestion.questionContent;
+    presetContainer.appendChild(option);
+  }
+}
+
+function fillPreset(e) {
+  const question = savedQuestions[e.target.value];
+  // Update form elements
+  document.getElementById('saveQuestion').checked = false;
+  document.getElementById('newQuestionType').value = question.type;
+  document.getElementById('questionText').value = question.questionContent;
+  responseTypeChanged();
+
+  // Clear current allowed responses
+  const responseContainer = document.getElementById('responsesList');
+  while (responseContainer.firstChild) {
+    responseContainer.firstChild.remove();
+  }
+  // Add question responses
+  const type = question.type;
+  if (type === 'text') return;
+  for (let i = 0; i < question.answers.length; i++) {
+    const value = question.answers[i];
+    addCriteriaResponse(undefined, type, value);
+  }
 }
 
 async function getPosts() {
@@ -295,7 +367,6 @@ function createNewQuestion(type, question, responses = null) {
     textField.classList.add('large', 'criteria-content');
     textField.disabled = true;
     container.appendChild(textField);
-    return;
   } else if (type === 'checkbox' && responses) {
     // Create checkbox answer field
     for (let i = 0; i < responses.length; i++) {
@@ -310,8 +381,6 @@ function createNewQuestion(type, question, responses = null) {
       container.appendChild(label);
       container.appendChild(document.createElement('br'));
     }
-
-    return;
   } else if (type === 'radio' && responses) {
     // Create radio answer field
     for (let i = 0; i < responses.length; i++) {
@@ -327,11 +396,21 @@ function createNewQuestion(type, question, responses = null) {
       container.appendChild(label);
       container.appendChild(document.createElement('br'));
     }
-
+  } else {
+    console.log(type, ',', responses);
     return;
   }
 
-  console.log(type, ',', responses);
+  // Add save question box
+  container.appendChild(document.createElement('hr'));
+  const saveQuestion = document.createElement('input');
+  saveQuestion.type = 'checkbox';
+  saveQuestion.name = questionName + 'save';
+  saveQuestion.checked = document.getElementById('saveQuestion').checked;
+  container.appendChild(saveQuestion);
+  const saveLabel = document.createElement('label');
+  saveLabel.textContent = 'Save this question for use in future posts';
+  container.appendChild(saveLabel);
 }
 
 function updateQuestionNumber(mainContainer, number) {
@@ -366,10 +445,12 @@ function questionDeleted() {
   }
 }
 
-function addCriteriaResponse() {
+// e is assigned a value to allow calling with custom parameters as well as calling from event
+function addCriteriaResponse(e = undefined, type = undefined, value = undefined) {
   const container = document.createElement('div');
-  const questionType = document.getElementById('newQuestionType').value;
-  const responseValue = document.getElementById('newResponse').value;
+  const questionType = type || document.getElementById('newQuestionType').value;
+  const responseValue = value || document.getElementById('newResponse').value;
+  document.getElementById('newResponse').value = '';
   const box = document.createElement('input');
   box.disabled = true;
   const response = document.createElement('label');
@@ -386,6 +467,7 @@ function addCriteriaResponse() {
 
   // Create delete button
   const delButton = document.createElement('button');
+  delButton.type = 'button';
   delButton.textContent = 'Delete';
   delButton.classList.add('delete-criteria-button');
 
@@ -399,6 +481,14 @@ function addCriteriaResponse() {
   container.appendChild(response);
   container.appendChild(document.createElement('br'));
   document.getElementById('responsesList').appendChild(container);
+}
+
+function checkIfAddingNewResponse(e) {
+  console.log(e);
+  e.preventDefault();
+  if (e.keyCode === 13) { // If enter key pressed
+    addCriteriaResponse();
+  }
 }
 
 function responseTypeChanged() {
@@ -491,6 +581,7 @@ function getCriteriaData() {
 
 function getSingleCriteria(containerElement) {
   const questionContent = containerElement.childNodes[1].textContent;
+  const nodesLength = containerElement.childNodes.length;
 
   // Set up JSON object
   const object = {
@@ -506,13 +597,20 @@ function getSingleCriteria(containerElement) {
 
     // Get possible answers
     const answers = [];
-    for (let i = 3; i < containerElement.childNodes.length; i++) {
+    // First 3 and last 2 elements aren't questions
+    for (let i = 3; i < nodesLength - 2; i++) {
       const currentElement = containerElement.childNodes[i];
       if (currentElement.tagName === 'LABEL') {
         answers.push(currentElement.textContent);
       }
     }
     object.answers = answers;
+  }
+
+  // Check if being saved
+  const saving = containerElement.childNodes[nodesLength - 2].checked;
+  if (saving) {
+    object.save = saving;
   }
 
   return object;

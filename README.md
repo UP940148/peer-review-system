@@ -99,6 +99,8 @@ Bar chart visualisation of results
 
 I found that when a user wanted to delete a post, because I was needing to delete all the content of the post, things started to slow down, and as a user, you might have to wait 30-60 seconds before the post finally deleted and you were redirected to the group page. This was because of `fs.unlink()`. Both synchronous and asynchronous versions took a long time, so I decided to implement a clean-up function to delete files. When a post is deleted or a profile picture is updated/deleted, paths to the files that need deleting are stored in a file, `redundants.txt`, and every 10 minutes the clean-up function deletes them. This allows users to delete files near instantaneously.
 
+When creating a post, users can save questions and use them again as presets in future posts. This helps speed up the process of posting because it allows faster creation of questions. This is especially useful for adding radio questions along the lines of "What would you rate this work on a scale of 1-10" because adding responses 1-10 one-by-one can be a slow process on some devices.
+
 ## Future work
 
 - Downloadable feedback results
@@ -129,7 +131,14 @@ I found that when a user wanted to delete a post, because I was needing to delet
   - My database has tables for assignments and submissions already set up. The idea is that groups can have assignments set, with pre-defined marking criteria, which every member of the group can attempt. When the deadline hits, submissions will be stopped and the admin staff can assign feedback to each of the submissions
 
 
-- Add the ability for users to save questions, and then load them in the future to reuse them
+
+- Allow users to save question presets with specific names rather than just the name of the question text
+
+
+- Allow users to create presets without them being linked to a post
+
+- Allow users to delete saved questions
+  - Both of the above could be solved by a "Saved questions page" that would allow users to view their saved questions, and delete them/create new presets
 
 
 - Predict question responses

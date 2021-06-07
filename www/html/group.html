@@ -69,6 +69,13 @@
           <form id='createCriteriaForm'>
             <div class='new-criteria-container'>
               <h2>New Question</h2>
+              <label>Select from saved presets:</label>
+              <select id='presetSelect'>
+                <option value="" disabled selected hidden>-- None selected --</option>
+              </select>
+
+              <br><br>
+
               <label>Question Type:</label>
               <select id='newQuestionType' name='questionType'>
                 <option value='text'>Free text</option>
@@ -90,7 +97,9 @@
                 <div id='responsesList'></div>
               </fieldset>
 
+              <input type='checkbox' id='saveQuestion'>Save this question for use in future posts</input><br>
               <input type='submit' value='Add Question'>
+
             </div>
           </form>
           <form id='criteriaForm'></form>

@@ -486,6 +486,7 @@ exports.createPost = async function (req, res) {
 
   // List to store Ids to put in criteria record
   const questionIds = [];
+  const savingIDs = [];
   // Get question data
   for (let i = 0; i < criteriaData.questions.length; i++) {
     const currentQuestion = criteriaData.questions[i];
@@ -515,6 +516,18 @@ exports.createPost = async function (req, res) {
     }
     // Add ID to list
     questionIds.push(questionCreation.context.id);
+
+    // If question being saved, then add ID to list
+    if (currentQuestion.save) {
+      savingIDs.push(questionCreation.context.id);
+    }
+  }
+
+  // Add saved questions to profile
+  const savingString = savingIDs.toString();
+  const save = await db.addSavedQuestions(req.user.id, savingString);
+  if (save.failed) {
+    console.log(save);
   }
 
   // Insert criteria record
@@ -1098,9 +1111,46 @@ exports.clearUnused = function () {
   });
 };
 
-// exports.downloadPost = async function (req, res) {
-//
-// };
+exports.getSavedQuestions = async function (req, res) {
+  // Retrieve saved questions from user table
+  const questionStringRetrieval = await db.getSavedQuestions(req.user.id);
+  if (questionStringRetrieval.failed) {
+    console.log(questionStringRetrieval);
+    res.sendStatus(404);
+    return;
+  }
+  // Convert question ids into list
+  const questionList = questionStringRetrieval.context.savedQuestions.split(',');
+  console.log(questionList);
+  const returnList = [];
+  for (let i = 0; i < questionList.length; i++) {
+    const currentId = questionList[i];
+    // If current ID is blank, skip
+    // (the last entry will always be blank because of the comma at the end of the string)
+    if (currentId === '') {
+      continue;
+    }
+    const question = await db.getRecordByPrimaryKey('question', currentId);
+    // If retrieval failed, skip to next question
+    if (question.failed) {
+      continue;
+    }
+    // Create question object
+    const questionObj = {
+      questionContent: question.context.questionContent,
+      type: question.context.type,
+    };
+    // Get answers for question if applicable
+    if (questionObj.type !== 'text') {
+      questionObj.answers = answerStringToList(question.context.answers);
+    }
+    // Add question to list
+    returnList.push(questionObj);
+  }
+  res.status(200).json({
+    data: returnList,
+  });
+};
 
 async function handleFileUpload(files) {
   // Handle document upload

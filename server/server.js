@@ -121,6 +121,7 @@ app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponse
 app.get('/username/:username', googleAuth.guardMiddleware(), api.checkUniqueUsername);
 app.get('/inviteable-users/:cohortId/:query', googleAuth.guardMiddleware(), api.searchInviteableUsers);
 app.get('/cohorts/:query', googleAuth.guardMiddleware(), api.searchCohorts);
+app.get('/questions/', googleAuth.guardMiddleware(), api.getSavedQuestions);
 
 app.patch('/user', googleAuth.guardMiddleware(), profileUploader.none(), api.updateUser);
 app.patch('/profile-pic/', googleAuth.guardMiddleware(), profileUploader.single('picture'), api.updateProfilePic);
