@@ -445,8 +445,9 @@ function questionDeleted() {
   }
 }
 
-// e is assigned a value to allow calling with custom parameters as well as calling from event
-function addCriteriaResponse(e = undefined, type = undefined, value = undefined) {
+// e is declared to allow calling with custom parameters from fillPreset() as well as calling from event
+// Without having e declared, the event would go into 'type' and would just break things
+function addCriteriaResponse(e, type = undefined, value = undefined) { // eslint-disable-line no-unused-vars
   const container = document.createElement('div');
   const questionType = type || document.getElementById('newQuestionType').value;
   const responseValue = value || document.getElementById('newResponse').value;
