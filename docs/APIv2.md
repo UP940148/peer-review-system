@@ -299,7 +299,7 @@
 
     Example
 
-      ![Example Response](./images/ExampleResponse.png)
+      ![Example Response](images/ExampleResponse.png)
 
     would be represented as:
     ```
