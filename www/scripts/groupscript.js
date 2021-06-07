@@ -108,7 +108,7 @@ async function getGroupInfo() {
   document.getElementById('createNewPost').classList.remove('hidden');
   // Populate question presets
   // Get saved questions
-  const saved = await fetch('/questions/', {
+  const saved = await fetch('/questions', {
     headers: {
       Authorization: 'Bearer ' + idToken,
     },
