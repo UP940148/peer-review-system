@@ -885,16 +885,6 @@ exports.deletePost = async function (req, res) {
   // Delete post
   db.deletePost(postId);
 
-  // fs.unlink takes a long time, and until I can figure out why, I'm not going to unlink the files
-  // (DELETE /post/:postId took 16 seconds with fs.unlink. Without it, it took 70milliseconds)
-  // Delete files
-  // const fileList = postRetrieval.context.files.split(',');
-  // for (let i = 0; i < fileList.length; i++) {
-  //   fs.unlink(config.docStore + fileList[i], (err) => {
-  //     console.log(err);
-  //   });
-  // }
-
   // Mark files for deletion
   const fileList = postRetrieval.context.files.split(',');
   for (let i = 0; i < fileList.length; i++) {

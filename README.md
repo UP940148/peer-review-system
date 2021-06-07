@@ -121,7 +121,7 @@ When creating a post, users can save questions and use them again as presets in 
   - Currently the design is optimised primarily for mainstream computers which have a landscape display, with less consideration towards mobile users, however with some tweaking, the design could be easily optimised for mobile
 
 
-- Implement an internal method of displaying files, so that people can't just navigate to a file's URL in order to view it through Chrome
+- Implement an internal method of displaying files, so that people can't just navigate to a private file's URL in order to view it through their browser
   - I had this sort of thing set up nicely in my prototype system, however when I restarted the project and implemented the current system, something changed and `res.download(...)` stopped functioning in the same way. I could only get it to work if the client was directed directly to the request URL, which meant that I couldn't (in any way I know) check the userId and verify that the user had access to the file/s before allowing the download. So I want to research this issue a bit more and find the cause and a solution
   - Because of my issues with `res.download()`, I decided that it wasn't worth the extra time implementing a secure file viewer if it could be so easily circumvented by just requesting to download the files instead, hence this is future work
   - Maybe use `res.sendFile()`, and then have the client download the file with a href to `createObjectURL(file)`?
@@ -155,5 +155,9 @@ Initial design:
 ![Initial design](./docs/images/OriginalFeed.png)
 
 I also had to make some changes to my database design throughout the project because, again, I found the initial design to be too limiting. I designed the database at the same time as the layout, rather than designing the database and then the layout. This, again, meant I got locked in with a system that had no room to grow
+
+My original API design was severely lacking, and only gave a basic idea of what routes would be needed in the system. So throughout the project, my API has changed drastically, and covers a wider range of operations.
+
+I had the idea that I might use web-sockets to allow for live commenting on posts, and debated the idea of adding a chat function/individual file sharing system. But as I made progress with the system, I realised that it wouldn't add anything particularly useful to the system, hence I decided to forgo the idea.
 
 In order to properly stress test my system, I allowed users to access it and treat it as they would any other system. This helped me find bugs and fix them which helped a lot in development. However, rather unsurprisingly, I ended up with a couple of users posting what they wanted to, rather than what I wanted them to. This made me realise that, no matter how well I design a system to do something, users won't always use my system in the way I expect them to, and the way I designed it to be used. Users will use systems however they want. I decided not to delete posts and files that don't reflect what I was expecting, as I think that would have given a biased representation of the system, which would render the testing useless.
