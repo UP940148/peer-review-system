@@ -136,7 +136,6 @@ When creating a post, users can save questions and use them again as presets in 
 
 
 - Allow users to create presets without them being linked to a post
-
 - Allow users to delete saved questions
   - Both of the above could be solved by a "Saved questions page" that would allow users to view their saved questions, and delete them/create new presets
 

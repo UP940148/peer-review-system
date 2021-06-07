@@ -131,14 +131,14 @@ p.admin-tag {
   white-space: nowrap;
 }
 
-#createNewGroupContent > input[type='submit'] {
+#createNewGroupContent > div > input[type='submit'] {
   margin-top: .5rem;
   height: 2rem;
   border-radius: .5rem;
   border: 2px solid rgba(0, 0, 0, .5);
 }
 
-#createNewGroupContent > input[type='submit']:hover {
+#createNewGroupContent > div > input[type='submit']:hover {
   background-color: #ffffff;
 }
 
@@ -159,7 +159,7 @@ p.admin-tag {
     column-gap: 1%;
     margin: .5rem 0;
   }
-  #createNewGroupContent > input[type='submit'] {
+  #createNewGroupContent > div > input[type='submit'] {
     width: 25%;
   }
   #groupName {
@@ -181,7 +181,7 @@ p.admin-tag {
     font-size: 90%;
     margin: .5rem 0;
   }
-  #createNewGroupContent > input[type='submit'], #groupName {
+  #createNewGroupContent > div > input[type='submit'], #groupName {
     width: 100%;
   }
 }

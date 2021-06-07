@@ -1,7 +1,8 @@
 /* global userProfile, idToken, getDateStringFromUnix */
 
+// Prevent implicit form submission
 document.addEventListener('keydown', (e) => {
-  if (e.keyCode === 13) {
+  if (e.keyCode === 13 && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault();
   }
 });
@@ -132,7 +133,6 @@ async function getGroupInfo() {
   for (let i = 0; i < questions.length; i++) {
     const currentQuestion = questions[i];
     savedQuestions.push(currentQuestion);
-    console.log(currentQuestion);
     const option = document.createElement('option');
     option.value = i;
     option.textContent = currentQuestion.questionContent.slice(0, maxDisplayLength);
