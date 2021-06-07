@@ -38,7 +38,7 @@ exports.checkUniqueUsername = async function (req, res) {
   // Get current user profile to compare username
   const user = await db.getRecordByPrimaryKey('user', req.user.id);
   if (user.failed) {
-    res.sendStatus(404);
+    res.sendStatus(500);
     return;
   }
   // If username is owned by current user, then return 200
@@ -101,6 +101,16 @@ exports.createNewUser = async function (req, res) {
 };
 
 exports.createUpdateCohort = async function (req, res) {
+  // If required data not found, return 400
+  if (!req.body.cohortName || !req.body.cohortDesc) {
+    res.sendStatus(400);
+    return;
+  }
+  if (req.body.cohortName.length === 0 || req.body.cohortDesc.length === 0) {
+    res.sendStatus(400);
+    return;
+  }
+
   // Format data correctly
   if (req.body.cohortName.length > 32) {
     const name = req.body.cohortName.substring(0, 32);
@@ -128,7 +138,7 @@ exports.createUpdateCohort = async function (req, res) {
       if (cohortResponse.failed) {
         res.sendStatus(500);
       } else {
-        res.sendStatus(200);
+        res.sendStatus(204);
       }
     } else {
       res.sendStatus(404);
@@ -149,7 +159,7 @@ exports.createUpdateCohort = async function (req, res) {
     return;
   }
 
-  res.sendStatus(201);
+  res.sendStatus(204);
 };
 
 async function insertRegistration(userId, cohortId, rank = 'member') {
@@ -163,6 +173,9 @@ exports.getUserCohorts = async function (req, res) {
   if (response.failed) {
     res.sendStatus(500);
   } else {
+    if (response.context.length === 0) {
+      res.sendStatus(204);
+    }
     res.status(200).json({
       data: response.context,
     });
@@ -220,6 +233,13 @@ exports.getProfilePic = async function (req, res) {
 
 exports.getCohort = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
+
+  // If cohortId wrong type, return 400
+  if (isNaN(cohortId)) {
+    res.sendStatus(400);
+    return;
+  }
+
   // Get group from database
   const response = await db.getRecordByPrimaryKey('cohort', cohortId);
 
@@ -258,8 +278,14 @@ exports.getCohort = async function (req, res) {
 };
 
 exports.registerUser = async function (req, res) {
-  // Check if cohort is public or not
+  // If cohortId invalid, return 400
   const cohortId = parseInt(req.params.cohortId);
+  if (isNaN(cohortId)) {
+    res.sendStatus(400);
+    return;
+  }
+
+  // Check if cohort is public or not
   const response = await db.getPublicCohort(cohortId);
   if (!response.context) {
     res.sendStatus(404);
@@ -288,22 +314,31 @@ exports.registerUser = async function (req, res) {
       return;
     }
   }
-  res.sendStatus(200);
+  res.sendStatus(204);
 };
 
 exports.getRegistration = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
-  if (!req.user) {
-    res.sendStatus(404);
+  // If cohortId invalid, return 400
+  if (isNaN(cohortId)) {
+    res.sendStatus(400);
     return;
   }
+  // Attempt to fetch registration
   const response = await db.checkRegistration(cohortId, req.user.id);
+  if (response.failed) {
+    console.log(response);
+    res.sendStatus(500);
+    return;
+  }
+  // If user not registered, return guest
   if (!response.context) {
     res.status(200).json({
       rank: 'guest',
     });
     return;
   }
+  // Return user's rank
   res.status(200).json({
     rank: response.context.rank,
   });
@@ -311,8 +346,14 @@ exports.getRegistration = async function (req, res) {
 
 exports.inviteUsers = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
+  const validBody = (req.body.userIds && typeof req.body.userIds === 'string');
+  // If request data invalid, return 400
+  if (isNaN(cohortId) || !validBody) {
+    res.sendStatus(400);
+    return;
+  }
   const checkRank = await db.checkRegistration(cohortId, req.user.id);
-  if (!(checkRank.context.rank === 'owner' || checkRank.context.rank === 'admin')) {
+  if (!(checkRank.context.rank === 'owner')) { // || checkRank.context.rank === 'admin')) { -- Admin rank unused in current version
     res.sendStatus(404);
     return;
   }
@@ -334,7 +375,7 @@ exports.inviteUsers = async function (req, res) {
     }
   }
 
-  res.sendStatus(200);
+  res.sendStatus(204);
 };
 
 exports.getInvites = async function (req, res) {
@@ -355,10 +396,16 @@ exports.getInvites = async function (req, res) {
 exports.acceptInvite = async function (req, res) {
   // Get invite by id
   const inviteId = parseInt(req.params.inviteId);
+
+  if (isNaN(inviteId)) {
+    res.sendStatus(400);
+    return;
+  }
+
   const invite = await db.getRecordByPrimaryKey('invite', inviteId);
 
-  // If invite not with this user, return 404
-  if (invite.context.userId !== req.user.id) {
+  // If invite not found with this user, return 404
+  if (!invite.context || invite.context.userId !== req.user.id) {
     res.sendStatus(404);
     return;
   }
@@ -379,17 +426,22 @@ exports.acceptInvite = async function (req, res) {
     return;
   }
 
-  // If success, return 200
-  res.sendStatus(200);
+  // If success, return 204
+  res.sendStatus(204);
 };
 
 exports.declineInvite = async function (req, res) {
-  // Get invite by id
   const inviteId = parseInt(req.params.inviteId);
+  // If inviteId invalid, return 400
+  if (isNaN(inviteId)) {
+    res.sendStatus(400);
+    return;
+  }
+  // Get invite by id
   const invite = await db.getRecordByPrimaryKey('invite', inviteId);
 
   // If invite not with this user, return 404
-  if (invite.context.userId !== req.user.id) {
+  if (!invite.context || invite.context.userId !== req.user.id) {
     res.sendStatus(404);
     return;
   }
@@ -401,14 +453,14 @@ exports.declineInvite = async function (req, res) {
     res.sendStatus(500);
     return;
   }
-  // If success, return 200
-  res.sendStatus(200);
+  // If success, return 204
+  res.sendStatus(204);
 };
 
 exports.getPosts = async function (req, res) {
   // If attempting to get own posts but not logged in, return 404;
   if (!req.params.cohortId && !req.user) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
   // If requesting group posts
@@ -435,6 +487,12 @@ exports.getPosts = async function (req, res) {
       res.sendStatus(500);
       return;
     }
+    // If no posts found, return 204
+    if (posts.context.length === 0) {
+      res.sendStatus(204);
+      return;
+    }
+    // Return posts
     res.status(200).json({
       data: posts.context,
     });
@@ -445,6 +503,12 @@ exports.getPosts = async function (req, res) {
       res.sendStatus(500);
       return;
     }
+    // If no posts found, return 204
+    if (posts.context.length === 0) {
+      res.sendStatus(204);
+      return;
+    }
+    // Return posts
     res.status(200).json({
       data: posts.context,
     });
@@ -456,11 +520,15 @@ exports.createPost = async function (req, res) {
   // If group ID invalid, return 404
   const cohortId = parseInt(req.params.cohortId);
   if (isNaN(cohortId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
 
-  // If no question or description, return 400
+  // If no title or description, return 400
+  if (!req.body.postTitle || !req.body.postDesc) {
+    res.sendStatus(400);
+    return;
+  }
   if (req.body.postTitle === '' || req.body.postDesc === '') {
     res.sendStatus(400);
     return;
@@ -503,8 +571,8 @@ exports.createPost = async function (req, res) {
       answerStringToList(answerString);
       data.push(answerString);
     } else {
-      // If type not valid, return 404
-      res.sendStatus(404);
+      // If type not valid, return 400
+      res.sendStatus(400);
       return;
     }
 
@@ -557,7 +625,7 @@ exports.getPost = async function (req, res) {
   // Check postId is valid
   const postId = parseInt(req.params.postId);
   if (isNaN(postId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
 
@@ -592,18 +660,23 @@ exports.getPost = async function (req, res) {
 exports.getCriteria = async function (req, res) {
   const criteriaId = parseInt(req.params.criteriaId);
   if (isNaN(criteriaId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
 
   // Retrieve questions
   const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', criteriaId);
   if (criteriaRetrieval.failed) {
+    res.sendStatus(500);
+    return;
+  }
+  // If not found, return 404
+  if (!criteriaRetrieval.context) {
     res.sendStatus(404);
     return;
   }
 
-
+  // Get the questions from the criteria object
   const questionList = criteriaRetrieval.context.questions.split(',');
   const questions = [];
   for (let i = 0; i < questionList.length; i++) {
@@ -627,6 +700,12 @@ exports.getCriteria = async function (req, res) {
     questions.push(questionObj);
   }
 
+  // If no questions, return 204
+  if (questions.length === 0) {
+    res.sendStatus(204);
+    return;
+  }
+
   // Return data to client
   res.status(200).json({
     data: questions,
@@ -636,7 +715,7 @@ exports.getCriteria = async function (req, res) {
 exports.createResponse = async function (req, res) {
   const postId = parseInt(req.params.postId);
   if (isNaN(postId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
 
@@ -684,15 +763,21 @@ exports.createResponse = async function (req, res) {
   const questionNumList = [];
   const answers = [];
   const body = Object.keys(req.body);
+  if (body.length === 0) {
+    res.sendStatus(400);
+    return;
+  }
   for (let i = 0; i < body.length; i++) {
+    console.log(body[i] + ': ' + req.body[body[i]]);
     // Get question number
     const questionNum = body[i].match(/\d+/)[0];
     // If this question doesn't already have an answer, create a new reference in list
     if (!questionNumList.includes(questionNum)) {
       questionNumList.push(questionNum);
     }
-    // Was it a checkbox question
+
     const matchList = body[i].match(/\d+/g);
+    // Was it a checkbox question
     if (matchList.length > 1) {
       // Get the index of the question
       const indexPos = questionNumList.indexOf(questionNum);
@@ -720,9 +805,11 @@ exports.createResponse = async function (req, res) {
     }
 
     // If question has multiple answers, convert indexes to actual answers
+    // Checkboxes can have more than one answer in one response
+    // So type is array ('object') rather than 'string'
     if (typeof answers[i] !== 'string') {
       if (currentQuestion.context.type !== 'checkbox') {
-        res.sendStatus(404);
+        res.sendStatus(400);
         return;
       }
 
@@ -772,7 +859,7 @@ exports.createResponse = async function (req, res) {
 exports.getResponseStats = async function (req, res) {
   const postId = parseInt(req.params.postId);
   if (isNaN(postId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
 
@@ -865,7 +952,7 @@ async function getQuestionStats(questionId) {
 exports.deletePost = async function (req, res) {
   const postId = parseInt(req.params.postId);
   if (isNaN(postId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
 
@@ -883,7 +970,12 @@ exports.deletePost = async function (req, res) {
   }
 
   // Delete post
-  db.deletePost(postId);
+  const delResponse = await db.deletePost(postId);
+  if (delResponse.failed) {
+    res.sendStatus(500);
+    return;
+  }
+
 
   // Mark files for deletion
   const fileList = postRetrieval.context.files.split(',');
@@ -900,13 +992,13 @@ exports.deletePost = async function (req, res) {
   const criteriaRetrieval = await db.getRecordByPrimaryKey('criteria', postRetrieval.context.criteriaId);
   db.deleteCriteria(postRetrieval.context.criteriaId);
 
-  // Delete questions and responses
+  // Delete question responses
   const questionList = criteriaRetrieval.context.questions.split(',');
   for (let i = 0; i < questionList.length; i++) {
-    db.deleteQuestion(questionList[i]);
+    db.deleteResponses(questionList[i]);
   }
 
-  res.sendStatus(200);
+  res.sendStatus(204);
 };
 
 exports.updateUser = async function (req, res) {
@@ -916,6 +1008,13 @@ exports.updateUser = async function (req, res) {
     res.sendStatus(404);
     return;
   }
+
+  // If fields not provided, return 404
+  if (!req.body.newUsername || !req.body.newName) {
+    res.sendStatus(404);
+    return;
+  }
+
   // If username not owned by current user, check if unique
   if (user.context.username !== req.body.newUsername) {
     const isUnique = await checkUsername(req.body.newUsername);
@@ -936,20 +1035,20 @@ exports.updateUser = async function (req, res) {
     return;
   }
 
-  res.sendStatus(201);
+  res.sendStatus(204);
 };
 
 exports.searchInviteableUsers = async function (req, res) {
   const cohortId = parseInt(req.params.cohortId);
   if (isNaN(cohortId)) {
-    res.sendStatus(404);
+    res.sendStatus(400);
     return;
   }
   // Converting to upper case is somewhat irrelevant because SQLite is case-insensitive by default
   // However future additions might benefit
   const searchQuery = '%' + decodeURIComponent(req.params.query).toUpperCase() + '%';
   const response = await db.searchInviteableUsers(searchQuery, cohortId);
-  if (response.failed) {
+  if (response.failed || response.context.length === 0) {
     res.sendStatus(204);
     return;
   }
@@ -965,6 +1064,10 @@ exports.searchCohorts = async function (req, res) {
   const response = await db.searchCohorts(searchQuery, req.user.id);
   if (response.failed) {
     console.log(response);
+    res.sendStatus(500);
+    return;
+  }
+  if (response.context.length === 0) {
     res.sendStatus(204);
     return;
   }
@@ -976,20 +1079,49 @@ exports.searchCohorts = async function (req, res) {
 exports.getImage = function (req, res) {
   const id = req.params.imageId;
   const image = `${config.imageStore}${id}`;
-  res.sendFile(image);
+
+  // Check if image exists
+  fs.access(image, fs.F_OK, (err) => {
+    if (err) {
+      // If doesn't exists, return 404
+      res.sendStatus(404);
+      return;
+    }
+    // Else send image
+    res.sendFile(image);
+  });
 };
 
 exports.getFile = function (req, res) {
   const id = req.params.fileId;
   const file = `${config.docStore}${id}`;
-  res.sendFile(file);
+
+  // Check if file exists
+  fs.access(file, fs.F_OK, (err) => {
+    if (err) {
+      // If doesn't exists, return 404
+      res.sendStatus(404);
+      return;
+    }
+    // Else send file
+    res.sendFile(file);
+  });
 };
 
 exports.downloadFile = function (req, res) {
-  // Takes the document id specified in req.params and makes the client download it
   const id = req.params.fileId;
   const file = `${config.docStore}${id}`;
-  res.download(file);
+
+  // Check if file exists
+  fs.access(file, fs.F_OK, (err) => {
+    if (err) {
+      // If doesn't exists, return 404
+      res.sendStatus(404);
+      return;
+    }
+    // Else send file
+    res.download(file);
+  });
 };
 
 exports.downloadAll = async function (req, res) {
@@ -1036,7 +1168,7 @@ exports.updateProfilePic = async function (req, res) {
   }
 
   picture = '';
-  if (req.method === 'PATCH' && req.file) {
+  if (req.file) {
     // If updating picture, handle file upload
     const file = req.file;
     // Get the file extension and add it to the random file name
@@ -1056,7 +1188,7 @@ exports.updateProfilePic = async function (req, res) {
     return;
   }
 
-  res.sendStatus(200);
+  res.sendStatus(204);
 };
 
 // Get redundant files from file
@@ -1106,12 +1238,21 @@ exports.getSavedQuestions = async function (req, res) {
   const questionStringRetrieval = await db.getSavedQuestions(req.user.id);
   if (questionStringRetrieval.failed) {
     console.log(questionStringRetrieval);
-    res.sendStatus(404);
+    res.sendStatus(500);
     return;
   }
   // Convert question ids into list
   const questionList = questionStringRetrieval.context.savedQuestions.split(',');
-  console.log(questionList);
+  let questionCount = 0;
+  for (let i = 0; i < questionList.length; i++) {
+    if (questionList[i] !== '') questionCount++;
+  }
+  // If no questionIds in list, return 204
+  if (questionCount === 0) {
+    res.sendStatus(204);
+    return;
+  }
+
   const returnList = [];
   for (let i = 0; i < questionList.length; i++) {
     const currentId = questionList[i];

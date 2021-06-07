@@ -147,8 +147,7 @@ exports.getUserCohorts = async function (userId) {
       cohort.cohortId,
       cohort.name,
       cohort.description,
-      cohort.isPrivate,
-      registration.rank
+      cohort.isPrivate
     FROM cohort
     INNER JOIN registration
       ON cohort.cohortId = registration.cohortId
@@ -289,13 +288,13 @@ exports.getCohortPosts = async function (cohortId) {
   const sql = `
     SELECT
       post.postId,
-      post.criteriaId,
       post.title,
       post.description,
       post.files,
       post.timeCreated,
-      user.username,
-      user.userId
+      post.criteriaId,
+      user.userId,
+      user.username
     FROM post
     INNER JOIN registration
       ON post.registrationId = registration.registrationId
@@ -354,11 +353,11 @@ exports.getPost = async function (postId) {
   const sql = `
   SELECT
     postId,
-    criteriaId,
     title,
     description,
     files,
     timeCreated,
+    criteriaId,
     registration.cohortId,
     registration.userId,
     user.username
@@ -504,12 +503,11 @@ exports.deleteCriteria = async function (criteriaId) {
   return response;
 };
 
-exports.deleteQuestion = async function (questionId) {
+exports.deleteResponses = async function (questionId) {
   const sql = `
     DELETE FROM response WHERE questionId = ?;
-    DELETE FROM question WHERE questionId = ?;
   `;
-  const response = await db.get(sql, [questionId, questionId])
+  const response = await db.get(sql, [questionId])
     .then(() => {
       return { failed: false, context: null };
     })
@@ -542,33 +540,32 @@ exports.searchInviteableUsers = async function (query, cohortId) {
   const sql = `
     SELECT DISTINCT
       user.userId,
-      user.username,
-      (
-        SELECT
-          COUNT(*)
-        FROM registration
-        WHERE registration.userId = user.userId
-        AND registration.cohortId = ?
-      ) AS registrationCount,
-      (
-        SELECT
-          COUNT(*)
-        FROM invite
-        WHERE invite.userId = user.userId
-        AND invite.cohortId = ?
-      ) AS inviteCount
+      user.username
     FROM user
     WHERE
     (
       username LIKE ?
       OR email LIKE ?
     )
-    AND registrationCount = 0 -- Don't return if user already registered
-    AND inviteCount = 0 -- Don't return if user has pending invite
+    AND ? NOT IN
+      (
+        SELECT
+          registration.cohortId
+        FROM registration
+        WHERE registration.userId = user.userId
+      ) -- Don't return if user already registered
+
+    AND ? NOT IN
+      (
+        SELECT
+          invite.cohortId
+        FROM invite
+        WHERE invite.userId = user.userId
+      ) -- Don't return if user has pending invite
     ORDER BY username
     LIMIT 10
   ;`;
-  const response = await db.all(sql, [cohortId, cohortId, query, query])
+  const response = await db.all(sql, [query, query, cohortId, cohortId])
     .then(rows => {
       return { failed: false, context: rows };
     })
@@ -584,20 +581,20 @@ exports.searchCohorts = async function (query, userId) {
       cohort.cohortId,
       cohort.name,
       cohort.description,
-      (
-        SELECT
-          COUNT(*)
-        FROM registration
-        WHERE registration.cohortId = cohort.cohortId
-        AND registration.userId = ?
-      ) AS registrationCount
+      cohort.isPrivate
     FROM cohort
     WHERE cohort.name LIKE ?
     AND cohort.isPrivate = 0
-    AND registrationCount = 0 -- Don't return if already registered
+    AND ? NOT IN
+      (
+        SELECT
+          registration.userId
+        FROM registration
+        WHERE cohort.cohortId = registration.cohortId
+      ) -- Don't return if already registered
     ORDER BY cohort.name
   ;`;
-  const response = await db.all(sql, [userId, query])
+  const response = await db.all(sql, [query, userId])
     .then(rows => {
       return { failed: false, context: rows };
     })

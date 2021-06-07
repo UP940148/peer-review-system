@@ -128,7 +128,7 @@ function downloadFile(file) {
 
 function downloadAllFiles() {
 /*
-  const response = await fetch('/downloadAll/' + postId, {
+  const response = await fetch('/download-all/' + postId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
     },
@@ -140,7 +140,7 @@ function downloadAllFiles() {
   }
   console.log(response);
 */
-  window.open('/downloadAll/' + postId);
+  window.open('/download-all/' + postId);
 }
 
 function displayPostContent() {
@@ -182,7 +182,7 @@ function displayPostContent() {
 }
 
 async function displayFeedbackForm(criteriaId) {
-  const response = await fetch('/criteria/' + criteriaId, {
+  const response = await fetch('/questions/' + criteriaId, {
     headers: {
       Authorization: 'Bearer ' + idToken,
     },

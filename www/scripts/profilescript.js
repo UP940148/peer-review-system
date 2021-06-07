@@ -96,7 +96,7 @@ async function deleteProfilePic() {
       Authorization: 'Bearer ' + idToken,
     },
     credentials: 'same-origin',
-    method: 'DELETE',
+    method: 'PATCH',
   });
 
   // Set pictures back to default

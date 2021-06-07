@@ -48,13 +48,11 @@ npm start
 
 The application will then be accessible from `localhost:8080`
 
-(You can change to your preferred port by changing the value in `{ROOT}/config.js`)
+(You can change to your preferred port by changing the value in `{ROOT_DIR}/config.js`)
 
 ## Interacting with the system
 
-(Throughout this section, `*host*` will refer to the combination of the application's Hostname and port number)
-
-When first launching the application at `*host*/`, you will be presented with a welcome page, from which you can log in to the system and access all of it's features. Attempting to access this welcome page whilst signed in will redirect you to `*host*/dashboard`, and inversely, attempting to access `*host*/dashboard` without being signed in will redirect you back to this welcome screen.
+When first launching the application at `<root>/`, you will be presented with a welcome page, from which you can log in to the system and access all of it's features. Attempting to access this welcome page whilst signed in will redirect you to `<root>/dashboard`, and inversely, attempting to access `<root>/dashboard` without being signed in will redirect you back to this welcome screen.
 
 ### Signing in
 
@@ -101,6 +99,8 @@ I found that when a user wanted to delete a post, because I was needing to delet
 
 When creating a post, users can save questions and use them again as presets in future posts. This helps speed up the process of posting because it allows faster creation of questions. This is especially useful for adding radio questions along the lines of "What would you rate this work on a scale of 1-10" because adding responses 1-10 one-by-one can be a slow process on some devices.
 
+Users don't have to be logged in to view work. As long as work is posted in a public group, anyone can view it, for as long as the group is public, by navigating to the post's URL
+
 ## Future work
 
 - Downloadable feedback results
@@ -131,7 +131,6 @@ When creating a post, users can save questions and use them again as presets in 
   - My database has tables for assignments and submissions already set up. The idea is that groups can have assignments set, with pre-defined marking criteria, which every member of the group can attempt. When the deadline hits, submissions will be stopped and the admin staff can assign feedback to each of the submissions
 
 
-
 - Allow users to save question presets with specific names rather than just the name of the question text
 
 
@@ -146,6 +145,16 @@ When creating a post, users can save questions and use them again as presets in 
 
 - Delete files that didn't make it to a post
   - Currently if a user attempts to create a post, or update their profile picture, the files go through the 'uploads' folder, before being moved to the 'saved' folder. However if posting fails, for whatever reason, the files will stay there, and won't be removed
+
+
+- Allow admins in groups, so that not only the owner has access to admin features
+
+
+- Delete cohorts
+
+## Additional documentation
+
+Some additional documentation files can be found in `./docs/`
 
 ## Reflections
 

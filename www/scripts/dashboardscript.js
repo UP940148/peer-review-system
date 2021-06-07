@@ -361,21 +361,16 @@ async function searchNewGroups(e) {
     method: 'GET',
   });
   let results;
-  if (responses.status === 204) {
+  if (responses.status !== 200) {
     // Display no results
     results = 'No results';
     groupList.classList.add('hidden');
     return;
   } else {
     const resData = await responses.json();
-    if (resData.results.length === 0) {
-      results = 'No Results';
-      groupList.classList.add('hidden');
-      return;
-    } else {
-      results = resData.results;
-    }
+    results = resData.results;
   }
+
   // Create new list entry for each result
   for (let i = 0; i < results.length; i++) {
     const result = results[i];

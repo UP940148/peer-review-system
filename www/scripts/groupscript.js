@@ -115,8 +115,7 @@ async function getGroupInfo() {
     credentials: 'same-origin',
     method: 'GET',
   });
-  if (!saved.ok) {
-    console.log(saved);
+  if (saved.status !== 200) {
     return;
   }
   const questionData = await saved.json();
@@ -178,16 +177,16 @@ async function getPosts() {
   if (!postsResponse.ok) {
     return;
   }
-  const resData = await postsResponse.json();
-  const postsList = resData.data;
-  if (postsList.length === 0) {
-    // No posts found
+  // No posts found
+  if (postsResponse.status === 204) {
     const message = document.createElement('p');
     message.classList.add('soft-alert');
     message.textContent = '-- Nobody has posted yet --';
     document.getElementById('postList').appendChild(message);
     return;
   }
+  const resData = await postsResponse.json();
+  const postsList = resData.data;
   for (let i = 0; i < postsList.length; i++) {
     const currentPost = postsList[i];
     const postContainer = document.createElement('div');

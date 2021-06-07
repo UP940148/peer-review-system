@@ -13,7 +13,7 @@ const docUploader = multer({
   dest: config.uploads,
   limits: {
     fileSize: 1024 * 1024 * 50,
-    files: 25,
+    files: 20,
   },
   fileFilter: function (_req, file, cb) {
     checkDocType(file, cb);
@@ -22,7 +22,7 @@ const docUploader = multer({
 
 function checkDocType(file, cb) {
   // Allowed types
-  const filetypes = /image|audio|pdf|application\/zip/;
+  const filetypes = /image|audio|application\/pdf|application\/zip/;
   // Check mime
   const mimetype = filetypes.test(file.mimetype);
 
@@ -38,7 +38,7 @@ function checkDocType(file, cb) {
 const profileUploader = multer({
   dest: config.uploads,
   limits: {
-    fields: 5,
+    fields: 2,
     fileSize: 1024 * 1024 * 25,
     files: 1,
   },
@@ -101,40 +101,54 @@ app.get('/admin/all/:table', api.getAllInTable);
 app.get('/admin/wipe', api.wipeEmails);
 app.get('/admin/:table/:value', api.getFromTableWherePrimaryKey);
 
+// -- USER ROUTES --
 app.post('/user', googleAuth.guardMiddleware(), api.createNewUser);
-app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), docUploader.none(), api.createUpdateCohort);
-app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
-app.post('/invite/:cohortId', googleAuth.guardMiddleware(), docUploader.none(), api.inviteUsers);
-app.post('/accept-invite/:inviteId', googleAuth.guardMiddleware(), api.acceptInvite);
-app.post('/post/:cohortId', googleAuth.guardMiddleware(), docUploader.array('file'), api.createPost);
-app.post('/response/:postId', googleAuth.guardMiddleware(), docUploader.none(), api.createResponse);
-
-app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
 app.get('/user', googleAuth.guardMiddleware(), api.getCurrentUser);
-app.get('/cohort/:cohortId', api.getCohort);
-app.get('/post/:postId', api.getPost);
-app.get('/posts/:cohortId?', api.getPosts);
-app.get('/registration/:cohortId', api.getRegistration);
-app.get('/invites', googleAuth.guardMiddleware(), api.getInvites);
-app.get('/criteria/:criteriaId', api.getCriteria);
-app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponseStats);
-app.get('/username/:username', googleAuth.guardMiddleware(), api.checkUniqueUsername);
-app.get('/inviteable-users/:cohortId/:query', googleAuth.guardMiddleware(), api.searchInviteableUsers);
-app.get('/cohorts/:query', googleAuth.guardMiddleware(), api.searchCohorts);
-app.get('/questions', googleAuth.guardMiddleware(), api.getSavedQuestions);
-
+app.get('/profile-pic/:userId?', api.getProfilePic);
 app.patch('/user', googleAuth.guardMiddleware(), profileUploader.none(), api.updateUser);
 app.patch('/profile-pic', googleAuth.guardMiddleware(), profileUploader.single('picture'), api.updateProfilePic);
 
-app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
-app.delete('/post/:postId', googleAuth.guardMiddleware(), api.deletePost);
-app.delete('/profile-pic', googleAuth.guardMiddleware(), api.updateProfilePic);
+// -- COHORT ROUTES --
+app.post('/cohort/:cohortId?', googleAuth.guardMiddleware(), docUploader.none(), api.createUpdateCohort);
+app.get('/cohort/:cohortId', api.getCohort);
+app.get('/cohorts', googleAuth.guardMiddleware(), api.getUserCohorts);
+app.get('/cohorts/:query', googleAuth.guardMiddleware(), api.searchCohorts);
 
-app.get('/profile-pic/:userId?', api.getProfilePic);
-app.get('/img/:imageId', api.getImage);
+// -- REGISTRATION ROUTES --
+app.post('/register/:cohortId', googleAuth.guardMiddleware(), api.registerUser);
+app.get('/registration/:cohortId', googleAuth.guardMiddleware(), api.getRegistration);
+
+// -- INVITE ROUTES --
+app.post('/invite/:cohortId', googleAuth.guardMiddleware(), docUploader.none(), api.inviteUsers);
+app.post('/accept-invite/:inviteId', googleAuth.guardMiddleware(), api.acceptInvite);
+app.get('/invites', googleAuth.guardMiddleware(), api.getInvites);
+app.get('/inviteable-users/:cohortId/:query', googleAuth.guardMiddleware(), api.searchInviteableUsers);
+app.delete('/decline-invite/:inviteId', googleAuth.guardMiddleware(), api.declineInvite);
+
+// -- POST ROUTES -- For user posts, not routes using the POST method
+app.post('/post/:cohortId', googleAuth.guardMiddleware(), docUploader.array('file'), api.createPost);
+app.get('/post/:postId', api.getPost);
+app.get('/posts/:cohortId?', api.getPosts);
+app.delete('/post/:postId', googleAuth.guardMiddleware(), api.deletePost);
+
+// -- CRITERIA ROUTES --
+app.get('/questions/:criteriaId', api.getCriteria);
+app.get('/questions', googleAuth.guardMiddleware(), api.getSavedQuestions);
+
+
+// -- RESPONSE ROUTES --
+app.post('/response/:postId', googleAuth.guardMiddleware(), docUploader.none(), api.createResponse);
+app.get('/response-stats/:postId', googleAuth.guardMiddleware(), api.getResponseStats);
+
+// -- FILE ROUTES --
 app.get('/file/:fileId', api.getFile);
+app.get('/img/:imageId', api.getImage);
 app.get('/download/:fileId', api.downloadFile);
-app.get('/downloadAll/:postId', api.downloadAll);
+app.get('/download-all/:postId', api.downloadAll);
+
+// -- MISCELLANEOUS ROUTES --
+app.get('/username/:username', googleAuth.guardMiddleware(), api.checkUniqueUsername);
+
 
 // Every 10 minutes, delete unused documents
 setInterval(api.clearUnused, 600000);
