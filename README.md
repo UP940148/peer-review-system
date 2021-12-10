@@ -1,8 +1,11 @@
-# UP940148 Peer Review System
+# Daniel Ellis Peer Review System
 
 ## About this repository
 
-This repository is set up for the development of UP940148's Application Engineering coursework.
+This repository was created for my university coursework, where I was required to create a peer review system that users could upload their work to for their peers to review.
+It is a JavaScript based application comprised of an Express server and an Sqlite3 database to manage the backend, and a HTML and JS frontend with no frameworks in use.
+
+This submission achieved a mark of 80%
 
 ## Installing
 
@@ -18,7 +21,7 @@ Errors when installing could be caused by a bug in `node-pre-gyp v0.11.0`. If an
 npm install --build-from-source
 ```
 
-*This command worked a couple of times on my VM, however it seems that SQLite3 failing to install at* `node-pre-gyp install --fallback-to-build` *is a common issue that requires updating or rolling back Node Versions, which I can't do on my VM*
+*This command worked a couple of times on my Linux VM, however it seems that SQLite3 failing to install at* `node-pre-gyp install --fallback-to-build` *is a common issue that requires updating or rolling back Node Versions, which I can't do on my university VM*
 
 **Last Resort:**
 
